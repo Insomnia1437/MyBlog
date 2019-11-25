@@ -96,5 +96,5 @@ theme: landscape
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:Insomnia1437/MyBlog.git
+  repo: https://github.com/Insomnia1437/MyBlog
   branch: gh-pages
