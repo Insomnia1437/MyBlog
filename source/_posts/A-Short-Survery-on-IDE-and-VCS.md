@@ -1,9 +1,11 @@
 ---
 title: A Short Survery on IDE and VCS
-date: 2019-11-28 01:51:40
+date: 2019-11-19 01:51:40
+categories: "Software"
 tags:
-  - Essay
-  - KEK
+  - "Essay"
+  - "KEK"
+  - "English"
 ---
 
 <!-- # A Short Introduction To VCS and IDE -->

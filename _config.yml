@@ -5,7 +5,7 @@
 # Site
 title: Heterotopia
 subtitle: ''
-description: 'A place to record some information related with particle accelerator control system.'
+description: 'A place to record some information related with particle accelerator control system and some "diary".'
 keywords: 
 author: Di WANG
 language: en
@@ -98,3 +98,12 @@ deploy:
   type: git
   repo: https://github.com/Insomnia1437/MyBlog
   branch: gh-pages
+
+
+symbols_count_time:
+  # show in article
+  symbols: true
+  time: true
+  # show in the bottom
+  total_symbols: true
+  total_time: true
