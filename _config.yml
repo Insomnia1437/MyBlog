@@ -3,18 +3,18 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: Heterotopia
 subtitle: ''
-description: ''
-keywords:
-author: John Doe
+description: 'A place to record some information related with particle accelerator control system.'
+keywords: 
+author: Di WANG
 language: en
 timezone: ''
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
-root: /
+url: https://insomnia1437.github.io/MyBlog
+root: /MyBlog/
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -90,7 +90,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
