@@ -27,7 +27,7 @@ If you have any problem of the basic structure of EPICS (e.g. confused about the
 
 > Noted: the introduction of Wind River software installation will not be included.
 
-#### EPICS Base Release 3.14.12.5
+### EPICS Base Release 3.14.12.5
 
 Download EPICS Base file from the ANL site here [https://epics.anl.gov/base/R3-14/12.php](https://epics.anl.gov/base/R3-14/12.php)
 
@@ -51,7 +51,6 @@ setenv EPICS_BASE `env PERL5LIB=src/tools perl src/tools/fullPathName.pl .`
 echo $EPICS_BASE
 ```
 - EPICS_HOST_ARCH
-
 ```shell
 setenv EPICS_BASE `env PERL5LIB=src/tools perl src/tools/fullPathName.pl .`
 echo $EPICS_BASE
@@ -118,7 +117,17 @@ mkdir -p test/vx
 cd test/vx/
 $EPICS_BASE/bin/$EPICS_HOST_ARCH/makeBaseApp.pl -t example myapp
 $EPICS_BASE/bin/$EPICS_HOST_ARCH/makeBaseApp.pl -i -t example -p myapp myapp
-# here you should input vxworks as your host_arch according to the prompt information.
+```
+
+```
+# here you should input vxworks as your host_arch according to the prompt information. In my case:
+The following target architectures are available in base:
+    linux-x86_64
+    vxWorks-ppc604_long
+What architecture do you want to use? 
+```
+
+```shell
 mkdir log
 make | & tee log/base-3.14.12.5-app-linux64.txt
 ```
