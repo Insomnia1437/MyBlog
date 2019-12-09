@@ -54,8 +54,8 @@ echo $EPICS_BASE
 ```
 - EPICS_HOST_ARCH
 ```shell
-setenv EPICS_BASE `env PERL5LIB=src/tools perl src/tools/fullPathName.pl .`
-echo $EPICS_BASE
+setenv EPICS_HOST_ARCH `startup/EpicsHostArch`
+echo $EPICS_HOST_ARCH
 ```
 - readline 
 If readline is not installed on your linux:
