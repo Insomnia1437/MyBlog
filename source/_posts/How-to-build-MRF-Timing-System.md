@@ -1,7 +1,9 @@
 ---
 title: How to build MRF Timing System
 date: 2019-11-30 18:04:35
-categories: "MEMO"
+categories: 
+  - "MEMO"
+  - "Linux"
 tags:
   - "EPICS"
   - "vxWorks"

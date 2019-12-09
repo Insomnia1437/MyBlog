@@ -1,7 +1,9 @@
 ---
 title: How to build EPICS on vxWorks
 date: 2019-11-29 19:52:46
-categories: "MEMO"
+categories: 
+  - "MEMO"
+  - "EPICS"
 tags:
   - "EPICS"
   - "vxWorks"
