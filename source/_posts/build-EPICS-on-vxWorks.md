@@ -44,7 +44,7 @@ cd base-3.14.12.5/
 - make (version 3.81 or later)
 - Perl (version 5.8.1 or later)
 - vxWorks (You must have vxWorks installed if any of your target systems are vxWorks systems.)
-- gcc
+- gcc (version larger than 6.1 might have some problems. A discussion: [EPICS tech talk: Compiling EPICS 3.14.12.5 with GCC 6](https://epics.anl.gov/tech-talk/2016/msg01120.php))
 
 ### Set environment variables
 - EPICS_BASE
