@@ -1,5 +1,5 @@
 ---
-title: Acc control leanring EPICS dir
+title: EPICS目录结构
 date: 2019-12-14 22:27:48
 categories:
   - "Accelerator Control"
