@@ -31,3 +31,4 @@ tags:
 暂时也不知道这个系列会写多少文章，这篇就作为一个总目录吧。
 
 - {% post_link Acc-control-learing-step 入门指南%}
+- {% post_link Acc-control-leanring-EPICS-dir EPICS目录结构%}
