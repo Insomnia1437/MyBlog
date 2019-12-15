@@ -90,3 +90,7 @@ EPICS_EXTENSIONS=$(TOP)
 
 因此下一篇文章我会介绍一下关于EPICS模块管理的模块[Support Module Manager (SUMO)](https://goetzpf.bitbucket.io/sumo/introduction.html)
 
+> **20191215更新：**
+
+经过周末数个小时的研究，`SUMO`模块学习曲线过高，文档描述逻辑复杂，不建议使用。
+
