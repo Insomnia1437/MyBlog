@@ -47,6 +47,15 @@ tags:
       - procServ-2-8-0App
       - msi-7
       - ...
+  - modules
+    - instruments
+    - soft
+      - asyn
+      - gpio
+      - i2c
+      - iocstats
+      - seq
+      - stream
 - R3.14.12.5
   - base
     - config
@@ -57,10 +66,12 @@ tags:
     - startup
   - ioc
   - extensions
+  - modules
 - R7.0.3
   - base
   - ioc
   - extensions
+  - modules
 - ...
 
 以3.15.6版本为例，base目录放置base，编译之后基本不需改动，ioc目录下可以创建多个ioc application，便于管理。如需切换base，只需要修改`EPICS_BASE` 环境变量即可，以下为我的shell环境变量设置
@@ -82,7 +93,7 @@ EPICS_EXTENSIONS=$(TOP)
 
 ### EPICS module 和 extension
 
-关于module 和 extension 分不清楚的问题，我查阅了部分资料，得出的结论是实际上现在二者基本也不作区分，原则上extensions需要放置在`extensions/src`目录下，而module可放置在任意目录。
+关于module 和 extension 分不清楚的问题，我查阅了部分资料，得出的结论是实际上现在二者基本也不作区分，原则上extensions需要放置在`extensions/src`目录下，而module可放置在任意目录。常用的一些extension和module在上述示例目录中也已列出。
 
 ### 版本管理
 
