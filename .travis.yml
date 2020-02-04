@@ -1,0 +1,28 @@
+language: node_js
+node_js:
+  - lts/*
+
+cache:
+  directories:
+    - node_modules
+
+branches:
+  only:
+    - master
+
+install:
+  - npm install -g hexo-cli
+  - npm install
+
+script:
+  - hexo g
+
+after_script:
+  - cd ./public
+  - git init
+  - git config user.name "Insomnia1437"
+  - git config user.email "sdcswd@gmail.com"
+  - git add .
+  - git commit -m "Update blog content by Travis CI"
+  - git push --force --quiet "https://${GH_TOKEN}@${GH_REPO}" master:gh-pages
+
