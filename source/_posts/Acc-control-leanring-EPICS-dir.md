@@ -1,14 +1,15 @@
 ---
 title: EPICS目录结构
-date: 2019-12-14 22:27:48
 categories:
-  - "Accelerator Control"
+  - Accelerator Control
 tags:
-  - "EPICS"
-  - "Control"
-  - "KEK"
-  - "Accelerator"
-  - "Chinese"
+  - EPICS
+  - Control
+  - KEK
+  - Accelerator
+  - Chinese
+abbrlink: 79cbdb0
+date: 2019-12-14 22:27:48
 ---
 
 ```python
@@ -22,7 +23,7 @@ tags:
 ## EPICS 目录结构
 
 初学者对于如何放置EPICS base目录 ioc目录 extensions目录总是感到混乱，因此总结下我的使用经验。
-
+<!-- more -->
 ### 我的目录方案
 
 先分享下我的目录放置位置，然后再解释原因，在`/home/yourusername/epics`目录下，我安装了多个EPICS Base版本。

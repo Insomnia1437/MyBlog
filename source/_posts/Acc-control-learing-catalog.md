@@ -1,11 +1,12 @@
 ---
 title: 粒子加速器控制
-date: 2019-12-10 21:50:30
 categories:
-  - "Accelerator Control"
+  - Accelerator Control
 tags:
-  - "Chinese"
-  - "Catalog"
+  - Chinese
+  - Catalog
+abbrlink: f5b5e0fc
+date: 2019-12-10 21:50:30
 ---
 
 ```python
@@ -18,7 +19,7 @@ tags:
 
 ## Introduction
 
-本系列文章内容大体根据KEK-SOKENDAI联合开办的Controls Class in Fall 2019课程编写，感谢授课的几位老师，包括：
+本系列文章内容大体根据KEK-SOKENDAI联合开办的Controls Class in Fall 2019课程编写，感谢授课的几位老师，<!-- more -->包括：
 
 - 古川和朗 Kazuro Furukawa
 - 上窪田紀彦 Norihiko Kamikubota

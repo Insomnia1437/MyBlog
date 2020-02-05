@@ -1,15 +1,16 @@
 ---
 title: 粒子加速器控制-入门指南
-date: 2019-12-10 21:43:08
 categories:
-  - "Accelerator Control"
+  - Accelerator Control
 tags:
-  - "EPICS"
-  - "Control"
-  - "KEK"
-  - "Linux"
-  - "Accelerator"
-  - "Chinese"
+  - EPICS
+  - Control
+  - KEK
+  - Linux
+  - Accelerator
+  - Chinese
+abbrlink: 3ea1f950
+date: 2019-12-10 21:43:08
 ---
 
 ```python
@@ -22,7 +23,7 @@ tags:
 
 ## Introduction
 下面列出**我认为**粒子加速器控制需要学习的一些知识，很多没有列出的细节可能是因为我一时想不起来，更可能是我也不太懂不敢妄言。
-
+<!-- more -->
 ### step 0 入门知识
 
 1. 习惯使用Unix(Linux)

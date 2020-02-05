@@ -1,13 +1,14 @@
 ---
 title: Shell Script Learning
-date: 2019-12-07 16:12:17
-categories: 
-  - "MEMO"
-  - "Linux"
+categories:
+  - MEMO
+  - Linux
 tags:
-  - "Linux"
-  - "Shell"
-  - "Chinese"
+  - Linux
+  - Shell
+  - Chinese
+abbrlink: b81d8b84
+date: 2019-12-07 16:12:17
 ---
 
 ```python
@@ -21,7 +22,7 @@ tags:
 # Shell 脚本编程
 
 > 一直以来只是使用bash或者zsh，对于shell脚本并不了解，上次组会导师告知可以通过shell script进入epics IOC的shell，进而通过**dbl**命令获取所有IOC的所有PV，虽然只是获取了PV名，进一步获取PV Type，Value还需要进一步执行**dbpr**等命令，不过可以先试着玩一下。
-
+<!-- more -->
 关于Shell脚本一些基本介绍此处就忽略了，只记录一些我还不太熟悉的。忽略掉的包括：
 - 运行方法
 - 注释

@@ -3,6 +3,8 @@ title: About Me
 date: 2019-11-28 17:26:36
 ---
 
+> He who fights with monsters should look to it that he himself does not become a monster. And if you gaze long into an abyss, the abyss also gazes into you.
+
 Di WANG (sdcswd@gmail.com)
 Live in Tsukuba, Japan.
 

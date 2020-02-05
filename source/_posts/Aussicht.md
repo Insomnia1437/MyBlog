@@ -1,11 +1,12 @@
 ---
 title: Aussicht-眺望
-date: 2019-12-03 18:14:17
-categories: "Blog"
+categories: Blog
 tags:
-  - "Chinese"
-  - "诗"
-  - "荷尔德林"
+  - Chinese
+  - 诗
+  - 荷尔德林
+abbrlink: 9449a24d
+date: 2019-12-03 18:14:17
 ---
 
 ```python
@@ -17,7 +18,7 @@ tags:
 ```
 
 # 荷尔德林《塔楼之诗》
-
+<!-- more -->
 ```
 眺望
 

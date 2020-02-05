@@ -1,11 +1,12 @@
 ---
 title: YAML introduction
-date: 2020-02-02 23:19:18
 categories:
-  - "Software"
+  - Software
 tags:
-  - "YAML"
-  - "English"
+  - YAML
+  - English
+abbrlink: 24a5891
+date: 2020-02-02 23:19:18
 ---
 
 ```python
@@ -21,7 +22,7 @@ tags:
 > YAML means **“YAML Ain't a Markup Language”**. It uses Python-style indentation to indicate nesting, and use `[]` for lists and `{}` for maps.
 >
 > Since the name is recursive, it is a better option to explain YAML by YAML.
-
+<!-- more -->
 ```yaml
 --- # Syntax
 basic syntax:

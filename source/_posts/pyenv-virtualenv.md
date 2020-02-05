@@ -1,12 +1,13 @@
 ---
 title: Python版本管理与虚拟环境
-date: 2020-01-22 00:12:07
 categories:
-  - "Software"
+  - Software
 tags:
-  - "Linux"
-  - "Python"
-  - "Chinese"
+  - Linux
+  - Python
+  - Chinese
+abbrlink: 7a8ba2cd
+date: 2020-01-22 00:12:07
 ---
 
 ```python
@@ -18,7 +19,7 @@ tags:
 ```
 
 > 对于控制领域而言，目前常用的epics Python support有CaChannel, caffi, caproto, Cothread, pvaPy和 PyEpics 3. 不同的用户有不同的偏好软件，而哪怕是同一个软件也存在版本更迭。Python环境的管理一直是个大难题，包括Python版本和库依赖管理，在尝试了几种方式后，目前选择了`pyenv+pyenv-virtualenv`的方式。
-
+<!-- more -->
 ## pyenv
 
 [pyenv at GitHub](https://github.com/pyenv/pyenv)

@@ -1,8 +1,9 @@
 ---
 title: First Blog
+categories: Blog
+tags: Chinese
+abbrlink: a30a3587
 date: 1984-06-04 12:00:00
-categories: "Blog"
-tags: "Chinese"
 ---
 
 ```python
@@ -18,7 +19,7 @@ tags: "Chinese"
 权衡过几种方式，如在KEK LINAC的server上建博客，也考虑过在Notion里便利地记录TODO List，最终还是使用了Hexo+GitHub Pages的方式。
 
 无论如何，我的异托邦总算是搭建起来了。
-
+<!-- more -->
 曾经写了十年纸质日记的我也尝试过在互联网大潮过程中写一些东西，包括如今偶尔去扫墓的Qzone，连墓碑都没留下的百度空间，遗忘了密码的天涯博客等等，终于还是没有坚持下来。及到开始读哲学，对互联网的批判又使我远离各种社交软件。
 
 开始写点东西起初是因为古川老师多次的建议，在熟悉VxWorks，MRF Timing System时因为他持续多年记录memo的好习惯使我受益良多，但一年间懒惰的我还是没抖擞起精神系统地记录一些论文阅读体会和工程经验，真正促使我下决心的还是在纽约开会时感受到一群科学家工程师对于contribute to EPICS community的热忱。对良好社群的向往让我不满足于只是donate，也决定贡献自己浅薄的力量了。

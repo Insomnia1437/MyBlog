@@ -1,14 +1,15 @@
 ---
 title: How to build EPICS on vxWorks
-date: 2019-11-29 19:52:46
-categories: 
-  - "MEMO"
-  - "EPICS"
+categories:
+  - MEMO
+  - EPICS
 tags:
-  - "EPICS"
-  - "vxWorks"
-  - "KEK"
-  - "English"
+  - EPICS
+  - vxWorks
+  - KEK
+  - English
+abbrlink: 76fb0fda
+date: 2019-11-29 19:52:46
 ---
 
 ```python
@@ -24,7 +25,7 @@ tags:
 Check this site for the detail. [README](https://epics.anl.gov/base/R3-14/12-docs/README.html)
 
 This MEMO will introduce how to build EPICS Base 3.14.12.5 on linux and run IOC on vxWorks, VME5500 .
-
+<!-- more -->
 If you have any problem of the basic structure of EPICS (e.g. confused about the Host ARCH and Target ARCH), please refer to the [**EPICS Application Developer's Guide**](https://epics.anl.gov/base/R3-14/12-docs/AppDevGuide/). (Though it may take several days to read :)
 
 > Noted: the introduction of Wind River software installation will not be included.

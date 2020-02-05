@@ -1,11 +1,12 @@
 ---
 title: A Short Survery on IDE and VCS
-date: 2019-11-19 01:51:40
-categories: "Software"
+categories: Software
 tags:
-  - "Essay"
-  - "KEK"
-  - "English"
+  - Essay
+  - KEK
+  - English
+abbrlink: 46c470de
+date: 2019-11-19 01:51:40
 ---
 
 <!-- # A Short Introduction To VCS and IDE -->
@@ -23,7 +24,7 @@ tags:
 ## Overview
 
 This essay will briefly introduce and compare several kinds of VCS software, IDE and popular text editors. I hope this article may help people in KEK who need to program (**Using Java, C/C++, Python**) and collaborate with others could select efficient and suitable tools easily.
-
+<!-- more -->
 The introduction would mainly based on three stages: 
 
 - **Editor**: how to read the program source code with a more user friendly experience 

@@ -1,17 +1,18 @@
 ---
 title: How to build MRF Timing System
-date: 2019-11-30 18:04:35
-categories: 
-  - "MEMO"
-  - "Linux"
+categories:
+  - MEMO
+  - Linux
 tags:
-  - "EPICS"
-  - "vxWorks"
-  - "KEK"
-  - "MRF"
-  - "Timing System"
-  - "EVR"
-  - "English"
+  - EPICS
+  - vxWorks
+  - KEK
+  - MRF
+  - Timing System
+  - EVR
+  - English
+abbrlink: '59e84085'
+date: 2019-11-30 18:04:35
 ---
 
 ```python
@@ -24,7 +25,7 @@ tags:
 
 ## Build MRF EVR230 on vxWorks
 > This file is a guide to build your own MRF Timing IOC on vxworks as well as write your own device support to meet your own demand of EPICS record.
-
+<!-- more -->
 Some links might be helpful:
 - [MRF Company](http://mrf.fi/)
 - [EPICS](http://www.aps.anl.gov/epics/)

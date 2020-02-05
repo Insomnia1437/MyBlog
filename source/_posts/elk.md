@@ -1,13 +1,14 @@
 ---
 title: Elasticsearch+Kibana+Beats+Logstash学习
-date: 2020-01-28 11:15:08
 categories:
-  - "Software"
-  - "elk"
+  - Software
+  - elk
 tags:
-  - "Linux"
-  - "Kibana"
-  - "Chinese"
+  - Linux
+  - Kibana
+  - Chinese
+abbrlink: 5410d8cb
+date: 2020-01-28 11:15:08
 ---
 
 ```python
@@ -25,7 +26,7 @@ tags:
 
 Elasticsearch+Logstash+Kibana，合称ELK，Elasticsearch用来完成搜索，Logstash用于数据采集，Kibana用于数据可视化。
 数据采集工作早期由Logstash完成，现在则使用Beats，Logstash更多用于数据汇聚处理。
-
+<!-- more -->
 
 ### Phronesis!!!
 

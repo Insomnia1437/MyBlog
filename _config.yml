@@ -5,8 +5,8 @@
 # Site
 title: Heterotopia
 subtitle: ''
-description: 'A place to record some information related with particle accelerator control system and some "diary".'
-keywords: 
+description: 'A place to record some information related with particle accelerator control system'
+keywords: EPICS
 author: Di WANG
 language: en
 timezone: ''
@@ -17,7 +17,10 @@ timezone: ''
 # root: /MyBlog/
 url: https://www.sdcswd.wang
 root: /
-permalink: :year/:month/:day/:title/
+permalink: archives/:abbrlink/
+abbrlink:
+  alg: crc32  # crc16(default) and crc32
+  rep: hex    # dec(default) and hex
 permalink_defaults:
 pretty_urls:
   trailing_index: true # Set to false to remove trailing index.html from permalinks
@@ -109,3 +112,31 @@ symbols_count_time:
   # show in the bottom
   total_symbols: true
   total_time: true
+
+# for nofollow link
+nofollow:
+  enable: true
+  field: site
+  # exclude:
+    # - 'exclude1.com'
+    # - 'exclude2.com'
+
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 100
+
+douban:
+  user: Insomnia_1437
+  builtin: true
+  book:
+    title: '稻子和稗子的区别'
+    quote: '我这一生中从来没有爱过任何一个民族、任何一个集体——不爱德意志，不爱法兰西，不爱美利坚，不爱工人阶级，不爱这一切。我‘只’爱我的朋友，我所知道、所信仰的惟一一种爱，就是爱人。'
+  movie:
+    title: '解放受困之人'
+    quote: '送你苹果会腐烂；送你玫瑰会枯萎；送你葡萄会压坏；给你一滴我的泪水。'
+  # game:
+    # title: 'This is my game title'
+    # quote: 'This is my game quote'
+  timeout: 100000
