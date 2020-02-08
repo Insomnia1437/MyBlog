@@ -31,5 +31,6 @@ date: 2019-12-10 21:50:30
 
 暂时也不知道这个系列会写多少文章，这篇就作为一个总目录吧。
 
-- {% post_link Acc-control-learing-step 入门指南%}
-- {% post_link Acc-control-leanring-EPICS-dir EPICS目录结构%}
+- {% post_link Acc-control-learning-step 粒子加速器控制-入门指南%}
+- {% post_link Acc-control-learning-EPICS-dir 粒子加速器控制-EPICS目录结构%}
+- {% post_link Acc-control-learning-linux-tools 粒子加速器控制-Linux命令整理%}

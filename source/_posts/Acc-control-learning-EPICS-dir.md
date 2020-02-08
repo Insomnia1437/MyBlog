@@ -1,5 +1,5 @@
 ---
-title: EPICS目录结构
+title: 粒子加速器控制-EPICS目录结构
 categories:
   - Accelerator Control
 tags:
