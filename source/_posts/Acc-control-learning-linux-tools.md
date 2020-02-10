@@ -17,7 +17,9 @@ date: 2020-02-07 17:50:46
 # @Author  : Di Wang(KEK Linac)
 # @Email   : sdcswd@gmail.com
 ```
-
+> 本系列主目录：
+>  {% post_link Acc-control-learning-catalog 粒子加速器控制%}
+------
 > 这周把前段时间积累的一些工作给完成了，包括：
 >
 > - 使用Elastic Stack对EPICS控制系统网络进行监控与可视化
@@ -26,7 +28,7 @@ date: 2020-02-07 17:50:46
 > - 花了一晚上更新了博客，添加了一部分功能，本想添加豆瓣读书和电影模块，但似乎模块有bug，已提交了issue，等作者解决。在源码中添加了Travis CI支持，以后可以在页面上写博客了。
 > - 这几天发生了很糟糕的事情，哀悼之余着手用Amazon 免费的云服务器EC2搭了一个v2ray的服务，便于仍在墙内的朋友去接受多样的信息。
 >
-> 
+<!-- more -->
 >
 > 这个周末决定先努力把我常用的Linux命令以及一些不熟悉的命令给整理一下，如果有时间的话再读一读科大师兄早就发给我的定时系统的论文，以及几个同门师兄的博士毕业论文，看看对于自己的课题有没有什么启发；如果还有时间就再去研究下 [https://github.com/ChannelFinder](https://github.com/ChannelFinder)  似乎BNL和ANL都在使用，正好看看是自己造轮子还是复用。本文内容主要基于 [此文章](https://linuxtools-rst.readthedocs.io/zh_CN/latest/)，向作者表示感谢！
 >
@@ -53,7 +55,6 @@ date: 2020-02-07 17:50:46
 - 显示命令以及参数的作用 [https://www.explainshell.com/](https://www.explainshell.com/)
 - 学习正则表达式 [https://github.com/ziishaned/learn-regex](https://github.com/ziishaned/learn-regex)
 - 测试正则表达式 [https://regex101.com/](https://regex101.com/)
-
 ## 文件与目录管理
 
 ```shell

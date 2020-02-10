@@ -22,6 +22,9 @@ date: 2019-12-14 22:27:48
 
 ## EPICS 目录结构
 
+> 本系列主目录：
+>  {% post_link Acc-control-learning-catalog 粒子加速器控制%}
+------
 初学者对于如何放置EPICS base目录 ioc目录 extensions目录总是感到混乱，因此总结下我的使用经验。
 <!-- more -->
 ### 我的目录方案

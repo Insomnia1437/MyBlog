@@ -34,3 +34,4 @@ date: 2019-12-10 21:50:30
 - {% post_link Acc-control-learning-step 粒子加速器控制-入门指南%}
 - {% post_link Acc-control-learning-EPICS-dir 粒子加速器控制-EPICS目录结构%}
 - {% post_link Acc-control-learning-linux-tools 粒子加速器控制-Linux命令整理%}
+- {% post_link Acc-control-learning-event-timing-glossary 粒子加速器控制-粒子加速器定时系统常见概念%}
