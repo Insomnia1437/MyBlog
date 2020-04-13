@@ -1,6 +1,8 @@
 ---
 title: 粒子加速器控制-粒子加速器定时系统常见概念
-date: '2020-02-10 18:53:02 - Accelerator Control'
+date: '2020-02-10 18:53:02'
+categories:
+  - Accelerator Control
 tags:
   - Timing System
   - MRF
@@ -40,7 +42,7 @@ abbrlink: 4362c88b
 - orbit frequency 或者 revolution frequency，回旋频率，一秒钟粒子在环里转多少圈。由环的周长和粒子速度确定。
 - orbit cycle 或者 revolution cycle，回旋周期，回旋频率的倒数，粒子在环里转一圈的时间。
 - harmonic number 或者 bucket number 或者 bunch number，即谐波数，由回旋频率和RF频率共同确定，谐波数也决定了环内最多有多少个“bucket”，每个bunch都要注入进一个bucket，然后在环内升能。
-- coincidence frequency 或者 common frequency 不知道怎么翻译，相干频率或者重合频率？其实就是两个环的回旋频率的最大公约数（也就是两个环回旋周期的最大公倍数），只有在这个频率下extract一个环的bunch才能恰好进入另一个环的对应bucket。
+- coincidence frequency 或者 common frequency 不知道怎么翻译，相干频率或者重合频率？其实就是两个环的回旋频率的最大公约数（也就是两个环回旋周期的最小公倍数），只有在这个频率下extract一个环的bunch才能恰好进入另一个环的对应bucket。
 - Event rate 或者 Event clock 或 clock frequency，即Event timing system中发送事件的频率，MRF系列产品支持25MHz~125MHz。为了和环锁相，通常由环RF高频频率分频得到。
 - Timing jitter或 clock precision，信号的抖动，通常要求抖动在几十皮秒(picosecond)的数量级。
 - **Bucket Selection**，顾名思义就是要选择注入到环里的哪一个bucket，根据BPM测得的束团数据或运行需求选择bucket之后，计算并设置电子枪的延迟。

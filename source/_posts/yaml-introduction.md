@@ -32,7 +32,7 @@ basic syntax:
   - use key:value to denote array
   - case sensitive
 Support data structure:
-  - map (also called dictory or hashes or key:value pair)
+  - map (also called dictionary or hashes or key:value pair)
   - array or list or sequence
   - scalars
 
