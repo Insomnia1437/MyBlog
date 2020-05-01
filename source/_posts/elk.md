@@ -1,11 +1,11 @@
 ---
-title: Elasticsearch+Kibana+Beats+Logstash学习
+title: Elasticsearch+Kibana+Beats+Logstash安装
 categories:
   - Software
   - elk
 tags:
-  - Linux
   - Kibana
+  - Elasticsearch
   - Chinese
 abbrlink: 5410d8cb
 date: 2020-01-28 11:15:08
