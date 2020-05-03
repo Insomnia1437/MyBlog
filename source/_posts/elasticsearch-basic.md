@@ -18,9 +18,7 @@ tags:
 # @Email   : sdcswd@gmail.com
 ```
 
-> 前言：之前在LINAC安装了ES，采集了控制网络内EPICS beacon anomaly和Archive Appliance的数据，但是使用了一个非常老旧的桌面计算机，也没有修改什么参数，导致机器非常卡顿。最近购入了一个新的服务器，准备migrate到新的机器上，再加上疫情在家隔离终于有时间去研究下ES的一些细节概念了。
-
-[toc]
+> 前言：之前在LINAC安装了ES，采集了控制网络内EPICS beacon anomaly和Archive Appliance的数据，但是使用了一个非常老旧的桌面计算机，也没有修改什么参数，导致机器非常卡顿（文末会分析原因）。最近购入了一个新的服务器，准备migrate到新的机器上，再加上疫情在家隔离终于有时间去研究下ES的一些细节概念了。
 
 <!-- more -->
 
@@ -88,7 +86,7 @@ curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: applicat
 
 - `discovery.seed_hosts` 在ES启动过程中，有一个discovery的过程去寻找别的集群节点，别的节点的IP地址或者hostname（ES会自己用DNS lookup转换成IP地址）就在这个配置项中设置。同时可以指定端口，默认是9300。
 
-- `cluster.initial_master_nodes` 设定初始的master node，集群启动时候有一个`cluster bootstrapping`的过程，会通过选举产生有资格成为master node的节点，如果没有配置这个bootstrapping会自动完成，但可能会由于节点discovery的速度过慢形成了多个集群，因此需要指定几个有选举资格的master node。（discovery和bootstrapping的细节我没有仔细研究，可能有理解错误。
+- `cluster.initial_master_nodes` 设定初始的master node，集群启动时候有一个`cluster bootstrapping`的过程，会通过选举产生有资格成为master node的节点，如果没有配置这个bootstrapping会自动完成，但可能会由于节点discovery的速度过慢形成了多个集群，因此需要指定几个有选举资格的master node。（discovery和bootstrapping的细节我没有仔细研究，可能有理解错误。ES 7.0以前的版本使用`discovery.zen.minimum_master_nodes`这个配置项防止脑裂，现在已被忽略。
 
   ```yaml
   discovery.seed_hosts:
@@ -2158,10 +2156,10 @@ master                             | m                                          
 name                               | n                                           | node name
 ```
 
-然后通过`h`指定表头。下面是我的测试机器，可以通过rc rp rm看到，机器内存被用满了，堆内存hp只使用了51%，看到这里分析原因可能是lucene segment cache占用过多或者别的程序。然后看segment memory（sm）占用了403.8 MB也并不多，因此可以确定
+然后通过`h`指定表头。下面是我的测试机器，可以通过rc rp rm看到，机器内存被用满了，堆内存hp只使用了51%，看到这里分析原因可能是lucene segment cache占用过多或者别的程序。然后看segment memory（sm）占用了403.8 MB也并不多，因此可以确定是别的程序占用了过多内容，事实上我在这个节点上还运行了logstash，占用了较多内存。
 
 ```http
-curl -X GET "wang:9200/_cat/nodes?v&h=ip,port,dt,du,dup,hc,hp,rc,rp,rm,cpu,l,sc,sm,fm"
+curl -X GET "localhost:9200/_cat/nodes?v&h=ip,port,dt,du,dup,hc,hp,rc,rp,rm,cpu,l,sc,sm,fm"
 ip            port    dt      du   dup    hc hp   rc rp     rm cpu    l   sc      sm    fm
 172.19.64.254 9300 1.5tb 756.3gb 48.75 3.8gb 65 15gb 98 15.4gb  15 1.86 1746 403.8mb 9.7mb
 ```

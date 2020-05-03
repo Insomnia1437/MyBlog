@@ -18,9 +18,7 @@ date: 2020-01-28 11:15:08
 # @Author  : Di Wang(KEK Linac)
 # @Email   : sdcswd@gmail.com
 ```
-## Elastic Stack学习笔记
 
-### 概述
 
 本博客资料来源：[Elastic官网](https://www.elastic.co/)
 
@@ -28,7 +26,11 @@ Elasticsearch+Logstash+Kibana，合称ELK，Elasticsearch用来完成搜索，Lo
 数据采集工作早期由Logstash完成，现在则使用Beats，Logstash更多用于数据汇聚处理。
 <!-- more -->
 
-### Phronesis!!!
+## Elastic Stack学习笔记
+
+### 概述
+
+**Phronesis!!!**
 
 实践是最好的理解，先安装然后慢慢深入了解。
 
