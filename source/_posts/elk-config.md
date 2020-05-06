@@ -24,19 +24,19 @@ tags:
 
 ## 集群设置
 
-VMware 15 创建四个 CentOS 7虚拟机，IP都使用NAT。
+VMware 15 创建四个 CentOS 7虚拟机（我只有16G内存，所以不使用GUI，设置了系统默认运行级别为`multi-user.target`，通过ssh进行操作），IP都使用NAT。
 
-| 节点         | IP            | 说明                         |
-| ------------ | ------------- | ---------------------------- |
-| Host Machine | 192.168.1.1   | Windows 10                   |
-| node1        | 192.168.1.111 | 生产集群，运行ES，Kibana     |
-| node2        | 192.168.1.112 | 生产集群，运行ES，metricbeat |
-| node3        | 192.168.1.113 | 生产集群，运行ES，metricbeat |
-| node4        | 192.168.1.114 | 监控集群，运行ES，Kibana     |
+| 节点         | IP            | 说明                     |
+| ------------ | ------------- | ------------------------ |
+| Host Machine | 192.168.1.1   | Windows 10               |
+| node1        | 192.168.1.111 | 生产集群，运行ES，Kibana |
+| node2        | 192.168.1.112 | 生产集群，运行ES         |
+| node3        | 192.168.1.113 | 生产集群，运行ES         |
+| node4        | 192.168.1.114 | 监控集群，运行ES，Kibana |
 
 ## ES
 
-安装和预配置
+安装和预配置，（shasum命令如果不存在，则`sudo yum install perl-Digest-SHA`）
 
 ```shell
 mkdir -p ~/elk/downloads
@@ -102,7 +102,7 @@ xpack.monitoring.collection.enabled: true
 一些系统设置：可能也不需要设置
 
 ```
-# Must config！！！
+# 这个需要设置！！！
 sudo systemctl edit elasticsearch
 # 添加
 [Service]
@@ -110,13 +110,13 @@ LimitMEMLOCK=infinity
 # 执行
 sudo systemctl daemon-reload
 -------------------------------------
-# Not clear:
+# 这些因人而异:
 sysctl vm.max_map_count
 ulimit -a
-# 其中 -u 应该是4096， -n 应该是65535
 vim /etc/security/limits.conf
 # 文件添加
 elasticsearch  -  nofile  65535
+# 下面这俩也是配置文件
 vim /etc/sysconfig/elasticsearch
 vim /usr/lib/systemd/system/elasticsearch.service
 ```
@@ -154,13 +154,155 @@ xpack.monitoring.enabled: true
 xpack.monitoring.kibana.collection.enabled: true
 ```
 
+至此，开启集群就可以正常运行，且集群内可以监控数据。
+
 ## Logstash
 
 //TODO
 
 ## Beat
 
+### Filebeat
+
+安装
+
+```shell
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.6.2-x86_64.rpm
+sudo rpm -vi filebeat-7.6.2-x86_64.rpm
+```
+
+这篇文章写的挺好，我自己就不总结了。[FileBeat-Log 相关配置指南](https://www.cyhone.com/articles/usage-of-filebeat-log-config/)
+
+`filebeat.yml`：
+
+> input 和 output都可以设置pipeline，如果都设置会使用input中的pipeline，ES官方建议在input中，因为 `this option usually results in simpler configuration files`
+>
+> 通过ES的Ingest Node可以使用pipeline，在pipeline内定义了不同的processors。同时也可以直接在filebeat中定义processor，注意这两个地方的processors并不一样。前者的内容更丰富。
+
+```yaml
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/*.log
+    #- c:\programdata\elasticsearch\logs\*
+    # exclude_lines: ['^DBG']
+    # exclude_files: ['.gz$']
+  fields: 
+    logtype: test2
+    
+- type: log
+  enabled: true
+  paths:
+    - /var/another_log/*.log
+    #- c:\programdata\elasticsearch\logs\*
+    # exclude_lines: ['^DBG']
+    # exclude_files: ['.gz$']
+  fields: 
+    logtype: test1
+  # 以下几项都是默认值，根据需要修改
+  encoding: plain
+  ignore_older: "2h"
+  close_inactive: "1m"
+  close_renamed: false
+  close_eof: false
+  close_removed: true
+  close_timeout: "0"
+  harvester_limit: 0
+  scan_frequency: "10s"
+  # pipeline需要在集群内通过API设置
+  pipeline: "my_pipeline"
+
+setup.ilm.enabled: false
+#setup.ilm.rollover_alias: "test-%{[agent.version]}"
+#setup.ilm.pattern: "%{now/d}-000001"
+#setup.ilm.policy_name: "my-policy-%{[agent.version]}"
+
+output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: ["localhost:9200"]
+  indices:
+    - index: "filebeat-%{[agent.version]}-test1-%{+yyyy.MM.dd}"
+      when.contains:
+        fields.logtype: "test1"
+    - index: "filebeat-%{[agent.version]}-test2-%{+yyyy.MM.dd}"
+      when.contains:
+        fields.logtype: "test2"
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+  
+monitoring.enabled: true
+```
+
+写完一个pipeline，可以通过以下`_simulate` API进行测试，测试没问题之后写入集群，一例：
+
+```http
+POST /_ingest/pipeline/_simulate?pretty
+{
+  "pipeline": {
+    "description": "_description",
+    "processors": [
+      {
+        "csv": {
+          "field": "message",
+          "target_fields": [
+            "NTPtime",
+            "NTPts",
+            "PTPtime",
+            "PTPts",
+            "databuffer_time",
+            "databuffer_ts",
+            "255_1",
+            "255_2",
+            "shot",
+            "pre_trigger_delay_1",
+            "pre_trigger_delay_2",
+            "mr_bkt_1",
+            "mr_bkt_2",
+            "dr_bkt",
+            "D8",
+            "D9",
+            "rf_phase_her",
+            "rf_phase_ler",
+            "c_mode",
+            "n_bmode",
+            "nn_bmode"
+          ],
+          "trim": true
+        },
+        "remove": {
+          "field": "message"
+        }
+      }
+    ]
+  },
+  "docs": [
+    {
+      "_index": "index",
+      "_id": "id",
+      "_source": {
+        "message": "2020/04/04 00:01:53.369591,3668770913.369590,2020/04/04 00:02:30.363358,3668770950.363357,2020/04/04 00:01:53.370848,3668770913.370847,255,255,25026,0,0,245,230,0,0,50544,1038,36492,42,31,180,60032,1053"
+      }
+    },
+    {
+      "_index": "index",
+      "_id": "id",
+      "_source": {
+        "message": "2020/04/04 00:01:53.429934,3668770913.429934,2020/04/04 00:02:30.423227,3668770950.423226,2020/04/04 00:01:53.430860,3668770913.430860,255,255,25029,0,0,686,117,0,0,50544,1038,36492,182,41,30,60032,1053"
+      }
+    }
+  ]
+}
+```
+
 ### Metricbeat
+
+> 因为发现ES和kibana默认的监控也大体够用（metricbeat提供的内容更丰富），以及自己机器内存有限，开俩集群耗电太高（在家办公时刻心疼电费）。所以下面的内容就没测试。
 
 ES 推荐使用单独的集群和单独的`kibana`实例监控生产集群，事实上这也是非常必要的，因为一旦生产集群出现问题时，监控也可能会产生问题，那监控就没有意义了。
 

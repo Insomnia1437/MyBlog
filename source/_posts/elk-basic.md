@@ -2065,7 +2065,7 @@ ES集群采集：`xpack.monitoring.elasticsearch.collection.enabled`，此项仅
 
 7. 启动Metricbeat
 
-8. 禁用`xpack.monitoring.elasticsearch.collection.enabled` （why？）
+8. 禁用`xpack.monitoring.elasticsearch.collection.enabled` （因为功能重复了）
 
    ```http
    curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'
