@@ -1,6 +1,5 @@
 ---
 title: ELK配置
-date: 2020-05-02 23:27:33
 categories:
   - Software
   - elk
@@ -8,6 +7,8 @@ tags:
   - Kibana
   - Elasticsearch
   - Chinese
+abbrlink: d1e427b6
+date: 2020-05-02 23:27:33
 ---
 
 ```python

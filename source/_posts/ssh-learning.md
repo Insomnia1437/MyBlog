@@ -1,13 +1,14 @@
 ---
 title: ssh learning
-date: 2020-04-13 13:55:49
 categories:
-  - Memo
+  - MEMO
   - Linux
 tags:
   - Linux
   - Chinese
   - ssh
+abbrlink: a5271c15
+date: 2020-04-13 13:55:49
 ---
 
 ```python

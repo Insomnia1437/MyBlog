@@ -1,6 +1,5 @@
 ---
 title: ElasticSearch 基本概念
-date: 2020-04-23 14:42:38
 categories:
   - Software
   - elk
@@ -8,6 +7,8 @@ tags:
   - Kibana
   - Elasticsearch
   - Chinese
+abbrlink: df79f51
+date: 2020-04-23 14:42:38
 ---
 
 ```python

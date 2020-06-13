@@ -1,12 +1,13 @@
 ---
 title: Raspberry pi
-date: 2020-04-17 15:13:34
 categories:
- - Memo
- - Raspberry Pi
+  - MEMO
+  - Raspberry Pi
 tags:
- - Raspberry Pi
- - English
+  - Raspberry Pi
+  - English
+abbrlink: 6c816457
+date: 2020-04-17 15:13:34
 ---
 
 ```python
@@ -22,6 +23,15 @@ tags:
 Some memo during the usage of Raspberry Pi
 
 <!-- more -->
+
+## Linux Kernel
+
+How to obtain the kernel config options ?
+[https://superuser.com/questions/287371/obtain-kernel-config-from-currently-running-linux-system](https://superuser.com/questions/287371/obtain-kernel-config-from-currently-running-linux-system)
+
+1. `sudo modprobe configs`
+2. `cat /proc/config.gz | gunzip > running.config`
+3. `less running.config`
 
 ## Using a proxy
 

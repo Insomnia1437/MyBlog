@@ -1,11 +1,12 @@
 ---
 title: 关于信仰
-date: 2020-04-20 11:46:43
-categories: 
- - Philosophy
+categories:
+  - Philosophy
 tags:
- - Chinese
- - 哲学
+  - Chinese
+  - 哲学
+abbrlink: b87f94e5
+date: 2020-04-20 11:46:43
 ---
 
 ```python

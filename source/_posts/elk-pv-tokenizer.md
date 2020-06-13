@@ -1,6 +1,5 @@
 ---
 title: 配置基于Elasticsearch的EPICS PV分析器
-date: 2020-05-27 17:45:41
 categories:
   - Software
   - elk
@@ -8,6 +7,8 @@ categories:
 tags:
   - Elasticsearch
   - Chinese
+abbrlink: 94c24f0b
+date: 2020-05-27 17:45:41
 ---
 
 ```python
@@ -153,7 +154,7 @@ POST my_index/_analyze
 }
 ```
 
-输出结过一个去除了`the`，一个保留。
+输出结果一个去除了`the`，一个保留。
 
 ### 如何自定义分析器
 
@@ -246,7 +247,7 @@ POST my_index/_analyze
 ## Character filter
 
 - HTML Strip Char Filter
-  - 处理HTML的，把`<p>I&apos;m so <b>happy</b>!</p>`  --->> `I'm, so, happy`
+  - 处理HTML的，把`<p>I&apos;m so <b>happy</b>!</p>`  ---> `I'm, so, happy`
 - Mapping Character Filter
   - 看上面自定义分析器的例子
 - Pattern Replace Character Filter
@@ -276,9 +277,9 @@ POST my_index/_analyze
 ### Partial Word Tokenizers
 
 - N-Gram Tokenizer
-  - 默认使用2-gram，`quick` --->> `[qu, ui, ic, ck]`
+  - 默认使用2-gram，`quick` ---> `[qu, ui, ic, ck]`
 - Edge N-gram Tokenizer
-  - 在单词头设置anchor，如果5-gram的话，`quick` --->> `[q, qu, qui, quic, quick]`
+  - 在单词头设置anchor，如果5-gram的话，`quick` ---> `[q, qu, qui, quic, quick]`
 
 ### Structured Text Tokenizers
 
@@ -293,7 +294,7 @@ POST my_index/_analyze
 - Simple Pattern Split Tokenizer
   - 遇到正则匹配的项就分隔，和上面那个的区别跑一下下面的例子就明白了
 - Path_hierarchy Tokenizer
-  - 根据路径分隔，`/one/two/three` --->> `[ /one, /one/two, /one/two/three ]`
+  - 根据路径分隔，`/one/two/three` ---> `[ /one, /one/two, /one/two/three ]`
 
 ```http
 POST _analyze
