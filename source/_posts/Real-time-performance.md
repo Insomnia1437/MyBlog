@@ -115,5 +115,19 @@ notest_nop_accept
 notest_nop_refuse
 ```
 
+### CPU freq
 
+测试中发现使用`chrt`命令调整程序优先级之后，latency依然不稳定，经过测试发现，是由于CPU没有工作在最高频率。
+
+安装并测试`cpufrequtils`:
+
+`apt install cpufrequtils`
+
+内部包含了三个工具：
+
+- /usr/bin/cpufreq-info
+- /usr/bin/cpufreq-set
+- /usr/bin/cpufreq-aperf
+
+具体使用可以参考手册。
 
