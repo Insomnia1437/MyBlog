@@ -70,7 +70,7 @@ Python的VISA包可以装PyVisa或者R&S提供的RsInstrument。
 from RsInstrument.RsInstrument import RsInstrument
 
 resource_string_1 = 'TCPIP::rohdeosc3.linac.kek.jp::INSTR'  # Standard LAN connection (also called VXI-11)
-resource_string_2 = 'TCPIP::rohdeosc3.linac.kek.jp::inst0::INSTR'  # Hi-Speed LAN connection - see 1MA208
+resource_string_2 = 'TCPIP0::192.168.2.100::hislip0'  # High-Speed LAN Instrument Protocol
 resource_string_3 = 'GPIB::20::INSTR'  # GPIB Connection
 resource_string_4 = 'USB::0x0AAD::0x0119::022019943::INSTR'  # USB-TMC (Test and Measurement Class)
 instr = RsInstrument(resource_string_2, True, False)
@@ -92,6 +92,8 @@ instr.close()
 
 ```
 
-注释写的挺详细了，基本一看函数名也就知道干嘛，`write_str`发送SCPI命令，`query_opc`执行，其中`opc`也是SCPI命令，具体可以参考这个页面[Introducing SCPI Commands](https://www.rohde-schwarz.com/pk/driver-pages/remote-control/remote-programming-environments_231250.html#media-gallery-6)，这个页面上也给了详细的SCPI标准手册。
+注释写的挺详细了，基本一看函数名也就知道干嘛，`write_str`发送SCPI命令，`query_opc`执行。代码很简单的设置了截图的格式，截图文件名称和在示波器硬盘上的保存路径，然后发送截图命令，最后把图片文件从示波器传输到本机。
 
-但是太长了，建议别看，直接去读自己要使用的设备手册，比如我使用的是RT0-1044 示波器，这个手册非常详细的介绍了如何发送SCPI命令进行示波器触发，测量。[RTO_HTML_UserManual](https://www.rohde-schwarz.com/webhelp/rto_html_usermanual_en_1/RTO_HTML_UserManual_en.htm)。
+其中`opc`也是SCPI命令，涉及到异步处理，具体可以参考这个页面[Introducing SCPI Commands](https://www.rohde-schwarz.com/pk/driver-pages/remote-control/remote-programming-environments_231250.html#media-gallery-6)，这个页面上也给了详细的SCPI标准手册。
+
+但是真的太长了，建议别看，直接去读自己要使用的设备手册，比如我使用的是RT0-1044 示波器，这个手册非常详细的介绍了如何发送SCPI命令进行示波器触发，测量。[RTO_HTML_UserManual](https://www.rohde-schwarz.com/webhelp/rto_html_usermanual_en_1/RTO_HTML_UserManual_en.htm)。
