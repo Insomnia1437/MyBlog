@@ -3,10 +3,10 @@ title: 配置基于Elasticsearch的EPICS PV分析器
 categories:
   - Software
   - elk
-  - EPICS
 tags:
   - Elasticsearch
   - Chinese
+  - EPICS
 abbrlink: 94c24f0b
 date: 2020-05-27 17:45:41
 ---
