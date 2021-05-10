@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/neworder.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/neworder.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="X3XC6nkOi10OiEv6p0Y1EWgoRjOngRcPrMiBtuuts-o">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sdcswd.wang","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="12345# @Time    : 2020-05-02# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com   为了方便配置，（其实是懒得研究Puppet，Chef，和Ansible这些自动化管理工具），把一些我常用的配置项在这里列一下。所有内容只">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK配置">
+<meta property="og:url" content="https://www.sdcswd.wang/archives/d1e427b6/index.html">
+<meta property="og:site_name" content="Heterotopia">
+<meta property="og:description" content="12345# @Time    : 2020-05-02# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com   为了方便配置，（其实是懒得研究Puppet，Chef，和Ansible这些自动化管理工具），把一些我常用的配置项在这里列一下。所有内容只">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-05-02T23:27:33.000Z">
+<meta property="article:modified_time" content="2021-05-10T20:19:50.708Z">
+<meta property="article:author" content="Di WANG">
+<meta property="article:tag" content="Chinese">
+<meta property="article:tag" content="Kibana">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.sdcswd.wang/archives/d1e427b6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>ELK配置 | Heterotopia</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-155331821-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Heterotopia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">29</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://www.sdcswd.wang/archives/d1e427b6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/pasj2019.jpg">
+      <meta itemprop="name" content="Di WANG">
+      <meta itemprop="description" content="A place to record some information related with particle accelerator control system">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Heterotopia">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ELK配置
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-05-02 23:27:33" itemprop="dateCreated datePublished" datetime="2020-05-02T23:27:33+00:00">2020-05-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-10 20:19:50" itemprop="dateModified" datetime="2021-05-10T20:19:50+00:00">2021-05-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Software/" itemprop="url" rel="index"><span itemprop="name">Software</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Software/elk/" itemprop="url" rel="index"><span itemprop="name">elk</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>7.3k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>7 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># @Time    : 2020-05-02</span></span><br><span class="line"><span class="comment"># @Language: Markdown</span></span><br><span class="line"><span class="comment"># @Software: VS Code</span></span><br><span class="line"><span class="comment"># @Author  : Di Wang(KEK Linac)</span></span><br><span class="line"><span class="comment"># @Email   : sdcswd@gmail.com</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>为了方便配置，（其实是懒得研究<code>Puppet</code>，<code>Chef</code>，和<code>Ansible</code>这些自动化管理工具），把一些<code>我常用</code>的配置项在这里列一下。所有内容只针对CentOS 7。ES版本 7.6。</p>
+</blockquote>
+<a id="more"></a>
+
+<h2 id="集群设置"><a href="#集群设置" class="headerlink" title="集群设置"></a>集群设置</h2><p>VMware 15 创建四个 CentOS 7虚拟机（我只有16G内存，所以不使用GUI，设置了系统默认运行级别为<code>multi-user.target</code>，通过ssh进行操作），IP都使用NAT。</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>IP</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Host Machine</td>
+<td>192.168.1.1</td>
+<td>Windows 10</td>
+</tr>
+<tr>
+<td>node1</td>
+<td>192.168.1.111</td>
+<td>生产集群，运行ES，Kibana</td>
+</tr>
+<tr>
+<td>node2</td>
+<td>192.168.1.112</td>
+<td>生产集群，运行ES</td>
+</tr>
+<tr>
+<td>node3</td>
+<td>192.168.1.113</td>
+<td>生产集群，运行ES</td>
+</tr>
+<tr>
+<td>node4</td>
+<td>192.168.1.114</td>
+<td>监控集群，运行ES，Kibana</td>
+</tr>
+</tbody></table>
+<h2 id="ES"><a href="#ES" class="headerlink" title="ES"></a>ES</h2><p>安装和预配置，（shasum命令如果不存在，则<code>sudo yum install perl-Digest-SHA</code>）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p ~/elk/downloads</span><br><span class="line">cd ~/elk/downloads</span><br><span class="line"></span><br><span class="line">wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.6.2-x86_64.rpm</span><br><span class="line">wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.6.2-x86_64.rpm.sha512</span><br><span class="line">shasum -a 512 -c elasticsearch-7.6.2-x86_64.rpm.sha512 </span><br><span class="line">sudo rpm --install elasticsearch-7.6.2-x86_64.rpm</span><br><span class="line"></span><br><span class="line">sudo systemctl start elasticsearch.service</span><br><span class="line">sudo systemctl status elasticsearch.service</span><br><span class="line">sudo systemctl stop elasticsearch.service</span><br></pre></td></tr></table></figure>
+
+<p>安装完成之后会自动生成名为<code>elasticsearch</code>的用户和组，因为配置文件的目录<code>/etc/elasticsearch/</code>权限是<code>740</code>，同组的可读，所以可以把自己添加到组里，方便<strong>查看</strong>配置文件，修改还是需要当然<code>root</code>。</p>
+<p><code>sudo usermod -a -G elasticsearch yourusername</code></p>
+<p><code>/etc/elasticsearch/elasticsearch.yml</code>:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cluster</span></span><br><span class="line"><span class="attr">cluster.name:</span> <span class="string">elasticsearch-dev</span></span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment"># node</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">node1</span></span><br><span class="line"><span class="attr">node.master:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">node.voting_only:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">node.ml:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">xpack.ml.enabled:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment"># path</span></span><br><span class="line"><span class="attr">path.data:</span> <span class="string">/var/lib/elasticsearch</span></span><br><span class="line"><span class="attr">path.logs:</span> <span class="string">/var/log/elasticsearch</span></span><br><span class="line"><span class="comment"># memory</span></span><br><span class="line"><span class="attr">bootstrap.memory_lock:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment"># network</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9200</span></span><br><span class="line"><span class="comment"># discovery</span></span><br><span class="line"><span class="attr">discovery.seed_hosts:</span> <span class="string">["192.168.1.111",</span> <span class="string">"192.168.1.112:9300"</span><span class="string">,</span> <span class="string">"192.168.1.113"</span><span class="string">]</span></span><br><span class="line"><span class="attr">cluster.initial_master_nodes:</span> <span class="string">["node1",</span> <span class="string">"node2"</span><span class="string">,</span> <span class="string">"node3"</span><span class="string">]</span></span><br><span class="line"><span class="comment"># gateway</span></span><br><span class="line"><span class="attr">gateway.expected_nodes:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">gateway.expected_master_nodes:</span> <span class="number">3</span></span><br><span class="line"><span class="comment"># gateway.expected_data_nodes: 3</span></span><br><span class="line"><span class="attr">gateway.recover_after_time:</span> <span class="string">5m</span></span><br><span class="line"><span class="attr">gateway.recover_after_nodes:</span> <span class="number">3</span></span><br><span class="line"><span class="comment"># xpack monitoring</span></span><br><span class="line"><span class="attr">xpack.monitoring.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">xpack.monitoring.collection.enabled:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p><code>jvm.options</code>，默认为1 GB</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-Xms512m</span><br><span class="line">-Xmx512m</span><br></pre></td></tr></table></figure>
+
+<p>一些系统设置：可能也不需要设置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 这个需要设置！！！</span><br><span class="line">sudo systemctl edit elasticsearch</span><br><span class="line"># 添加</span><br><span class="line">[Service]</span><br><span class="line">LimitMEMLOCK&#x3D;infinity</span><br><span class="line"># 执行</span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">-------------------------------------</span><br><span class="line"># 这些因人而异:</span><br><span class="line">sysctl vm.max_map_count</span><br><span class="line">ulimit -a</span><br><span class="line">vim &#x2F;etc&#x2F;security&#x2F;limits.conf</span><br><span class="line"># 文件添加</span><br><span class="line">elasticsearch  -  nofile  65535</span><br><span class="line"># 下面这俩也是配置文件</span><br><span class="line">vim &#x2F;etc&#x2F;sysconfig&#x2F;elasticsearch</span><br><span class="line">vim &#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;elasticsearch.service</span><br></pre></td></tr></table></figure>
+
+<p>最终通过检查是否设置成功。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "192.168.1.113:9200/_nodes?filter_path=**.mlockall&amp;pretty"</span><br><span class="line">curl -X GET "192.168.1.113:9200/_nodes/stats/process?filter_path=**.max_file_descriptors&amp;pretty"</span><br></pre></td></tr></table></figure>
+
+<h2 id="Kibana"><a href="#Kibana" class="headerlink" title="Kibana"></a>Kibana</h2><p>安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cd ~/elk/downloads</span><br><span class="line">wget https://artifacts.elastic.co/downloads/kibana/kibana-7.6.2-x86_64.rpm</span><br><span class="line">shasum -a 512 kibana-7.6.2-x86_64.rpm </span><br><span class="line">sudo rpm --install kibana-7.6.2-x86_64.rpm</span><br><span class="line"></span><br><span class="line">sudo systemctl start kibana.service</span><br><span class="line">sudo systemctl stop kibana.service</span><br></pre></td></tr></table></figure>
+
+<p><code>/etc/kibana/kibana.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server.port:</span> <span class="number">5601</span></span><br><span class="line"><span class="attr">server.host:</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.111</span></span><br><span class="line"><span class="attr">server.name:</span> <span class="string">"Kibana-dev"</span></span><br><span class="line"></span><br><span class="line"><span class="attr">elasticsearch.hosts:</span> <span class="string">["http://192.168.1.111:9200",</span> <span class="string">"http://192.168.1.112:9200"</span><span class="string">,</span> <span class="string">"http://192.168.1.113:9200"</span><span class="string">]</span></span><br><span class="line"><span class="attr">xpack.monitoring.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">xpack.monitoring.kibana.collection.enabled:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>至此，开启集群就可以正常运行，且集群内可以监控数据。</p>
+<h2 id="Logstash"><a href="#Logstash" class="headerlink" title="Logstash"></a>Logstash</h2><p>//TODO</p>
+<h2 id="Beat"><a href="#Beat" class="headerlink" title="Beat"></a>Beat</h2><h3 id="Filebeat"><a href="#Filebeat" class="headerlink" title="Filebeat"></a>Filebeat</h3><p>安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.6.2-x86_64.rpm</span><br><span class="line">sudo rpm -vi filebeat-7.6.2-x86_64.rpm</span><br></pre></td></tr></table></figure>
+
+<p>这篇文章写的挺好，我自己就不总结了。<a href="https://www.cyhone.com/articles/usage-of-filebeat-log-config/" target="_blank" rel="noopener external nofollow noreferrer">FileBeat-Log 相关配置指南</a></p>
+<p><code>filebeat.yml</code>：</p>
+<blockquote>
+<p>input 和 output都可以设置pipeline，如果都设置会使用input中的pipeline，ES官方建议在input中，因为 <code>this option usually results in simpler configuration files</code></p>
+<p>通过ES的Ingest Node可以使用pipeline，在pipeline内定义了不同的processors。同时也可以直接在filebeat中定义processor，注意这两个地方的processors并不一样。前者的内容更丰富。</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">filebeat.inputs:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/var/log/*.log</span></span><br><span class="line">    <span class="comment">#- c:\programdata\elasticsearch\logs\*</span></span><br><span class="line">    <span class="comment"># exclude_lines: ['^DBG']</span></span><br><span class="line">    <span class="comment"># exclude_files: ['.gz$']</span></span><br><span class="line">  <span class="attr">fields:</span> </span><br><span class="line">    <span class="attr">logtype:</span> <span class="string">test2</span></span><br><span class="line">    </span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/var/another_log/*.log</span></span><br><span class="line">    <span class="comment">#- c:\programdata\elasticsearch\logs\*</span></span><br><span class="line">    <span class="comment"># exclude_lines: ['^DBG']</span></span><br><span class="line">    <span class="comment"># exclude_files: ['.gz$']</span></span><br><span class="line">  <span class="attr">fields:</span> </span><br><span class="line">    <span class="attr">logtype:</span> <span class="string">test1</span></span><br><span class="line">  <span class="comment"># 以下几项都是默认值，根据需要修改</span></span><br><span class="line">  <span class="attr">encoding:</span> <span class="string">plain</span></span><br><span class="line">  <span class="attr">ignore_older:</span> <span class="string">"2h"</span></span><br><span class="line">  <span class="attr">close_inactive:</span> <span class="string">"1m"</span></span><br><span class="line">  <span class="attr">close_renamed:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">close_eof:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">close_removed:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">close_timeout:</span> <span class="string">"0"</span></span><br><span class="line">  <span class="attr">harvester_limit:</span> <span class="number">0</span></span><br><span class="line">  <span class="attr">scan_frequency:</span> <span class="string">"10s"</span></span><br><span class="line">  <span class="comment"># pipeline需要在集群内通过API设置</span></span><br><span class="line">  <span class="attr">pipeline:</span> <span class="string">"my_pipeline"</span></span><br><span class="line"></span><br><span class="line"><span class="attr">setup.ilm.enabled:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment">#setup.ilm.rollover_alias: "test-%&#123;[agent.version]&#125;"</span></span><br><span class="line"><span class="comment">#setup.ilm.pattern: "%&#123;now/d&#125;-000001"</span></span><br><span class="line"><span class="comment">#setup.ilm.policy_name: "my-policy-%&#123;[agent.version]&#125;"</span></span><br><span class="line"></span><br><span class="line"><span class="attr">output.elasticsearch:</span></span><br><span class="line">  <span class="comment"># Array of hosts to connect to.</span></span><br><span class="line">  <span class="attr">hosts:</span> <span class="string">["localhost:9200"]</span></span><br><span class="line">  <span class="attr">indices:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">index:</span> <span class="string">"filebeat-<span class="template-variable">%&#123;[agent.version]&#125;</span>-test1-<span class="template-variable">%&#123;+yyyy.MM.dd&#125;</span>"</span></span><br><span class="line">      <span class="attr">when.contains:</span></span><br><span class="line">        <span class="attr">fields.logtype:</span> <span class="string">"test1"</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">index:</span> <span class="string">"filebeat-<span class="template-variable">%&#123;[agent.version]&#125;</span>-test2-<span class="template-variable">%&#123;+yyyy.MM.dd&#125;</span>"</span></span><br><span class="line">      <span class="attr">when.contains:</span></span><br><span class="line">        <span class="attr">fields.logtype:</span> <span class="string">"test2"</span></span><br><span class="line"><span class="attr">logging.level:</span> <span class="string">info</span></span><br><span class="line"><span class="attr">logging.to_files:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">logging.files:</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">/var/log/filebeat</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">filebeat</span></span><br><span class="line">  <span class="attr">keepfiles:</span> <span class="number">7</span></span><br><span class="line">  <span class="attr">permissions:</span> <span class="number">0644</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">monitoring.enabled:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>写完一个pipeline，可以通过以下<code>_simulate</code> API进行测试，测试没问题之后写入集群，一例：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">POST /_ingest/pipeline/_simulate?pretty</span><br><span class="line">&#123;</span><br><span class="line">  "pipeline": &#123;</span><br><span class="line">    "description": "_description",</span><br><span class="line">    "processors": [</span><br><span class="line">      &#123;</span><br><span class="line">        "csv": &#123;</span><br><span class="line">          "field": "message",</span><br><span class="line">          "target_fields": [</span><br><span class="line">            "NTPtime",</span><br><span class="line">            "NTPts",</span><br><span class="line">            "PTPtime",</span><br><span class="line">            "PTPts",</span><br><span class="line">            "databuffer_time",</span><br><span class="line">            "databuffer_ts",</span><br><span class="line">            "255_1",</span><br><span class="line">            "255_2",</span><br><span class="line">            "shot",</span><br><span class="line">            "pre_trigger_delay_1",</span><br><span class="line">            "pre_trigger_delay_2",</span><br><span class="line">            "mr_bkt_1",</span><br><span class="line">            "mr_bkt_2",</span><br><span class="line">            "dr_bkt",</span><br><span class="line">            "D8",</span><br><span class="line">            "D9",</span><br><span class="line">            "rf_phase_her",</span><br><span class="line">            "rf_phase_ler",</span><br><span class="line">            "c_mode",</span><br><span class="line">            "n_bmode",</span><br><span class="line">            "nn_bmode"</span><br><span class="line">          ],</span><br><span class="line">          "trim": true</span><br><span class="line">        &#125;,</span><br><span class="line">        "remove": &#123;</span><br><span class="line">          "field": "message"</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  "docs": [</span><br><span class="line">    &#123;</span><br><span class="line">      "_index": "index",</span><br><span class="line">      "_id": "id",</span><br><span class="line">      "_source": &#123;</span><br><span class="line">        "message": "2020/04/04 00:01:53.369591,3668770913.369590,2020/04/04 00:02:30.363358,3668770950.363357,2020/04/04 00:01:53.370848,3668770913.370847,255,255,25026,0,0,245,230,0,0,50544,1038,36492,42,31,180,60032,1053"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      "_index": "index",</span><br><span class="line">      "_id": "id",</span><br><span class="line">      "_source": &#123;</span><br><span class="line">        "message": "2020/04/04 00:01:53.429934,3668770913.429934,2020/04/04 00:02:30.423227,3668770950.423226,2020/04/04 00:01:53.430860,3668770913.430860,255,255,25029,0,0,686,117,0,0,50544,1038,36492,182,41,30,60032,1053"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Metricbeat"><a href="#Metricbeat" class="headerlink" title="Metricbeat"></a>Metricbeat</h3><blockquote>
+<p>因为发现ES和kibana默认的监控也大体够用（metricbeat提供的内容更丰富），以及自己机器内存有限，开俩集群耗电太高（在家办公时刻心疼电费）。所以下面的内容就没测试。</p>
+</blockquote>
+<p>ES 推荐使用单独的集群和单独的<code>kibana</code>实例监控生产集群，事实上这也是非常必要的，因为一旦生产集群出现问题时，监控也可能会产生问题，那监控就没有意义了。</p>
+<p>如果不想使用单独的集群，那直接配置<code>xpack.monitoring.collection.enabled</code>就可以。</p>
+<p>以下的配置是用来介绍分开监控的情况，有两个集群：生产集群和监控集群，</p>
+<p>在生产集群禁用默认的ES监控：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PUT _cluster/settings</span><br><span class="line">&#123;</span><br><span class="line">  "persistent": &#123;</span><br><span class="line">    "xpack.monitoring.elasticsearch.collection.enabled": false</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>安装和配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.6.2-x86_64.rpm</span><br><span class="line">sudo rpm -vi metricbeat-7.6.2-x86_64.rpm</span><br><span class="line">metricbeat modules enable elasticsearch-xpack</span><br></pre></td></tr></table></figure>
+
+<p><code>/etc/metricbeat/metricbeat.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">metricbeat.config.modules:</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">$&#123;path.config&#125;/modules.d/*.yml</span></span><br><span class="line">  <span class="attr">reload.enabled:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">setup.template.settings:</span></span><br><span class="line">  <span class="attr">index.number_of_shards:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">index.codec:</span> <span class="string">best_compression</span></span><br><span class="line"><span class="attr">setup.dashboards.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">setup.kibana:</span></span><br><span class="line">  <span class="comment"># 把 dashboard 导入监控集群的kibana实例</span></span><br><span class="line">  <span class="attr">host:</span> <span class="string">"192.168.1.114:5601"</span></span><br><span class="line"><span class="attr">output.elasticsearch:</span></span><br><span class="line">  <span class="comment"># 此处指定为监控集群</span></span><br><span class="line">  <span class="attr">hosts:</span> <span class="string">["192.168.1.114:9200"]</span></span><br></pre></td></tr></table></figure>
+
+<p><code>modules.d/elasticsearch-xpack.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">module:</span> <span class="string">elasticsearch</span></span><br><span class="line">   <span class="attr">metricsets:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">ccr</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">cluster_stats</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">index</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">index_recovery</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">index_summary</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">ml_job</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">node_stats</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">shard</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">enrich</span></span><br><span class="line">   <span class="attr">period:</span> <span class="string">10s</span></span><br><span class="line">   <span class="attr">hosts:</span> <span class="string">["http://192.168.1.111:9200"]</span></span><br><span class="line">   <span class="comment">#username: "user"</span></span><br><span class="line">   <span class="comment">#password: "secret"</span></span><br><span class="line">   <span class="attr">xpack.enabled:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>测试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -XGET &#39;http:&#x2F;&#x2F;192.168.1.114:9200&#x2F;metricbeat-*&#x2F;_search?pretty&#39;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Di WANG
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://www.sdcswd.wang/archives/d1e427b6/" title="ELK配置">https://www.sdcswd.wang/archives/d1e427b6/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Chinese/" rel="tag"># Chinese</a>
+              <a href="/tags/Kibana/" rel="tag"># Kibana</a>
+              <a href="/tags/Elasticsearch/" rel="tag"># Elasticsearch</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/archives/df79f51/" rel="prev" title="ElasticSearch 基本概念">
+      <i class="fa fa-chevron-left"></i> ElasticSearch 基本概念
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/archives/94c24f0b/" rel="next" title="配置基于Elasticsearch的EPICS PV分析器">
+      配置基于Elasticsearch的EPICS PV分析器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#集群设置"><span class="nav-number">1.</span> <span class="nav-text">集群设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ES"><span class="nav-number">2.</span> <span class="nav-text">ES</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kibana"><span class="nav-number">3.</span> <span class="nav-text">Kibana</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Logstash"><span class="nav-number">4.</span> <span class="nav-text">Logstash</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Beat"><span class="nav-number">5.</span> <span class="nav-text">Beat</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Filebeat"><span class="nav-number">5.1.</span> <span class="nav-text">Filebeat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metricbeat"><span class="nav-number">5.2.</span> <span class="nav-text">Metricbeat</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Di WANG"
+      src="/images/pasj2019.jpg">
+  <p class="site-author-name" itemprop="name">Di WANG</p>
+  <div class="site-description" itemprop="description">A place to record some information related with particle accelerator control system</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Insomnia1437" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Insomnia1437" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:sdcswd@gmail.com" title="E-Mail → mailto:sdcswd@gmail.com" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Di WANG</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">110k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:40</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">NexT.Gemini</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

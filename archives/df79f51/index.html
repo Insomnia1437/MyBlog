@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/neworder.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/neworder.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="X3XC6nkOi10OiEv6p0Y1EWgoRjOngRcPrMiBtuuts-o">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sdcswd.wang","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="12345# @Time    : 2020-04-23# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com   前言：之前在LINAC安装了ES，采集了控制网络内EPICS beacon anomaly和Archive Appliance的数据，但">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElasticSearch 基本概念">
+<meta property="og:url" content="https://www.sdcswd.wang/archives/df79f51/index.html">
+<meta property="og:site_name" content="Heterotopia">
+<meta property="og:description" content="12345# @Time    : 2020-04-23# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com   前言：之前在LINAC安装了ES，采集了控制网络内EPICS beacon anomaly和Archive Appliance的数据，但">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-04-23T14:42:38.000Z">
+<meta property="article:modified_time" content="2021-05-10T20:19:50.708Z">
+<meta property="article:author" content="Di WANG">
+<meta property="article:tag" content="Chinese">
+<meta property="article:tag" content="Kibana">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.sdcswd.wang/archives/df79f51/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>ElasticSearch 基本概念 | Heterotopia</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-155331821-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Heterotopia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">29</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://www.sdcswd.wang/archives/df79f51/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/pasj2019.jpg">
+      <meta itemprop="name" content="Di WANG">
+      <meta itemprop="description" content="A place to record some information related with particle accelerator control system">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Heterotopia">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ElasticSearch 基本概念
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-04-23 14:42:38" itemprop="dateCreated datePublished" datetime="2020-04-23T14:42:38+00:00">2020-04-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-10 20:19:50" itemprop="dateModified" datetime="2021-05-10T20:19:50+00:00">2021-05-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Software/" itemprop="url" rel="index"><span itemprop="name">Software</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Software/elk/" itemprop="url" rel="index"><span itemprop="name">elk</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>36k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>33 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># @Time    : 2020-04-23</span></span><br><span class="line"><span class="comment"># @Language: Markdown</span></span><br><span class="line"><span class="comment"># @Software: VS Code</span></span><br><span class="line"><span class="comment"># @Author  : Di Wang(KEK Linac)</span></span><br><span class="line"><span class="comment"># @Email   : sdcswd@gmail.com</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>前言：之前在LINAC安装了ES，采集了控制网络内EPICS beacon anomaly和Archive Appliance的数据，但是使用了一个非常老旧的桌面计算机，也没有修改什么参数，导致机器非常卡顿（文末会分析原因）。最近购入了一个新的服务器，准备migrate到新的机器上，再加上疫情在家隔离终于有时间去研究下ES的一些细节概念了。</p>
+</blockquote>
+<a id="more"></a>
+
+<p><strong>由于软件版本的更新，很多feature被移除（比如文档的<code>_type</code> metadata，<code>_default_</code> mapping），因此本文的概念基于Elasticsearch 7 以上版本</strong></p>
+<p>原文在此： <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.6/index.html" target="_blank" rel="noopener external nofollow noreferrer">Elasticsearch Reference 7.6</a></p>
+<h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><ul>
+<li><p>cluster：集群， 一个cluster由多个node组成。</p>
+</li>
+<li><p>node：节点，一个node就是一个ES实例，一台机器可以开启多个node，大多数情况就是一台机器或者一个独立的虚拟机环境。</p>
+</li>
+<li><p>index：索引，既可以当动词也可以当名词用，一系列文档归于一个index内。</p>
+</li>
+<li><p>shard：分片，是底层Lucene分配的基础单元，一个index有一个或者多个shard，shard会被ES动态分配在不同的node上，每个shard最大存放<code>Integer.MAX_VALUE - 128</code>个文档</p>
+<ul>
+<li>primary shard：主分片，响应搜索服务，创建index时设定，除非重建索引否则数量不可变。</li>
+<li>replica shard：副本分片，备份用主分片挂了，副本就会升级成主分片，数量随时可变</li>
+</ul>
+</li>
+</ul>
+<h2 id="安装与配置"><a href="#安装与配置" class="headerlink" title="安装与配置"></a>安装与配置</h2><h3 id="安装之前"><a href="#安装之前" class="headerlink" title="安装之前"></a>安装之前</h3><p>首先确定自己的Java版本，操作系统，查看官方的<a href="https://www.elastic.co/support/matrix" target="_blank" rel="noopener external nofollow noreferrer">support matrix</a>。如果不在这个martix里，比如想在Raspberry Pi上安装，可能需要做一些修改。</p>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><h4 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h4><p>大部分配置都可以通过RESTful API进行动态修改。</p>
+<p>一例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT &quot;localhost:9200&#x2F;_cluster&#x2F;settings?pretty&quot; -H &#39;Content-Type: application&#x2F;json&#39; -d&#39;</span><br><span class="line">&#123;</span><br><span class="line">    &quot;persistent&quot; : &#123;</span><br><span class="line">        &quot;indices.recovery.max_bytes_per_sec&quot; : &quot;50mb&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#39;</span><br></pre></td></tr></table></figure>
+
+<p>剩下的一些初始化配置在<code>config</code>目录下，配置文件是<code>YAML</code>格式。</p>
+<ul>
+<li><code>elasticsearch.yml</code> 配置Elasticsearch</li>
+<li><code>jvm.options</code> 配置Elasticsearch JVM</li>
+<li><code>log4j2.properties</code> 配置Elasticsearch logging</li>
+</ul>
+<p>配置也可以通过环境变量导入。</p>
+<h4 id="基础配置项"><a href="#基础配置项" class="headerlink" title="基础配置项"></a>基础配置项</h4><ul>
+<li><p><code>path.data</code>和<code>path.logs</code>：如果使用压缩包安装，为了防止升级时把这<code>data</code>和<code>logs</code>覆盖导致数据丢失，最好不放在ES文件夹内，<code>config</code>文件夹亦然。</p>
+</li>
+<li><p><code>cluster.name</code> 集群的名字，默认是<code>elasticsearch</code></p>
+</li>
+<li><p><code>node.name</code> 节点的名字，默认是本机<code>hostname</code></p>
+</li>
+<li><p><code>network.host</code>  节点IP</p>
+</li>
+<li><p><code>discovery.seed_hosts</code> 在ES启动过程中，有一个discovery的过程去寻找别的集群节点，别的节点的IP地址或者hostname（ES会自己用DNS lookup转换成IP地址）就在这个配置项中设置。同时可以指定端口，默认是9300。</p>
+</li>
+<li><p><code>cluster.initial_master_nodes</code> 设定初始的master node，集群启动时候有一个<code>cluster bootstrapping</code>的过程，会通过选举产生有资格成为master node的节点，如果没有配置这个bootstrapping会自动完成，但可能会由于节点discovery的速度过慢形成了多个集群，因此需要指定几个有选举资格的master node。（discovery和bootstrapping的细节我没有仔细研究，可能有理解错误。ES 7.0以前的版本使用<code>discovery.zen.minimum_master_nodes</code>这个配置项防止脑裂，现在已被忽略。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">discovery.seed_hosts:</span></span><br><span class="line">   <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.10</span><span class="string">:9300</span></span><br><span class="line">   <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.11</span> </span><br><span class="line">   <span class="bullet">-</span> <span class="string">seeds.mydomain.com</span> </span><br><span class="line">   <span class="bullet">-</span> <span class="string">[0:0:0:0:0:ffff:c0a8:10c]:9301</span> </span><br><span class="line"><span class="attr">cluster.initial_master_nodes:</span> </span><br><span class="line">   <span class="bullet">-</span> <span class="string">master-node-a</span></span><br><span class="line">   <span class="bullet">-</span> <span class="string">master-node-b</span></span><br><span class="line">   <span class="bullet">-</span> <span class="string">master-node-c</span></span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><code>http.port</code> http端口 默认9200，用于RESTful API的通信</li>
+<li><code>bootstrap.memory_lock</code> 允许JVM锁住内存，禁止swap。</li>
+</ul>
+<h4 id="JVM配置"><a href="#JVM配置" class="headerlink" title="JVM配置"></a>JVM配置</h4><p>查询JVM配置</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -XGET 'localhost:9200/_nodes/jvm?pretty'</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="堆内存"><a href="#堆内存" class="headerlink" title="堆内存"></a>堆内存</h5><p>使用<code>ES_JAVA_OPTS</code>环境变量设置</p>
+<p>可以指定JVM版本，比如<code>8-9:-Xmx2g</code>代表如果JVM版本是8和9，设置最大堆内存为2 GB。默认值为1 GB。</p>
+<p>通常需要设置<strong>最大对内存和最小堆内存相同</strong>，防止程序在运行时改变堆内存大小。由于JVM的内存指针压缩（compressed oops），最大值不要超过32 GB，官方推荐安全值26 GB，也有办法查看自己机器的不开启指针压缩的最大堆内存值。</p>
+<blockquote>
+<p>-Xms8g<br>-Xmx8g</p>
+</blockquote>
+<h5 id="JVM缓存配置"><a href="#JVM缓存配置" class="headerlink" title="JVM缓存配置"></a>JVM缓存配置</h5><p>ES会在<code>/tmp</code>目录下创建一些temp file，而有些Linux发行版可能会定期删除这些文件导致ES出现问题。如果使用包管理工具安装ES并且通过<code>systemd</code>运行，这种情况不会发生，如果使用<code>.tar.gz</code>下载就需要通过<code>$ES_TMPDIR</code>这个环境变量指定，同时这个目录也要设置permission，只允许ES的运行者访问。</p>
+<h4 id="安全配置"><a href="#安全配置" class="headerlink" title="安全配置"></a>安全配置</h4><p>通过<code>bin/elasticsearch-keystore create</code>创建<code>keystore</code>。目前似乎不是非常完善。</p>
+<h4 id="日志配置"><a href="#日志配置" class="headerlink" title="日志配置"></a>日志配置</h4><p>ES使用的是<a href="https://logging.apache.org/log4j/2.x/" target="_blank" rel="noopener external nofollow noreferrer">Log4j 2</a>，有非常多的配置项，以后需要使用再去研究。</p>
+<h4 id="xpack配置"><a href="#xpack配置" class="headerlink" title="xpack配置"></a>xpack配置</h4><p>xpack有许多功能都可以根据需要进行配置，比如Index lifecycle management (ilm)，Machine learning，Monitoring，Security，SQL，Watcher。稍微详细介绍。</p>
+<h4 id="重要配置"><a href="#重要配置" class="headerlink" title="重要配置"></a>重要配置</h4><p>ES默认用户在开发模式运行，允许很多重要的设置使用默认值，只给warning，但是一旦修改了网络设置，如<code>network.host</code>，ES会认为用户在生产运行模式，会把这些warning升级为exception，阻止ES启动。</p>
+<h5 id="增加文件句柄数量"><a href="#增加文件句柄数量" class="headerlink" title="增加文件句柄数量"></a>增加文件句柄数量</h5><p>根据ES安装方式不同，配置文件也不同</p>
+<ul>
+<li><p><code>.zip</code>和.<code>tar.gz</code>： 临时配置使用<code>ulimit</code>，永久配置在<code>/etc/security/limits.conf</code>。在Linux上需要使用<code>ulimit</code>来配置最大允许打卡的文件数。例如root 执行：<code>ulimit -n 65535</code></p>
+</li>
+<li><p>包管理工具：RPM在<code>/etc/sysconfig/elasticsearch</code>，Debian在<code>/etc/default/elasticsearch</code></p>
+</li>
+<li><p>包管理工具切使用了<code>systemd</code>：<code>sudo systemctl edit elasticsearch</code>，改成</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line">LimitMEMLOCK=infinity</span><br></pre></td></tr></table></figure>
+
+<p>然后<code>sudo systemctl daemon-reload</code></p>
+</li>
+</ul>
+<p>最后用下面的语句去查询。（这个配置在Windows上不用管，返回值是-1）</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET _nodes/stats/process?filter_path=**.max_file_descriptors</span><br></pre></td></tr></table></figure>
+
+<h5 id="禁用swapping"><a href="#禁用swapping" class="headerlink" title="禁用swapping"></a>禁用swapping</h5><p>也有不同的方式，懒得一一罗列，可以通过下面这个语句查看是否禁用</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET _nodes?filter_path=**.mlockall</span><br></pre></td></tr></table></figure>
+
+<h5 id="虚拟内存"><a href="#虚拟内存" class="headerlink" title="虚拟内存"></a>虚拟内存</h5><p>ES使用<code>mmapfs</code>目录存indices（？？？不懂），在Linux上要增加mmap count。RPM 和 Debian安装的已自动设置。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo sysctl -w vm.max_map_count=262144</span><br><span class="line"><span class="comment"># 也可以在文件里改，永久生效</span></span><br><span class="line">sudo vim /etc/sysctl.conf</span><br><span class="line"><span class="comment"># 检验是否生效</span></span><br><span class="line">sysctl vm.max_map_count</span><br></pre></td></tr></table></figure>
+
+<h5 id="线程数"><a href="#线程数" class="headerlink" title="线程数"></a>线程数</h5><p>使用<code>systemd</code>运行的忽略此项。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">ulimit</span> -u 4096</span><br><span class="line"><span class="comment"># 或者设置 nproc = 4096</span></span><br><span class="line">sudo vi /etc/security/limits.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="bootstrap-check"><a href="#bootstrap-check" class="headerlink" title="bootstrap check"></a>bootstrap check</h4><p>如果只部署了一个node，且不设置<code>transport</code>或设置discovery 类型为<code>single-node</code>，bootstrap check就会被跳过，这可能导致一些问题，所以最好强制进行check，可以在JVM设置里<code>es.enforce.bootstrap.checks= true</code>来强制开启。</p>
+<p>check会检查上面所列的一些重要配置项，除此之外，还会检查：</p>
+<ul>
+<li><p>最大文件大小</p>
+</li>
+<li><p>JVM是client JVM还是server JVM</p>
+</li>
+<li><p>GC</p>
+</li>
+<li><p>system call filters</p>
+</li>
+<li><p>OnError和OnOutOfMemoryError</p>
+</li>
+<li><p>early-access</p>
+</li>
+<li><p>G1GC</p>
+</li>
+<li><p>All permission</p>
+</li>
+<li><p>discovery配置检测</p>
+<ul>
+<li><code>discovery.seed_hosts</code></li>
+<li><code>discovery.seed_providers</code></li>
+<li><code>cluster.initial_master_nodes</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="模块"><a href="#模块" class="headerlink" title="模块"></a>模块</h2><p>ES有不同的模块负责不同的功能，每个模块的配置分为两种，一种必须在配置文件中指定（或者在环境变量），另一种可以通过API动态改变。</p>
+<h3 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h3><p>首先介绍node，开启一个ES的时候其实就是启动了一个node，一系列node的集合就是一个集群。每个node使用<code>HTTP</code>和<code>Transport</code>两个模块进行信息交换，前者用于服务REST客户端，后者是用于节点之间的交互。</p>
+<p>节点类型有四种类型，在<code>elasticsearch.yml</code>文件中设置。可以既是<code>master-eligible</code>也是<code>data</code>节点。如果所有类型都设置为false，那节点就成为一个类似于proxy的coordinating node，负责转发请求和结果聚合。</p>
+<h4 id="Master-eligible-node"><a href="#Master-eligible-node" class="headerlink" title="Master-eligible node"></a>Master-eligible node</h4><p>配置项：<code>node.master</code>，使一个节点拥有成为参与投票选举master节点的资格。设置<code>node.voting_only</code>可以让这个节点只有选举权没有被选举权。</p>
+<p>为了保证master节点有足够的资源，如果资源富裕，可以禁用别的类型。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">node.master:</span> <span class="literal">true</span> </span><br><span class="line"><span class="attr">node.data:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">node.ingest:</span> <span class="literal">false</span> </span><br><span class="line"><span class="attr">cluster.remote.connect:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Data-node"><a href="#Data-node" class="headerlink" title="Data node"></a>Data node</h4><p>配置项：<code>node.data</code>，数据节点保存数据，可以进行CRUD，搜索和聚合。</p>
+<h4 id="Ingest-node"><a href="#Ingest-node" class="headerlink" title="Ingest node"></a>Ingest node</h4><p>配置项：<code>node.ingest</code>，使用pipeline，用于数据预处理（移除某个field，或者重命名），也可以实现一些复杂的逻辑，条件语句，正则表达式，异常处理。 （感觉和logstash功能重叠了）</p>
+<h4 id="Machine-learning-node"><a href="#Machine-learning-node" class="headerlink" title="Machine learning node"></a>Machine learning node</h4><p>用于机器学习，略。</p>
+<h3 id="Discovery-and-cluster-formation"><a href="#Discovery-and-cluster-formation" class="headerlink" title="Discovery and cluster formation"></a>Discovery and cluster formation</h3><p>这个模块负责发现节点，组成集群，选举master，改变集群状态。</p>
+<p>存在一个<code>seed hosts providers</code>的概念，有两种providers：a <em>settings</em>-based and a <em>file</em>-based seed hosts provider。通过配置<code>discovery.seed_providers</code>起作用。</p>
+<p>选取master节点是基于<code>quorum</code>（法定人数，即大于多少个节点的认可来保证只有一个master），在一批<code>master-eligible</code>节点中进行选举，具体办法可以通过<code>voting configuration</code>配置。这个过程在<code>cluster bootstrapping</code>过程中完成。</p>
+<p>添加和移除节点时候要多加小心，不要一次性移除太多节点，否则可能会导致没有足够多的<code>master-eligible</code>节点，导致集群无法正常工作。</p>
+<p><a href="https://zhuanlan.zhihu.com/p/34858035" target="_blank" rel="noopener external nofollow noreferrer">一些技术细节可以参考知乎的这篇文章</a></p>
+<h3 id="Shard-allocation-and-cluster-level-routing"><a href="#Shard-allocation-and-cluster-level-routing" class="headerlink" title="Shard allocation and cluster-level routing"></a>Shard allocation and cluster-level routing</h3><p>master节点的一个主要任务是决定分片分配以及在rebalance时如何移动分片。</p>
+<p>ES默认会监测节点的磁盘可用空间来选择分片分配方案，如下例，</p>
+<ul>
+<li>低警戒线：磁盘剩余空间不足100G，则停止向这个节点分配副本分片。默认85%。</li>
+<li>高警戒线：磁盘剩余空间不足50G，则把此节点的分片移动到别的节点。默认90%。</li>
+<li>洪水水位线：剩余不足10G，则将所有index标记为只读。默认95%。</li>
+<li>检测间隔为1分钟</li>
+</ul>
+<p>几个设置值要么都是百分比，要么都是字节值，不能混用</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "transient": &#123;</span><br><span class="line">    "cluster.routing.allocation.disk.watermark.low": "100gb",</span><br><span class="line">    "cluster.routing.allocation.disk.watermark.high": "50gb",</span><br><span class="line">    "cluster.routing.allocation.disk.watermark.flood_stage": "10gb",</span><br><span class="line">    "cluster.info.update.interval": "1m"</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h3 id="Gateway"><a href="#Gateway" class="headerlink" title="Gateway"></a>Gateway</h3><p>控制在集群重启时的一些策略。</p>
+<p>集群重启时，如果只有部分节点重启，集群发现缺失了节点，就会启动rebalance，在节点之间复制数据，这会消耗大量I/O和带宽。比较重要的配置项有<code>gateway.recover_after_time</code> 和 <code>gateway.recover_after_*</code>。</p>
+<h3 id="HTTP"><a href="#HTTP" class="headerlink" title="HTTP"></a>HTTP</h3><p>提供基于HTTP协议的ES APIs，建议客户端使用HTTP长连接以提高性能。默认端口9200</p>
+<h3 id="Transport"><a href="#Transport" class="headerlink" title="Transport"></a>Transport</h3><p>用于节点之间的内部通信。默认端口9300，可以设置多个profile指向不同的网卡地址和端口。</p>
+<h3 id="Network-setting"><a href="#Network-setting" class="headerlink" title="Network setting"></a>Network setting</h3><p>ES默认只会绑定localhost，经常使用的网络设置项：</p>
+<ul>
+<li><code>network.host</code></li>
+<li><code>discovery.seed_hosts</code></li>
+<li><code>http.port</code></li>
+<li><code>transport.port</code></li>
+</ul>
+<p>还有一些高级设置，比如需要proxy才能访问ES时的配置，可以自己去看官方文档。</p>
+<h3 id="Indices"><a href="#Indices" class="headerlink" title="Indices"></a>Indices</h3><p>一些和indices相关的配置</p>
+<h4 id="静态设置项"><a href="#静态设置项" class="headerlink" title="静态设置项"></a>静态设置项</h4><ul>
+<li><code>index.number_of_shards</code> 主分片的数量，默认为1。最大为1024</li>
+<li><code>index.shard.check_on_startup</code> 打卡分片之前是否进行check，默认为false</li>
+<li><code>index.codec</code> 默认使用<code>LZ4</code>压缩，可以设置为<code>best_compression</code>来提高压缩率</li>
+<li><code>index.routing_partition_size</code> 用于 routing</li>
+<li><code>index.load_fixed_bitset_filters_eagerly</code> Indicates whether cached filters are pre-loaded for nested queries. Possible values are true (default) and false.</li>
+</ul>
+<h4 id="动态设置项"><a href="#动态设置项" class="headerlink" title="动态设置项"></a>动态设置项</h4><ul>
+<li><code>index.number_of_replicas</code> 副本分片数量，默认为1。</li>
+<li><code>index.auto_expand_replicas</code> 自动扩充副本数量，设置为<code>0-5</code>，默认为false。只会考虑设置的部分分片分配的规则。</li>
+<li><code>index.search.idle.after</code>  默认30秒之后一个shard才能响应搜索</li>
+<li><code>index.refresh_interval</code> 默认为1秒，设置为-1可禁用。</li>
+</ul>
+<h4 id="Circuit-breaker"><a href="#Circuit-breaker" class="headerlink" title="Circuit breaker"></a>Circuit breaker</h4><p>ES有很多种断路器，都是指定一个内存使用的limit，防止OOM。</p>
+<h4 id="Field-data"><a href="#Field-data" class="headerlink" title="Field data"></a>Field data</h4><p>主要用于缓存搜索或者聚合时使用的field，设置cache <code>indices.fielddata.cache.size</code></p>
+<h4 id="Node-query-cache"><a href="#Node-query-cache" class="headerlink" title="Node query cache"></a>Node query cache</h4><p>filter 查询时的cache，设置<code>indices.queries.cache.size</code></p>
+<h4 id="Indexing-buffer"><a href="#Indexing-buffer" class="headerlink" title="Indexing buffer"></a>Indexing buffer</h4><p>顾名思义。<code>indices.memory.index_buffer_size</code></p>
+<h4 id="Shard-request-cache"><a href="#Shard-request-cache" class="headerlink" title="Shard request cache"></a>Shard request cache</h4><p>分片级别的cache。查询：</p>
+<p><code>curl -X GET &quot;localhost:9200/_stats/request_cache?human&amp;pretty&quot;</code></p>
+<p><code>curl -X GET &quot;localhost:9200/_nodes/stats/indices/request_cache?human&amp;pretty&quot;</code></p>
+<h4 id="Index-recovery"><a href="#Index-recovery" class="headerlink" title="Index recovery"></a>Index recovery</h4><p>以下两种情况带来的索引重建时候的配置</p>
+<ul>
+<li>分片丢失，索引重建</li>
+<li>集群rebalance或者更改了分片分配设置项，索引重建</li>
+</ul>
+<p>设置<code>indices.recovery.max_bytes_per_sec</code>：Limits total inbound and outbound recovery traffic for each node，默认为 40 MB</p>
+<h3 id="Thread-pool"><a href="#Thread-pool" class="headerlink" title="Thread pool"></a>Thread pool</h3><p>线程池的设置项。略。</p>
+<h2 id="集群操作"><a href="#集群操作" class="headerlink" title="集群操作"></a>集群操作</h2><h3 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h3><p>重启集群可以直接关闭整个集群，也可以一次只关闭一个node，从而不影响服务。</p>
+<h5 id="关闭shard分配"><a href="#关闭shard分配" class="headerlink" title="关闭shard分配"></a>关闭shard分配</h5><p>关闭一个节点时，集群会等待<code>index.unassigned.node_left.delayed_timeout</code> （默认一分钟），然后开始把shard复制到别的节点上，而这个过程会花费很多I/O。因此，应该首先禁用此项。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "persistent": &#123;</span><br><span class="line">    "cluster.routing.allocation.enable": "primaries"</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h5 id="停止索引文档，刷新缓冲区"><a href="#停止索引文档，刷新缓冲区" class="headerlink" title="停止索引文档，刷新缓冲区"></a>停止索引文档，刷新缓冲区</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST "localhost:9200/_flush/synced?pretty"</span><br></pre></td></tr></table></figure>
+
+<p>synced flush会在ES 8.0中被移除，以后直接使用 <code>_flush</code>，二者效果相同。</p>
+<h5 id="关闭节点"><a href="#关闭节点" class="headerlink" title="关闭节点"></a>关闭节点</h5><p>根据运行的方式：</p>
+<ul>
+<li><code>sudo systemctl stop elasticsearch.service</code></li>
+<li><code>sudo -i service elasticsearch stop</code></li>
+<li><code>kill $(cat pid)</code></li>
+</ul>
+<h5 id="重启节点"><a href="#重启节点" class="headerlink" title="重启节点"></a>重启节点</h5><p>如果有master nodes，先重启它们，然后等待它们互相发现，组成集群。可以通过下面的API查看集群状态</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_cat/health?pretty"</span><br><span class="line">curl -X GET "localhost:9200/_cat/nodes?pretty"</span><br></pre></td></tr></table></figure>
+
+<h5 id="等待所有节点加入集群，集群状态为yellow"><a href="#等待所有节点加入集群，集群状态为yellow" class="headerlink" title="等待所有节点加入集群，集群状态为yellow"></a>等待所有节点加入集群，集群状态为yellow</h5><p>等节点恢复自己的主分片，此时副本分片还未完成分配。</p>
+<h5 id="重新开启shard分配"><a href="#重新开启shard分配" class="headerlink" title="重新开启shard分配"></a>重新开启shard分配</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "persistent": &#123;</span><br><span class="line">    "cluster.routing.allocation.enable": null</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<p>此时集群开始根据节点数量和设置的副本分片数来分配副本分片到不同的node。</p>
+<h3 id="升级"><a href="#升级" class="headerlink" title="升级"></a>升级</h3><p>官方建议，先升级非master-eligible节点，通过<code>GET /_nodes/_all,master:false</code>找到它们，然后升级master-eligible节点。</p>
+<p>所有节点必须使用相同的版本。</p>
+<h5 id="升级之前"><a href="#升级之前" class="headerlink" title="升级之前"></a>升级之前</h5><ul>
+<li>检查是否使用了一些deprecated features</li>
+<li>检查更新日志中一些突破性的改变，是否需要更改配置文件</li>
+<li>在一个独立的环境中测试需要升级的版本</li>
+<li><strong>使用snapshot对数据进行备份！</strong></li>
+</ul>
+<h5 id="升级-（关闭节点之前的过程和重启节点一样）"><a href="#升级-（关闭节点之前的过程和重启节点一样）" class="headerlink" title="升级 （关闭节点之前的过程和重启节点一样）"></a>升级 （关闭节点之前的过程和重启节点一样）</h5><p>unset <code>cluster.initial_master_nodes</code>，升级后的node不需要再进行<code>bootstrapping check</code>。</p>
+<ul>
+<li>Debian 或 RPM 包：使用rpm或dpkg安装新版本</li>
+<li>压缩包安装：解压到一个<strong>新目录</strong>（否则data可能被删除！），同时为了升级方便，之前应该已经把<code>config</code>，<code>data</code>和<code>logs</code>目录放在一个单独的文件夹。此时可以设置<code>ES_PATH_CONF</code>环境变量指定<code>config</code>目录的位置，设置<code>path.data</code>和<code>path.logs</code>为<code>data</code>和<code>logs</code>目录。<br>如果当时没有把目录分开，那就要把旧的<code>config</code>，<code>data</code>和<code>logs</code>目录copy到刚解压的新目录下。</li>
+</ul>
+<p>之后升级插件，开启shard分配，等待node recover。</p>
+<h2 id="映射"><a href="#映射" class="headerlink" title="映射"></a>映射</h2><p>映射（mapping）就是把定义ES如何索引一个文档的方式。包括</p>
+<ul>
+<li>把哪些string field定义为full text field。（用于词法分析）</li>
+<li>包含数字，日期，地理信息的field</li>
+<li>日期的格式</li>
+<li>设置自定义规则进行动态field添加</li>
+</ul>
+<p>根据不同的需求可以设置不同的映射类型，比如要搜索可以把<code>string</code>定义为<code>text</code>类型，如果只是排序或者聚合，可以定义为<code>keyword</code>类型。也可以设置不同的词法分析器。</p>
+<p>每个映射类型都有自己的<code>parameters</code></p>
+<h3 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h3><p>按例子中的顺序：创建映射，添加新映射field，查看现有的映射，查看某一个field的映射（如果index太大的话很有用）</p>
+<blockquote>
+<p>不能更新映射，如果想更新，可以新建一个index，然后用<code>reindex</code>API操作，或者使用<code>alias</code>创建一个新的field name。</p>
+</blockquote>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my-index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "age":    &#123; "type": "integer" &#125;,  </span><br><span class="line">      "email":  &#123; "type": "keyword"  &#125;, </span><br><span class="line">      "name":   &#123; "type": "text"  &#125;     </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my-index/_mapping?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "properties": &#123;</span><br><span class="line">    "employee-id": &#123;</span><br><span class="line">      "type": "keyword",</span><br><span class="line">      "index": false</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my-index/_mapping?pretty"</span><br><span class="line">curl -X GET "localhost:9200/my-index/_mapping/field/employee-id?pretty"</span><br></pre></td></tr></table></figure>
+
+<h4 id="映射爆炸"><a href="#映射爆炸" class="headerlink" title="映射爆炸"></a>映射爆炸</h4><p>动态映射可能导致一个index的fields太多，可以设置limit，比如<code>index.mapping.total_fields.limit</code>，默认1000个fields。也可以设置映射的最大深度，默认20。</p>
+<h3 id="Mapping-types"><a href="#Mapping-types" class="headerlink" title="Mapping types"></a>Mapping types</h3><p>ES 7.0开始移除了mapping types，API也发生了变化。东西太多，略去。（反正我也没用过以前版本的ES)</p>
+<h3 id="Dynamic-mapping"><a href="#Dynamic-mapping" class="headerlink" title="Dynamic mapping"></a>Dynamic mapping</h3><p>可以在index文档的时候动态映射。默认情况，当ES发现一个新field时，会自动添加映射。把<code>dynamic</code>设置成<code>false</code>可以禁用动态映射，设置成<code>strict</code>抛出异常。</p>
+<p>ES 根据JSON 的类型来生成自己的映射类型，可以动态映射的field包括：</p>
+<ul>
+<li><code>null</code> 会被忽略</li>
+<li><code>boolean</code></li>
+<li><code>float</code></li>
+<li><code>long</code></li>
+<li><code>object</code></li>
+<li>数组的类型根据非空的第一个元素类型确定</li>
+<li>JSON 中的string可以映射为<code>date</code> <code>double</code> <code>long</code> <code>text</code> <code>keyword</code></li>
+</ul>
+<h4 id="Dynamic-templates"><a href="#Dynamic-templates" class="headerlink" title="Dynamic templates"></a>Dynamic templates</h4><p>可以设置一个模板指定动态映射。</p>
+<p>下例：把映射<code>integer</code>而非<code>long</code>，把<code>string</code>映射为<code>text</code>和<code>keyword</code>（使用了 <code>multi-fields</code>）</p>
+<p>其中<code>match_mapping_type</code>是其中一种match conditions，别的还有<code>match</code>, <code>match_pattern</code>, <code>unmatch</code>, <code>path_match</code>, <code>path_unmatch</code>。<code>match</code>和<code>unmatch</code>使用简单的pattern匹配和排除一些field name，<code>match_pattern</code>可以使用Java正则，<code>path_match</code>则可以匹配具体的路径：<code>some_object.*.some_field</code></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "dynamic_templates": [</span><br><span class="line">      &#123;</span><br><span class="line">        "integers": &#123;</span><br><span class="line">          "match_mapping_type": "long",</span><br><span class="line">          "mapping": &#123;</span><br><span class="line">            "type": "integer"</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        "strings": &#123;</span><br><span class="line">          "match_mapping_type": "string",</span><br><span class="line">          "mapping": &#123;</span><br><span class="line">            "type": "text",</span><br><span class="line">            "fields": &#123;</span><br><span class="line">              "raw": &#123;</span><br><span class="line">                "type":  "keyword",</span><br><span class="line">                "ignore_above": 256</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "my_integer": 5, </span><br><span class="line">  "my_string": "Some string" </span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<p>也可以用<code>{name}</code> 和 <code>{dynamic_type}</code>这俩placeholder去替换，如下例：<code>english</code> field的映射参数：<code>analyzer</code>的值被替换为field的name，也就是<code>english</code>，<code>count</code>的<code>type</code>是<code>long</code>。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "dynamic_templates": [</span><br><span class="line">      &#123;</span><br><span class="line">        "named_analyzers": &#123;</span><br><span class="line">          "match_mapping_type": "string",</span><br><span class="line">          "match": "*",</span><br><span class="line">          "mapping": &#123;</span><br><span class="line">            "type": "text",</span><br><span class="line">            "analyzer": "&#123;name&#125;"</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        "no_doc_values": &#123;</span><br><span class="line">          "match_mapping_type":"*",</span><br><span class="line">          "mapping": &#123;</span><br><span class="line">            "type": "&#123;dynamic_type&#125;",</span><br><span class="line">            "doc_values": false</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "english": "Some English text", </span><br><span class="line">  "count":   5 </span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h3 id="Fields-datatypes"><a href="#Fields-datatypes" class="headerlink" title="Fields datatypes"></a>Fields datatypes</h3><h4 id="Core-datatypes"><a href="#Core-datatypes" class="headerlink" title="Core datatypes"></a>Core datatypes</h4><h5 id="string"><a href="#string" class="headerlink" title="string"></a>string</h5><ul>
+<li><code>text</code> 如邮件正文，产品描述信息。</li>
+<li><code>keyword</code> 如IDs，邮箱，主机名，状态码，邮编，或标签。有时候一个field既可以是数字类型也可以是<code>keyword</code>类型，比如产品ID，这时候如果不会使用<code>range</code>查询，就尽量使用<code>keyword</code>，因为更快。也可以设置<code>multi-field</code>，同时映射两种。</li>
+</ul>
+<h5 id="numeric"><a href="#numeric" class="headerlink" title="numeric"></a>numeric</h5><ul>
+<li><code>long</code>  有符号64位</li>
+<li><code>integer</code> 有符号32位</li>
+<li><code>short</code> 有符号16位 (-32768, 32767)</li>
+<li><code>byte</code> 有符号8位</li>
+<li><code>double</code> 双精度64位浮点数 IEEE754标准</li>
+<li><code>float</code> 32位浮点数</li>
+<li><code>half_float</code> 16位浮点数</li>
+<li><code>scaled_float</code>  A floating point number that is backed by a <code>long</code>, scaled by a fixed <code>double</code> scaling factor. 比如CPU利用率是12.7%，设置<code>scaling_factor</code>为100，虽然查询出来是浮点数，但ES会先把它取整然后用整型存来节省空间，所以有个balance的过程，这个值越大，ES存的数精确度越高，但是占用的空间也越多。</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "number_of_bytes": &#123;</span><br><span class="line">        "type": "integer"</span><br><span class="line">      &#125;,</span><br><span class="line">      "time_in_seconds": &#123;</span><br><span class="line">        "type": "float"</span><br><span class="line">      &#125;,</span><br><span class="line">      "price": &#123;</span><br><span class="line">        "type": "scaled_float",</span><br><span class="line">        "scaling_factor": 100</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h5 id="date"><a href="#date" class="headerlink" title="date"></a>date</h5><p>ES支持三种date：</p>
+<ul>
+<li>strings containing formatted dates, e.g. <code>&quot;2015-01-01&quot;</code> or <code>&quot;2015/01/01 12:10:30&quot;</code>.</li>
+<li>a long number representing <em>milliseconds-since-the-epoch</em>. </li>
+<li>an integer representing <em>seconds-since-the-epoch</em>.</li>
+</ul>
+<p>如果不指定format，默认为<code>strict_date_optional_time||epoch_millis</code>，也可以指定多个日期格式。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "date": &#123;</span><br><span class="line">        "type":   "date",</span><br><span class="line">        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123; "date": "2015-01-01" &#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/2?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123; "date": "2015-01-01T12:10:30Z" &#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/3?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123; "date": 1420070400001 &#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "sort": &#123; "date": "asc"&#125; </span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h5 id="date-nanos"><a href="#date-nanos" class="headerlink" title="date_nanos"></a>date_nanos</h5><p>纳秒级的时间，范围从1970到2262年。但是聚合还是只能基于millisecond级别。</p>
+<h5 id="boolean"><a href="#boolean" class="headerlink" title="boolean"></a>boolean</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "is_published": &#123;</span><br><span class="line">        "type": "boolean"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X POST "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "is_published": "true" </span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "term": &#123;</span><br><span class="line">      "is_published": true </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h5 id="binary"><a href="#binary" class="headerlink" title="binary"></a>binary</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "name": &#123;</span><br><span class="line">        "type": "text"</span><br><span class="line">      &#125;,</span><br><span class="line">      "blob": &#123;</span><br><span class="line">        "type": "binary"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "name": "Some binary blob",</span><br><span class="line">  "blob": "U29tZSBiaW5hcnkgYmxvYg==" </span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h5 id="range"><a href="#range" class="headerlink" title="range"></a>range</h5><p>支持类型：</p>
+<ul>
+<li><code>integer_range</code></li>
+<li><code>float_range</code></li>
+<li><code>long_range</code></li>
+<li><code>double_range</code></li>
+<li><code>date_range</code></li>
+<li><code>ip_range</code></li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/range_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "settings": &#123;</span><br><span class="line">    "number_of_shards": 2</span><br><span class="line">  &#125;,</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "expected_attendees": &#123;</span><br><span class="line">        "type": "integer_range"</span><br><span class="line">      &#125;,</span><br><span class="line">      "time_frame": &#123;</span><br><span class="line">        "type": "date_range", </span><br><span class="line">        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/range_index/_doc/1?refresh&amp;pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "expected_attendees" : &#123; </span><br><span class="line">    "gte" : 10,</span><br><span class="line">    "lte" : 20</span><br><span class="line">  &#125;,</span><br><span class="line">  "time_frame" : &#123; </span><br><span class="line">    "gte" : "2015-10-31 12:00:00", </span><br><span class="line">    "lte" : "2015-11-01"</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="Complex-datatypes"><a href="#Complex-datatypes" class="headerlink" title="Complex datatypes"></a>Complex datatypes</h4><h5 id="object"><a href="#object" class="headerlink" title="object"></a>object</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123; </span><br><span class="line">      "region": &#123;</span><br><span class="line">        "type": "keyword"</span><br><span class="line">      &#125;,</span><br><span class="line">      "manager": &#123; </span><br><span class="line">        "properties": &#123;</span><br><span class="line">          "age":  &#123; "type": "integer" &#125;,</span><br><span class="line">          "name": &#123; </span><br><span class="line">            "properties": &#123;</span><br><span class="line">              "first": &#123; "type": "text" &#125;,</span><br><span class="line">              "last":  &#123; "type": "text" &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123; </span><br><span class="line">  "region": "US",</span><br><span class="line">  "manager": &#123; </span><br><span class="line">    "age":     30,</span><br><span class="line">    "name": &#123; </span><br><span class="line">      "first": "John",</span><br><span class="line">      "last":  "Smith"</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h5 id="nested"><a href="#nested" class="headerlink" title="nested"></a>nested</h5><p><code>nested</code>是特殊的<code>object</code>类型，可以被<code>nested</code>query独立的检索。如下例，如果不用<code>nested</code>，搜索<code>Alic Smith</code>也会返回匹配结果，但那是错误的结果。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "user": &#123;</span><br><span class="line">        "type": "nested" </span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "group" : "fans",</span><br><span class="line">  "user" : [</span><br><span class="line">    &#123;</span><br><span class="line">      "first" : "John",</span><br><span class="line">      "last" :  "Smith"</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      "first" : "Alice",</span><br><span class="line">      "last" :  "White"</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "nested": &#123;</span><br><span class="line">      "path": "user",</span><br><span class="line">      "query": &#123;</span><br><span class="line">        "bool": &#123;</span><br><span class="line">          "must": [</span><br><span class="line">            &#123; "match": &#123; "user.first": "Alice" &#125;&#125;,</span><br><span class="line">            &#123; "match": &#123; "user.last":  "Smith" &#125;&#125; </span><br><span class="line">          ]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "nested": &#123;</span><br><span class="line">      "path": "user",</span><br><span class="line">      "query": &#123;</span><br><span class="line">        "bool": &#123;</span><br><span class="line">          "must": [</span><br><span class="line">            &#123; "match": &#123; "user.first": "Alice" &#125;&#125;,</span><br><span class="line">            &#123; "match": &#123; "user.last":  "White" &#125;&#125; </span><br><span class="line">          ]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "inner_hits": &#123; </span><br><span class="line">        "highlight": &#123;</span><br><span class="line">          "fields": &#123;</span><br><span class="line">            "user.first": &#123;&#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="Geo-datatypes"><a href="#Geo-datatypes" class="headerlink" title="Geo datatypes"></a>Geo datatypes</h4><p>//略</p>
+<h5 id="geo-point"><a href="#geo-point" class="headerlink" title="geo_point"></a>geo_point</h5><h5 id="geo-shape"><a href="#geo-shape" class="headerlink" title="geo_shape"></a>geo_shape</h5><h4 id="Specialised-datatypes"><a href="#Specialised-datatypes" class="headerlink" title="Specialised datatypes"></a>Specialised datatypes</h4><h5 id="ip"><a href="#ip" class="headerlink" title="ip"></a>ip</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "ip_addr": &#123;</span><br><span class="line">        "type": "ip"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "ip_addr": "192.168.1.1"</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "term": &#123;</span><br><span class="line">      "ip_addr": "192.168.0.0/16"</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h5 id="completion"><a href="#completion" class="headerlink" title="completion"></a>completion</h5><p><code>completion</code> to provide auto-complete suggestions</p>
+<p>//略</p>
+<h5 id="token-count"><a href="#token-count" class="headerlink" title="token_count"></a>token_count</h5><p>这里使用了multi-fields中的<code>fields</code>，对一个<code>name</code> field添加了两个映射，一个是<code>text</code>，一个是<code>token_count</code>。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "name": &#123; </span><br><span class="line">        "type": "text",</span><br><span class="line">        "fields": &#123;</span><br><span class="line">          "length": &#123; </span><br><span class="line">            "type":     "token_count",</span><br><span class="line">            "analyzer": "standard"</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123; "name": "John Smith" &#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/2?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123; "name": "Rachel Alice Williams" &#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "term": &#123;</span><br><span class="line">      "name.length": 3 </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h5 id="murmur3"><a href="#murmur3" class="headerlink" title="murmur3"></a>murmur3</h5><p>用于计算hash值，需要在每一个node上都安装插件，且安装后必须restart</p>
+<p><code>sudo bin/elasticsearch-plugin install mapper-murmur3</code></p>
+<p><code>cardinality</code>聚合返回去重的值，如果直接对<code>my_field</code>使用结果一样，但是hash速度更快。不鼓励对数字类型使用，且如果大部分string field都不重复，也不建议使用。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "my_field": &#123;</span><br><span class="line">        "type": "keyword",</span><br><span class="line">        "fields": &#123;</span><br><span class="line">          "hash": &#123;</span><br><span class="line">            "type": "murmur3"</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line"># Example documents</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "my_field": "This is a document"</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/2?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "my_field": "This is another document"</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "aggs": &#123;</span><br><span class="line">    "my_field_cardinality": &#123;</span><br><span class="line">      "cardinality": &#123;</span><br><span class="line">        "field": "my_field.hash" </span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h5 id="percolator"><a href="#percolator" class="headerlink" title="percolator"></a>percolator</h5><p>过滤器，太复杂 //TODO</p>
+<h5 id="join"><a href="#join" class="headerlink" title="join"></a>join</h5><p>定义文档的关系，太复杂 //TODO</p>
+<h5 id="rank-feature"><a href="#rank-feature" class="headerlink" title="rank feature"></a>rank feature</h5><h5 id="rank-features"><a href="#rank-features" class="headerlink" title="rank features"></a>rank features</h5><h5 id="dense-vector"><a href="#dense-vector" class="headerlink" title="dense vector"></a>dense vector</h5><h5 id="sparse-vector"><a href="#sparse-vector" class="headerlink" title="sparse vector"></a>sparse vector</h5><h5 id="search-as-you-type"><a href="#search-as-you-type" class="headerlink" title="search-as-you-type"></a>search-as-you-type</h5><h5 id="alias"><a href="#alias" class="headerlink" title="alias"></a>alias</h5><h5 id="flattened"><a href="#flattened" class="headerlink" title="flattened"></a>flattened</h5><h5 id="shape"><a href="#shape" class="headerlink" title="shape"></a>shape</h5><h5 id="histogram"><a href="#histogram" class="headerlink" title="histogram"></a>histogram</h5><h4 id="Arrays"><a href="#Arrays" class="headerlink" title="Arrays"></a>Arrays</h4><p>ES没有特定的<code>arrya</code> datatype，所有field都可以包含0或多个值，但是类型必须相同。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "message": "some arrays in this document...",</span><br><span class="line">  "tags":  [ "elasticsearch", "wow" ], </span><br><span class="line">  "lists": [ </span><br><span class="line">    &#123;</span><br><span class="line">      "name": "prog_list",</span><br><span class="line">      "description": "programming list"</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      "name": "cool_list",</span><br><span class="line">      "description": "cool stuff list"</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/2?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "message": "no arrays in this document...",</span><br><span class="line">  "tags":  "elasticsearch",</span><br><span class="line">  "lists": &#123;</span><br><span class="line">    "name": "prog_list",</span><br><span class="line">    "description": "programming list"</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "match": &#123;</span><br><span class="line">      "tags": "elasticsearch" </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="Multi-fields"><a href="#Multi-fields" class="headerlink" title="Multi-fields"></a>Multi-fields</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "city": &#123;</span><br><span class="line">        "type": "text",</span><br><span class="line">        "fields": &#123;</span><br><span class="line">          "raw": &#123; </span><br><span class="line">            "type":  "keyword"</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/1?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "city": "New York"</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X PUT "localhost:9200/my_index/_doc/2?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "city": "York"</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "match": &#123;</span><br><span class="line">      "city": "york" </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  "sort": &#123;</span><br><span class="line">    "city.raw": "asc" </span><br><span class="line">  &#125;,</span><br><span class="line">  "aggs": &#123;</span><br><span class="line">    "Cities": &#123;</span><br><span class="line">      "terms": &#123;</span><br><span class="line">        "field": "city.raw" </span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h3 id="Meta-fields"><a href="#Meta-fields" class="headerlink" title="Meta-fields"></a>Meta-fields</h3><h4 id="index"><a href="#index" class="headerlink" title="_index"></a><code>_index</code></h4><p>文档索引field</p>
+<h4 id="type"><a href="#type" class="headerlink" title="_type"></a><code>_type</code></h4><p>移除</p>
+<h4 id="id"><a href="#id" class="headerlink" title="_id"></a><code>_id</code></h4><p>文档的id</p>
+<h4 id="source"><a href="#source" class="headerlink" title="_source"></a><code>_source</code></h4><p>包含原始的JSON文档</p>
+<h4 id="size"><a href="#size" class="headerlink" title="_size"></a><code>_size</code></h4><p><code>_source</code>field内容的大小，需要安装。</p>
+<p><code>sudo bin/elasticsearch-plugin install mapper-size</code></p>
+<h4 id="field-names"><a href="#field-names" class="headerlink" title="_field_names"></a><code>_field_names</code></h4><p>存所有的非空field，用于exists`查询。</p>
+<h4 id="ignored"><a href="#ignored" class="headerlink" title="_ignored"></a><code>_ignored</code></h4><p>返回被忽略的那些field。被忽略的field使用<code>ignore_malformed</code>映射参数指定。</p>
+<h4 id="routing"><a href="#routing" class="headerlink" title="_routing"></a><code>_routing</code></h4><p>通过路由，选择一个特定的分片操作。默认使用id，也可以自定义一个值。</p>
+<h4 id="meta"><a href="#meta" class="headerlink" title="_meta"></a><code>_meta</code></h4><p>自定义的一些meta data。</p>
+<h3 id="Mapping-parameters"><a href="#Mapping-parameters" class="headerlink" title="Mapping parameters"></a>Mapping parameters</h3><p>//TODO</p>
+<h2 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h2><p>在<code>regexp</code>和<code>query_string</code>中使用了正则，ES的正则语法：<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.6/regexp-syntax.html" target="_blank" rel="noopener external nofollow noreferrer">Regular expression syntax</a></p>
+<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>ES使用基于<code>Query DSL</code>的语法定义查询。</p>
+<p>搜索使用相关性评分，也就是返回值里的<code>_score</code>。</p>
+<h4 id="Query-context"><a href="#Query-context" class="headerlink" title="Query context"></a>Query context</h4><p>判断文档符合查询的程度，以<code>_score</code>标识。</p>
+<h4 id="Filter-context"><a href="#Filter-context" class="headerlink" title="Filter context"></a>Filter context</h4><p>过滤不符合要求的文档，通常用于选择结构性的数据，如日期范围。</p>
+<p>例子：<code>match</code>语句用来得出文档匹配度，<code>filter</code>只过滤不评分。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123; </span><br><span class="line">    "bool": &#123; </span><br><span class="line">      "must": [</span><br><span class="line">        &#123; "match": &#123; "title":   "Search"        &#125;&#125;,</span><br><span class="line">        &#123; "match": &#123; "content": "Elasticsearch" &#125;&#125;</span><br><span class="line">      ],</span><br><span class="line">      "filter": [ </span><br><span class="line">        &#123; "term":  &#123; "status": "published" &#125;&#125;,</span><br><span class="line">        &#123; "range": &#123; "publish_date": &#123; "gte": "2015-01-01" &#125;&#125;&#125;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<p>一个典型的搜索语句，查询<code>bank</code>这个index里的所有文档，按照<code>account_number</code>排序，分页显示，每页10个结果，从第10个结果开始显示。</p>
+<h3 id="Match-all-查询"><a href="#Match-all-查询" class="headerlink" title="Match all 查询"></a>Match all 查询</h3><p>查询所有文档，使用<code>boost</code>更改评分。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "match_all": &#123; "boost" : 1.2 &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h3 id="Term-level-查询"><a href="#Term-level-查询" class="headerlink" title="Term-level 查询"></a>Term-level 查询</h3><p>查询结构数据（如日期，IP地址，价格，产品ID等），这个应该是最常用的。</p>
+<h4 id="exists"><a href="#exists" class="headerlink" title="exists"></a>exists</h4><p>查field是否存在，不存在的情况：</p>
+<ul>
+<li>值为空字符串，如<code>“”</code>  <code>-</code></li>
+<li>数组中包含<code>null</code>，如 <code>[null, &quot;foo&quot;]</code></li>
+<li>在field mapping里自定义的<code>null-value</code></li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "exists": &#123;</span><br><span class="line">            "field": "user"</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="fuzzy"><a href="#fuzzy" class="headerlink" title="fuzzy"></a>fuzzy</h4><p>返回根据<code>Levenshtein distance</code>计算的相似值。</p>
+<p><code>fuzziness</code>指定最大的编辑距离。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "fuzzy": &#123;</span><br><span class="line">            "user": &#123;</span><br><span class="line">                "value": "ki",</span><br><span class="line">                "fuzziness": "AUTO",</span><br><span class="line">                "max_expansions": 50,</span><br><span class="line">                "prefix_length": 0,</span><br><span class="line">                "transpositions": true,</span><br><span class="line">                "rewrite": "constant_score"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="ids"><a href="#ids" class="headerlink" title="ids"></a>ids</h4><p>根据文档的<code>_id</code>field查询，</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "ids" : &#123;</span><br><span class="line">            "values" : ["1", "4", "100"]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="prefix"><a href="#prefix" class="headerlink" title="prefix"></a>prefix</h4><p>查prefix，可以通过使用<code>index_prefixes</code>这个mapping参数让ES保持prefix，从而提高检索速度。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "prefix": &#123;</span><br><span class="line">            "user": &#123;</span><br><span class="line">                "value": "ki"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="range-1"><a href="#range-1" class="headerlink" title="range"></a>range</h4><p>返回范围内的文档。</p>
+<p>参数：</p>
+<ul>
+<li><code>gt</code>：大于</li>
+<li><code>gte</code>：大于等于</li>
+<li><code>lt</code></li>
+<li><code>lte</code></li>
+<li><code>format</code>：日期的格式，默认使用mapping时定义的格式。</li>
+<li><code>relation</code>： Indicates how the range query matches values for <code>range</code> fields<ul>
+<li><code>INTERSECTS</code>(Default): Matches documents with a range field value that intersects the query’s range.</li>
+<li><code>CONTAINS</code>：Matches documents with a range field value that entirely contains the query’s range.</li>
+<li><code>WITHIN</code>：Matches documents with a range field value entirely within the query’s range.</li>
+</ul>
+</li>
+<li><code>time_zone</code></li>
+<li><code>boost</code>: 更改文档评分</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "range": &#123;</span><br><span class="line">      "timestamp": &#123;</span><br><span class="line">        "time_zone": "+01:00",        </span><br><span class="line">        "gte": "2020-01-01T00:00:00", </span><br><span class="line">        "lte": "now"                  </span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="regexp"><a href="#regexp" class="headerlink" title="regexp"></a>regexp</h4><p>正则表达式</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "regexp": &#123;</span><br><span class="line">            "user": &#123;</span><br><span class="line">                "value": "k.*y",</span><br><span class="line">                "flags" : "ALL",</span><br><span class="line">                "max_determinized_states": 10000,</span><br><span class="line">                "rewrite": "constant_score"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="term"><a href="#term" class="headerlink" title="term"></a>term</h4><p>完整匹配，不要用于<code>text</code>field。对于<code>text</code>，应使用<code>Full text查询</code>中的<code>match</code>查询。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "term": &#123;</span><br><span class="line">            "user": &#123;</span><br><span class="line">                "value": "Kimchy",</span><br><span class="line">                "boost": 1.0</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="terms"><a href="#terms" class="headerlink" title="terms"></a>terms</h4><p>多个<code>term</code>。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query" : &#123;</span><br><span class="line">        "terms" : &#123;</span><br><span class="line">            "user" : ["kimchy", "elasticsearch"],</span><br><span class="line">            "boost" : 1.0</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="terms-set"><a href="#terms-set" class="headerlink" title="terms_set"></a>terms_set</h4><p>返回匹配terms中子集的文档，例子中<code>required_matches</code>是index的一个field。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/job-candidates/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "terms_set": &#123;</span><br><span class="line">            "programming_languages": &#123;</span><br><span class="line">                "terms": ["c++", "java", "php"],</span><br><span class="line">                "minimum_should_match_field": "required_matches"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="type-1"><a href="#type-1" class="headerlink" title="type"></a>type</h4><p>搜索文档类型，ES 7.0 DEPRECATED</p>
+<h4 id="wildcard"><a href="#wildcard" class="headerlink" title="wildcard"></a>wildcard</h4><p>匹配通配符，不知道和<code>regexp</code>哪个快。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "wildcard": &#123;</span><br><span class="line">            "user": &#123;</span><br><span class="line">                "value": "ki*y",</span><br><span class="line">                "boost": 1.0,</span><br><span class="line">                "rewrite": "constant_score"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h3 id="Compound-查询"><a href="#Compound-查询" class="headerlink" title="Compound 查询"></a>Compound 查询</h3><h4 id="bool"><a href="#bool" class="headerlink" title="bool"></a>bool</h4><p><code>query</code>里可以指定<code>bool</code>查询，包括</p>
+<ul>
+<li><code>must</code>：必须匹配这些条件，贡献评分</li>
+<li><code>must_not</code>：必须不匹配，不影响评分</li>
+<li><code>should</code>：满足这些语句中的任意语句，会增加文档相关性得分</li>
+<li><code>filter</code>：必须匹配，不影响评分</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "bool" : &#123;</span><br><span class="line">      "must" : &#123;</span><br><span class="line">        "term" : &#123; "user" : "kimchy" &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "filter": &#123;</span><br><span class="line">        "term" : &#123; "tag" : "tech" &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "must_not" : &#123;</span><br><span class="line">        "range" : &#123;</span><br><span class="line">          "age" : &#123; "gte" : 10, "lte" : 20 &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "should" : [</span><br><span class="line">        &#123; "term" : &#123; "tag" : "wow" &#125; &#125;,</span><br><span class="line">        &#123; "term" : &#123; "tag" : "elasticsearch" &#125; &#125;</span><br><span class="line">      ],</span><br><span class="line">      "minimum_should_match" : 1,</span><br><span class="line">      "boost" : 1.0</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="boosting"><a href="#boosting" class="headerlink" title="boosting"></a>boosting</h4><p><code>positive</code>里的文档必须保护，<code>negative</code>里的文档减评分，减多少用 <code>negative_boost</code>指明。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "boosting" : &#123;</span><br><span class="line">            "positive" : &#123;</span><br><span class="line">                "term" : &#123;</span><br><span class="line">                    "text" : "apple"</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            "negative" : &#123;</span><br><span class="line">                 "term" : &#123;</span><br><span class="line">                     "text" : "pie tart fruit crumble tree"</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            "negative_boost" : 0.5</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="constant-score"><a href="#constant-score" class="headerlink" title="constant_score"></a>constant_score</h4><p><code>constant_score</code> 会给匹配<code>filter</code>内语句的文档一个默认<code>1.0</code>的评分。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "constant_score" : &#123;</span><br><span class="line">            "filter" : &#123;</span><br><span class="line">                "term" : &#123; "user" : "kimchy"&#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            "boost" : 1.2</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="dis-max"><a href="#dis-max" class="headerlink" title="dis_max"></a>dis_max</h4><p>必须匹配一个或多个子句，匹配的多，评分就高。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "dis_max" : &#123;</span><br><span class="line">            "queries" : [</span><br><span class="line">                &#123; "term" : &#123; "title" : "Quick pets" &#125;&#125;,</span><br><span class="line">                &#123; "term" : &#123; "body" : "Quick pets" &#125;&#125;</span><br><span class="line">            ],</span><br><span class="line">            "tie_breaker" : 0.7</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="function-score"><a href="#function-score" class="headerlink" title="function_score"></a>function_score</h4><p>可以根据function更改文档的评分，东西太多，懒得看了。下面的<code>random_score</code>就是其中一种function。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query": &#123;</span><br><span class="line">        "function_score": &#123;</span><br><span class="line">            "query": &#123; "match_all": &#123;&#125; &#125;,</span><br><span class="line">            "boost": "5",</span><br><span class="line">            "random_score": &#123;&#125;, </span><br><span class="line">            "boost_mode":"multiply"</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h3 id="Full-text-查询"><a href="#Full-text-查询" class="headerlink" title="Full text 查询"></a>Full text 查询</h3><p>查询<code>analyzed text fields</code>的，比如邮件正文。查询时用的文本 analyzer 和index时候用的一样。</p>
+<p>//TODO 以后再填坑</p>
+<h4 id="interval"><a href="#interval" class="headerlink" title="interval"></a>interval</h4><h4 id="match"><a href="#match" class="headerlink" title="match"></a>match</h4><h4 id="match-bool-prefix"><a href="#match-bool-prefix" class="headerlink" title="match_bool_prefix"></a>match_bool_prefix</h4><h4 id="match-phrase"><a href="#match-phrase" class="headerlink" title="match_phrase"></a>match_phrase</h4><h4 id="match-phrase-prefix"><a href="#match-phrase-prefix" class="headerlink" title="match_phrase_prefix"></a>match_phrase_prefix</h4><h4 id="multi-match"><a href="#multi-match" class="headerlink" title="multi_match"></a>multi_match</h4><h4 id="common-terms"><a href="#common-terms" class="headerlink" title="common terms"></a>common terms</h4><h4 id="query-string"><a href="#query-string" class="headerlink" title="query_string"></a>query_string</h4><h4 id="simple-query-string"><a href="#simple-query-string" class="headerlink" title="simple_query_string"></a>simple_query_string</h4><h3 id="Geo-查询"><a href="#Geo-查询" class="headerlink" title="Geo 查询"></a>Geo 查询</h3><p>地址位置查询</p>
+<p>//TODO</p>
+<h4 id="geo-bounding-box"><a href="#geo-bounding-box" class="headerlink" title="geo_bounding_box"></a>geo_bounding_box</h4><h4 id="geo-distance"><a href="#geo-distance" class="headerlink" title="geo_distance"></a>geo_distance</h4><h4 id="geo-polygon"><a href="#geo-polygon" class="headerlink" title="geo_polygon"></a>geo_polygon</h4><h4 id="geo-shape-1"><a href="#geo-shape-1" class="headerlink" title="geo_shape"></a>geo_shape</h4><h3 id="Shape-查询"><a href="#Shape-查询" class="headerlink" title="Shape 查询"></a>Shape 查询</h3><p>//TODO</p>
+<h3 id="Joining-查询"><a href="#Joining-查询" class="headerlink" title="Joining 查询"></a>Joining 查询</h3><h4 id="nested-1"><a href="#nested-1" class="headerlink" title="nested"></a>nested</h4><p>索引应当保护一个<code>nested</code> field。</p>
+<p>例子：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/my_index?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "mappings" : &#123;</span><br><span class="line">        "properties" : &#123;</span><br><span class="line">            "obj1" : &#123;</span><br><span class="line">                "type" : "nested"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br><span class="line">curl -X GET "localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "query":  &#123;</span><br><span class="line">        "nested" : &#123;</span><br><span class="line">            "path" : "obj1",</span><br><span class="line">            "query" : &#123;</span><br><span class="line">                "bool" : &#123;</span><br><span class="line">                    "must" : [</span><br><span class="line">                    &#123; "match" : &#123;"obj1.name" : "blue"&#125; &#125;,</span><br><span class="line">                    &#123; "range" : &#123;"obj1.count" : &#123;"gt" : 5&#125;&#125; &#125;</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            "score_mode" : "avg"</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="has-child"><a href="#has-child" class="headerlink" title="has_child"></a>has_child</h4><p>使用<code>join</code> 映射的文档。</p>
+<p>//TODO</p>
+<h4 id="has-parent"><a href="#has-parent" class="headerlink" title="has_parent"></a>has_parent</h4><p>使用<code>join</code> 映射的文档。</p>
+<p>//TODO</p>
+<h4 id="Parent-ID"><a href="#Parent-ID" class="headerlink" title="Parent ID"></a>Parent ID</h4><p>使用<code>join</code> 映射的文档。</p>
+<p>//TODO</p>
+<h3 id="Span-查询"><a href="#Span-查询" class="headerlink" title="Span 查询"></a>Span 查询</h3><p>官方说主要用于查询法律文书和专利文件。</p>
+<p>个么，略。</p>
+<h3 id="Specialized-查询"><a href="#Specialized-查询" class="headerlink" title="Specialized 查询"></a>Specialized 查询</h3><p>不属于其它组的查询。</p>
+<p>//TODO</p>
+<h2 id="聚合"><a href="#聚合" class="headerlink" title="聚合"></a>聚合</h2><p>聚合有四种概念：</p>
+<ul>
+<li><code>bucket</code></li>
+<li><code>metric</code></li>
+<li><code>matrix</code></li>
+<li><code>pipeline</code></li>
+</ul>
+<p>聚合的结构：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">"aggregations" : &#123;</span><br><span class="line">    "&lt;aggregation_name&gt;" : &#123;</span><br><span class="line">        "&lt;aggregation_type&gt;" : &#123;</span><br><span class="line">            &lt;aggregation_body&gt;</span><br><span class="line">        &#125;</span><br><span class="line">        [,"meta" : &#123;  [&lt;meta_data_body&gt;] &#125; ]?</span><br><span class="line">        [,"aggregations" : &#123; [&lt;sub_aggregation&gt;]+ &#125; ]?</span><br><span class="line">    &#125;</span><br><span class="line">    [,"&lt;aggregation_name_2&gt;" : &#123; ... &#125; ]*</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一个典型的聚合：首先按照<code>state</code>分类为不同的<code>bucket</code>，然后计算了每个<code>state</code>的平均银行余额并按照余额排序。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/bank/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "size": 0,</span><br><span class="line">  "aggs": &#123;</span><br><span class="line">    "group_by_state": &#123;</span><br><span class="line">      "terms": &#123;</span><br><span class="line">        "field": "state.keyword",</span><br><span class="line">        "order": &#123;</span><br><span class="line">          "average_balance": "desc"</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "aggs": &#123;</span><br><span class="line">        "average_balance": &#123;</span><br><span class="line">          "avg": &#123;</span><br><span class="line">            "field": "balance"</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h3 id="Metric-聚合"><a href="#Metric-聚合" class="headerlink" title="Metric 聚合"></a>Metric 聚合</h3><h4 id="Avg-聚合"><a href="#Avg-聚合" class="headerlink" title="Avg 聚合"></a>Avg 聚合</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST "localhost:9200/exams/_search?size=0&amp;pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "aggs" : &#123;</span><br><span class="line">        "grade_avg" : &#123;</span><br><span class="line">            "avg" : &#123;</span><br><span class="line">                "field" : "grade",</span><br><span class="line">                "missing": 10 </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<p>求平均值，<code>missing</code>可以指定如果field缺失的默认值。</p>
+<h4 id="Weighted-Avg-聚合"><a href="#Weighted-Avg-聚合" class="headerlink" title="Weighted Avg 聚合"></a>Weighted Avg 聚合</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST "localhost:9200/exams/_search?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">    "size": 0,</span><br><span class="line">    "aggs" : &#123;</span><br><span class="line">        "weighted_grade": &#123;</span><br><span class="line">            "weighted_avg": &#123;</span><br><span class="line">                "value": &#123;</span><br><span class="line">                    "field": "grade",</span><br><span class="line">                    "missing": 2</span><br><span class="line">                &#125;,</span><br><span class="line">                "weight": &#123;</span><br><span class="line">                    "field": "weight",</span><br><span class="line">                    "missing": 3</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<p>计算加权平均，一看就懂。</p>
+<h4 id="Cardinality-聚合"><a href="#Cardinality-聚合" class="headerlink" title="Cardinality 聚合"></a>Cardinality 聚合</h4><p>返回一个field distinct或者unique值的数目，也就是去重</p>
+<h4 id="Extended-Stats-聚合"><a href="#Extended-Stats-聚合" class="headerlink" title="Extended Stats 聚合"></a>Extended Stats 聚合</h4><p>计算一些统计值，看例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET &quot;localhost:9200&#x2F;exams&#x2F;_search?pretty&quot; -H &#39;Content-Type: application&#x2F;json&#39; -d&#39;</span><br><span class="line">&#123;</span><br><span class="line">    &quot;size&quot;: 0,</span><br><span class="line">    &quot;aggs&quot; : &#123;</span><br><span class="line">        &quot;grades_stats&quot; : &#123; &quot;extended_stats&quot; : &#123; &quot;field&quot; : &quot;grade&quot; &#125; &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#39;</span><br><span class="line"></span><br><span class="line">返回值</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    &quot;aggregations&quot;: &#123;</span><br><span class="line">        &quot;grades_stats&quot;: &#123;</span><br><span class="line">           &quot;count&quot;: 2,</span><br><span class="line">           &quot;min&quot;: 50.0,</span><br><span class="line">           &quot;max&quot;: 100.0,</span><br><span class="line">           &quot;avg&quot;: 75.0,</span><br><span class="line">           &quot;sum&quot;: 150.0,</span><br><span class="line">           &quot;sum_of_squares&quot;: 12500.0,</span><br><span class="line">           &quot;variance&quot;: 625.0,</span><br><span class="line">           &quot;std_deviation&quot;: 25.0,</span><br><span class="line">           &quot;std_deviation_bounds&quot;: &#123;</span><br><span class="line">            &quot;upper&quot;: 125.0,</span><br><span class="line">            &quot;lower&quot;: 25.0</span><br><span class="line">           &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>//TODO 聚合的东西太多了，用到的却没几个，以后再慢慢添加。</p>
+<h2 id="Sctipting-脚本"><a href="#Sctipting-脚本" class="headerlink" title="Sctipting (脚本)"></a>Sctipting (脚本)</h2><p>ES可以使用<code>script</code>。关于<code>script</code>，本人没有需求，所以就不深入了解了，这篇腾讯云上的文章写的不错。<a href="https://cloud.tencent.com/developer/article/1507715" target="_blank" rel="noopener external nofollow noreferrer">Elasticsearch7.X Scripting脚本使用详解</a></p>
+<h2 id="ILM-index生命周期管理"><a href="#ILM-index生命周期管理" class="headerlink" title="ILM index生命周期管理"></a>ILM index生命周期管理</h2><p>用于管理index，有几种策略</p>
+<ul>
+<li><strong>Rollover</strong>  在index达到一定大小时创建新的index，并用alias指向新的index</li>
+<li><strong>Shrink</strong>  减少index中的主分片</li>
+<li><strong>Force merge</strong> 减少segments数（Lucene内部的存储形式）</li>
+<li><strong>Freeze</strong>  把index设为只读</li>
+<li><strong>Delete</strong> 删除index</li>
+</ul>
+<h3 id="Index-lifecycle"><a href="#Index-lifecycle" class="headerlink" title="Index lifecycle"></a>Index lifecycle</h3><p>有几种生命周期阶段</p>
+<ul>
+<li>hot 正在更新，可被查询。</li>
+<li>warm 不更新，可被查询</li>
+<li>cold 不更新，几乎不被查询 （允许查询速度慢一些）</li>
+<li>delete  </li>
+</ul>
+<h3 id="ILM-Phase-actions"><a href="#ILM-Phase-actions" class="headerlink" title="ILM Phase actions"></a>ILM Phase actions</h3><p>不同的生命周期有不同的actions</p>
+<ul>
+<li>Hot <ul>
+<li>Set Priority：设置index的优先级</li>
+<li>Unfollow：把一个CCR （cross-cluster replication）的index转为普通的index</li>
+<li>Rollover：最常用，下面介绍</li>
+</ul>
+</li>
+<li>Warm<ul>
+<li>Set Priority</li>
+<li>Unfollow</li>
+<li>Read-Only：设为只读</li>
+<li>Allocate：设置哪个node允许保存索引分片，以及改变副本分片数量</li>
+<li>Shrink：设置index为只读，并且减少主分片数量</li>
+<li>Force Merge：合并segments</li>
+</ul>
+</li>
+<li>Cold<ul>
+<li>Set Priority</li>
+<li>Unfollow</li>
+<li>Allocate</li>
+<li>Freeze：Freeze 索引，最小化内存占用</li>
+</ul>
+</li>
+<li>Delete<ul>
+<li>Wait For Snapshot</li>
+<li>Delete</li>
+</ul>
+</li>
+</ul>
+<h3 id="Rollover"><a href="#Rollover" class="headerlink" title="Rollover"></a>Rollover</h3><h4 id="创建生命周期策略"><a href="#创建生命周期策略" class="headerlink" title="创建生命周期策略"></a>创建生命周期策略</h4><p>主要还是通过kibana进行操作，API的话：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/_ilm/policy/datastream_policy?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "policy": &#123;</span><br><span class="line">    "phases": &#123;</span><br><span class="line">      "hot": &#123;                      </span><br><span class="line">        "actions": &#123;</span><br><span class="line">          "rollover": &#123;</span><br><span class="line">            "max_size": "50GB",     </span><br><span class="line">            "max_age": "30d"</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "delete": &#123;</span><br><span class="line">        "min_age": "90d",           </span><br><span class="line">        "actions": &#123;</span><br><span class="line">          "delete": &#123;&#125;              </span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建索引模板"><a href="#创建索引模板" class="headerlink" title="创建索引模板"></a>创建索引模板</h4><p>例子：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/_template/datastream_template?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "index_patterns": ["datastream-*"],                 </span><br><span class="line">  "settings": &#123;</span><br><span class="line">    "number_of_shards": 1,</span><br><span class="line">    "number_of_replicas": 1,</span><br><span class="line">    "index.lifecycle.name": "datastream_policy",      </span><br><span class="line">    "index.lifecycle.rollover_alias": "datastream"    </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="索引引导"><a href="#索引引导" class="headerlink" title="索引引导"></a>索引引导</h4><p>引导一个初始index，并且指定索引模板中设置好的alias</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/datastream-000001?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "aliases": &#123;</span><br><span class="line">    "datastream": &#123;</span><br><span class="line">      "is_write_index": true</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><p>查看ILM状态</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/datastream-*/_ilm/explain?pretty"</span><br></pre></td></tr></table></figure>
+
+<h2 id="集群管理"><a href="#集群管理" class="headerlink" title="集群管理"></a>集群管理</h2><h3 id="集群状态："><a href="#集群状态：" class="headerlink" title="集群状态："></a>集群状态：</h3><ul>
+<li>Green：所有primary shard和replica都工作正常</li>
+<li>Yellow：所有primary shard工作正常，但是有replica没有分配就绪（如果cluster里只有一个node，那副本分片和主分片就在一台机器上，这时候集群就是yellow</li>
+<li>Red：有主分片挂了</li>
+</ul>
+<h3 id="Monitor"><a href="#Monitor" class="headerlink" title="Monitor"></a>Monitor</h3><p>官方建议使用一个独立的集群监控集群状态。在ES 6.5之后应该使用Metricbeat。而非之前的<code>exporters</code></p>
+<h4 id="Monitoring-settings"><a href="#Monitoring-settings" class="headerlink" title="Monitoring settings"></a>Monitoring settings</h4><p>默认xpack监控被启用，但是数据收集被禁用。</p>
+<p>xpack监控：<code>xpack.monitoring.enabled</code>，默认为<code>true</code></p>
+<p>开启数据采集：<code>xpack.monitoring.collection.enabled</code>，默认为<code>false</code></p>
+<p>采集间隔：<code>xpack.monitoring.collection.interval</code>，默认为<code>10s</code></p>
+<p>ES集群采集：<code>xpack.monitoring.elasticsearch.collection.enabled</code>，此项仅禁用ES数据采集，别的数据采集依然允许（kibana，logstash，beats，APM Server）</p>
+<p>在<code>kibana.yml</code>中配置monitoring数据的显示方式，在<code>logstash.yml</code>中配置monitoring数据的采集方式。</p>
+<h3 id="Metricbeat"><a href="#Metricbeat" class="headerlink" title="Metricbeat"></a>Metricbeat</h3><ol>
+<li><p>开启数据采集</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_cluster/settings?pretty"</span><br><span class="line">curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "persistent": &#123;</span><br><span class="line">    "xpack.monitoring.collection.enabled": true</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在每一个node上安装Metricbeat</p>
+</li>
+<li><p>使用Metricbeat的模块：<br><code>metricbeat modules enable elasticsearch-xpack</code></p>
+</li>
+<li><p>配置<code>modules.d/elasticsearch-xpack.yml</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">module:</span> <span class="string">elasticsearch</span></span><br><span class="line">    <span class="attr">metricsets:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">ccr</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">cluster_stats</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">index</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">index_recovery</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">index_summary</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">ml_job</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">node_stats</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">shard</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">enrich</span></span><br><span class="line">    <span class="attr">period:</span> <span class="string">10s</span></span><br><span class="line">    <span class="attr">hosts:</span> <span class="string">["http://localhost:9200"]</span></span><br><span class="line">    <span class="comment">#username: "user"</span></span><br><span class="line">    <span class="comment">#password: "secret"</span></span><br><span class="line">    <span class="attr">xpack.enabled:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>禁用system模块：<br><code>metricbeat modules disable system</code></p>
+</li>
+<li><p>输出到ES：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">output.elasticsearch:</span></span><br><span class="line">  <span class="comment"># Array of hosts to connect to.</span></span><br><span class="line">  <span class="attr">hosts:</span> <span class="string">["http://es-mon-1:9200",</span> <span class="string">"http://es-mon2:9200"</span><span class="string">]</span> </span><br><span class="line"></span><br><span class="line">  <span class="comment"># Optional protocol and basic auth credentials.</span></span><br><span class="line">  <span class="comment">#protocol: "https"</span></span><br><span class="line">  <span class="comment">#username: "elastic"</span></span><br><span class="line">  <span class="comment">#password: "changeme"</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>启动Metricbeat</p>
+</li>
+<li><p>禁用<code>xpack.monitoring.elasticsearch.collection.enabled</code> （因为功能重复了）</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT "localhost:9200/_cluster/settings?pretty" -H 'Content-Type: application/json' -d'</span><br><span class="line">&#123;</span><br><span class="line">  "persistent": &#123;</span><br><span class="line">    "xpack.monitoring.elasticsearch.collection.enabled": false</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">'</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在kibana中查看</p>
+</li>
+</ol>
+<h2 id="RESRful-API"><a href="#RESRful-API" class="headerlink" title="RESRful API"></a>RESRful API</h2><p><code>curl -X&lt;VERB&gt; &#39;&lt;PROTOCOL&gt;://&lt;HOST&gt;:&lt;PORT&gt;/&lt;PATH&gt;?&lt;QUERY_STRING&gt;&#39; -d &#39;&lt;BODY&gt;&#39;</code></p>
+<h3 id="cat-API"><a href="#cat-API" class="headerlink" title="cat API"></a>cat API</h3><p>cat API 主要用于命令行或者kibana控制台，对于应用程序，还是应该使用JSON API。以下命令可以查看所有的cat API。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_cat"</span><br><span class="line">=^.^=</span><br><span class="line">/_cat/allocation</span><br><span class="line">/_cat/shards</span><br><span class="line">/_cat/shards/&#123;index&#125;</span><br><span class="line">/_cat/master</span><br><span class="line">/_cat/nodes</span><br><span class="line">/_cat/tasks</span><br><span class="line">/_cat/indices</span><br><span class="line">/_cat/indices/&#123;index&#125;</span><br><span class="line">/_cat/segments</span><br><span class="line">/_cat/segments/&#123;index&#125;</span><br><span class="line">/_cat/count</span><br><span class="line">/_cat/count/&#123;index&#125;</span><br><span class="line">/_cat/recovery</span><br><span class="line">/_cat/recovery/&#123;index&#125;</span><br><span class="line">/_cat/health</span><br><span class="line">/_cat/pending_tasks</span><br><span class="line">/_cat/aliases</span><br><span class="line">/_cat/aliases/&#123;alias&#125;</span><br><span class="line">/_cat/thread_pool</span><br><span class="line">/_cat/thread_pool/&#123;thread_pools&#125;</span><br><span class="line">/_cat/plugins</span><br><span class="line">/_cat/fielddata</span><br><span class="line">/_cat/fielddata/&#123;fields&#125;</span><br><span class="line">/_cat/nodeattrs</span><br><span class="line">/_cat/repositories</span><br><span class="line">/_cat/snapshots/&#123;repository&#125;</span><br><span class="line">/_cat/templates</span><br></pre></td></tr></table></figure>
+
+<p>可以指定help来查看帮助信息，第一列显示完整名称，第二列是缩写，第三列是参数说明</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_cat/nodes?help"</span><br><span class="line">id                                 | id,nodeId                                   | unique node id</span><br><span class="line">pid                                | p                                           | process id</span><br><span class="line">ip                                 | i                                           | ip address</span><br><span class="line">port                               | po                                          | bound transport port</span><br><span class="line">http_address                       | http                                        | bound http address</span><br><span class="line">version                            | v                                           | es version</span><br><span class="line">flavor                             | f                                           | es distribution flavor</span><br><span class="line">type                               | t                                           | es distribution type</span><br><span class="line">build                              | b                                           | es build hash</span><br><span class="line">jdk                                | j                                           | jdk version</span><br><span class="line">disk.total                         | dt,diskTotal                                | total disk space</span><br><span class="line">disk.used                          | du,diskUsed                                 | used disk space</span><br><span class="line">disk.avail                         | d,da,disk,diskAvail                         | available disk space</span><br><span class="line">disk.used_percent                  | dup,diskUsedPercent                         | used disk space percentage</span><br><span class="line">heap.current                       | hc,heapCurrent                              | used heap</span><br><span class="line">heap.percent                       | hp,heapPercent                              | used heap ratio</span><br><span class="line">heap.max                           | hm,heapMax                                  | max configured heap</span><br><span class="line">ram.current                        | rc,ramCurrent                               | used machine memory</span><br><span class="line">ram.percent                        | rp,ramPercent                               | used machine memory ratio</span><br><span class="line">ram.max                            | rm,ramMax                                   | total machine memory</span><br><span class="line">file_desc.current                  | fdc,fileDescriptorCurrent                   | used file descriptors</span><br><span class="line">file_desc.percent                  | fdp,fileDescriptorPercent                   | used file descriptor ratio</span><br><span class="line">file_desc.max                      | fdm,fileDescriptorMax                       | max file descriptors</span><br><span class="line">cpu                                | cpu                                         | recent cpu usage</span><br><span class="line">load_1m                            | l                                           | 1m load avg</span><br><span class="line">load_5m                            | l                                           | 5m load avg</span><br><span class="line">load_15m                           | l                                           | 15m load avg</span><br><span class="line">uptime                             | u                                           | node uptime</span><br><span class="line">node.role                          | r,role,nodeRole                             | m:master eligible node, d:data node, i:ingest node, -:coordinating node only</span><br><span class="line">master                             | m                                           | *:current master</span><br><span class="line">name                               | n                                           | node name</span><br></pre></td></tr></table></figure>
+
+<p>然后通过<code>h</code>指定表头。下面是我的测试机器，可以通过rc rp rm看到，机器内存被用满了，堆内存hp只使用了51%，看到这里分析原因可能是lucene segment cache占用过多或者别的程序。然后看segment memory（sm）占用了403.8 MB也并不多，因此可以确定是别的程序占用了过多内容，事实上我在这个节点上还运行了logstash，占用了较多内存。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET "localhost:9200/_cat/nodes?v&amp;h=ip,port,dt,du,dup,hc,hp,rc,rp,rm,cpu,l,sc,sm,fm"</span><br><span class="line">ip            port    dt      du   dup    hc hp   rc rp     rm cpu    l   sc      sm    fm</span><br><span class="line">172.19.64.254 9300 1.5tb 756.3gb 48.75 3.8gb 65 15gb 98 15.4gb  15 1.86 1746 403.8mb 9.7mb</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Di WANG
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://www.sdcswd.wang/archives/df79f51/" title="ElasticSearch 基本概念">https://www.sdcswd.wang/archives/df79f51/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Chinese/" rel="tag"># Chinese</a>
+              <a href="/tags/Kibana/" rel="tag"># Kibana</a>
+              <a href="/tags/Elasticsearch/" rel="tag"># Elasticsearch</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/archives/b87f94e5/" rel="prev" title="关于信仰">
+      <i class="fa fa-chevron-left"></i> 关于信仰
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/archives/d1e427b6/" rel="next" title="ELK配置">
+      ELK配置 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基础概念"><span class="nav-number">1.</span> <span class="nav-text">基础概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装与配置"><span class="nav-number">2.</span> <span class="nav-text">安装与配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装之前"><span class="nav-number">2.1.</span> <span class="nav-text">安装之前</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置"><span class="nav-number">2.2.</span> <span class="nav-text">配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#总览"><span class="nav-number">2.2.1.</span> <span class="nav-text">总览</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基础配置项"><span class="nav-number">2.2.2.</span> <span class="nav-text">基础配置项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM配置"><span class="nav-number">2.2.3.</span> <span class="nav-text">JVM配置</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#堆内存"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">堆内存</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#JVM缓存配置"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">JVM缓存配置</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安全配置"><span class="nav-number">2.2.4.</span> <span class="nav-text">安全配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#日志配置"><span class="nav-number">2.2.5.</span> <span class="nav-text">日志配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#xpack配置"><span class="nav-number">2.2.6.</span> <span class="nav-text">xpack配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重要配置"><span class="nav-number">2.2.7.</span> <span class="nav-text">重要配置</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#增加文件句柄数量"><span class="nav-number">2.2.7.1.</span> <span class="nav-text">增加文件句柄数量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#禁用swapping"><span class="nav-number">2.2.7.2.</span> <span class="nav-text">禁用swapping</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#虚拟内存"><span class="nav-number">2.2.7.3.</span> <span class="nav-text">虚拟内存</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#线程数"><span class="nav-number">2.2.7.4.</span> <span class="nav-text">线程数</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bootstrap-check"><span class="nav-number">2.2.8.</span> <span class="nav-text">bootstrap check</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模块"><span class="nav-number">3.</span> <span class="nav-text">模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Node"><span class="nav-number">3.1.</span> <span class="nav-text">Node</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Master-eligible-node"><span class="nav-number">3.1.1.</span> <span class="nav-text">Master-eligible node</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Data-node"><span class="nav-number">3.1.2.</span> <span class="nav-text">Data node</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ingest-node"><span class="nav-number">3.1.3.</span> <span class="nav-text">Ingest node</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Machine-learning-node"><span class="nav-number">3.1.4.</span> <span class="nav-text">Machine learning node</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Discovery-and-cluster-formation"><span class="nav-number">3.2.</span> <span class="nav-text">Discovery and cluster formation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Shard-allocation-and-cluster-level-routing"><span class="nav-number">3.3.</span> <span class="nav-text">Shard allocation and cluster-level routing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway"><span class="nav-number">3.4.</span> <span class="nav-text">Gateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP"><span class="nav-number">3.5.</span> <span class="nav-text">HTTP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Transport"><span class="nav-number">3.6.</span> <span class="nav-text">Transport</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Network-setting"><span class="nav-number">3.7.</span> <span class="nav-text">Network setting</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Indices"><span class="nav-number">3.8.</span> <span class="nav-text">Indices</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#静态设置项"><span class="nav-number">3.8.1.</span> <span class="nav-text">静态设置项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动态设置项"><span class="nav-number">3.8.2.</span> <span class="nav-text">动态设置项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Circuit-breaker"><span class="nav-number">3.8.3.</span> <span class="nav-text">Circuit breaker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Field-data"><span class="nav-number">3.8.4.</span> <span class="nav-text">Field data</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Node-query-cache"><span class="nav-number">3.8.5.</span> <span class="nav-text">Node query cache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Indexing-buffer"><span class="nav-number">3.8.6.</span> <span class="nav-text">Indexing buffer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Shard-request-cache"><span class="nav-number">3.8.7.</span> <span class="nav-text">Shard request cache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Index-recovery"><span class="nav-number">3.8.8.</span> <span class="nav-text">Index recovery</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Thread-pool"><span class="nav-number">3.9.</span> <span class="nav-text">Thread pool</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群操作"><span class="nav-number">4.</span> <span class="nav-text">集群操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#重启"><span class="nav-number">4.1.</span> <span class="nav-text">重启</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#关闭shard分配"><span class="nav-number">4.1.0.1.</span> <span class="nav-text">关闭shard分配</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#停止索引文档，刷新缓冲区"><span class="nav-number">4.1.0.2.</span> <span class="nav-text">停止索引文档，刷新缓冲区</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#关闭节点"><span class="nav-number">4.1.0.3.</span> <span class="nav-text">关闭节点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#重启节点"><span class="nav-number">4.1.0.4.</span> <span class="nav-text">重启节点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#等待所有节点加入集群，集群状态为yellow"><span class="nav-number">4.1.0.5.</span> <span class="nav-text">等待所有节点加入集群，集群状态为yellow</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#重新开启shard分配"><span class="nav-number">4.1.0.6.</span> <span class="nav-text">重新开启shard分配</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#升级"><span class="nav-number">4.2.</span> <span class="nav-text">升级</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#升级之前"><span class="nav-number">4.2.0.1.</span> <span class="nav-text">升级之前</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#升级-（关闭节点之前的过程和重启节点一样）"><span class="nav-number">4.2.0.2.</span> <span class="nav-text">升级 （关闭节点之前的过程和重启节点一样）</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#映射"><span class="nav-number">5.</span> <span class="nav-text">映射</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本操作"><span class="nav-number">5.1.</span> <span class="nav-text">基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#映射爆炸"><span class="nav-number">5.1.1.</span> <span class="nav-text">映射爆炸</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mapping-types"><span class="nav-number">5.2.</span> <span class="nav-text">Mapping types</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dynamic-mapping"><span class="nav-number">5.3.</span> <span class="nav-text">Dynamic mapping</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Dynamic-templates"><span class="nav-number">5.3.1.</span> <span class="nav-text">Dynamic templates</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fields-datatypes"><span class="nav-number">5.4.</span> <span class="nav-text">Fields datatypes</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Core-datatypes"><span class="nav-number">5.4.1.</span> <span class="nav-text">Core datatypes</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#string"><span class="nav-number">5.4.1.1.</span> <span class="nav-text">string</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#numeric"><span class="nav-number">5.4.1.2.</span> <span class="nav-text">numeric</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#date"><span class="nav-number">5.4.1.3.</span> <span class="nav-text">date</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#date-nanos"><span class="nav-number">5.4.1.4.</span> <span class="nav-text">date_nanos</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#boolean"><span class="nav-number">5.4.1.5.</span> <span class="nav-text">boolean</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#binary"><span class="nav-number">5.4.1.6.</span> <span class="nav-text">binary</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#range"><span class="nav-number">5.4.1.7.</span> <span class="nav-text">range</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Complex-datatypes"><span class="nav-number">5.4.2.</span> <span class="nav-text">Complex datatypes</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#object"><span class="nav-number">5.4.2.1.</span> <span class="nav-text">object</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nested"><span class="nav-number">5.4.2.2.</span> <span class="nav-text">nested</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Geo-datatypes"><span class="nav-number">5.4.3.</span> <span class="nav-text">Geo datatypes</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#geo-point"><span class="nav-number">5.4.3.1.</span> <span class="nav-text">geo_point</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#geo-shape"><span class="nav-number">5.4.3.2.</span> <span class="nav-text">geo_shape</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Specialised-datatypes"><span class="nav-number">5.4.4.</span> <span class="nav-text">Specialised datatypes</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#ip"><span class="nav-number">5.4.4.1.</span> <span class="nav-text">ip</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#completion"><span class="nav-number">5.4.4.2.</span> <span class="nav-text">completion</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#token-count"><span class="nav-number">5.4.4.3.</span> <span class="nav-text">token_count</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#murmur3"><span class="nav-number">5.4.4.4.</span> <span class="nav-text">murmur3</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#percolator"><span class="nav-number">5.4.4.5.</span> <span class="nav-text">percolator</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#join"><span class="nav-number">5.4.4.6.</span> <span class="nav-text">join</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#rank-feature"><span class="nav-number">5.4.4.7.</span> <span class="nav-text">rank feature</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#rank-features"><span class="nav-number">5.4.4.8.</span> <span class="nav-text">rank features</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#dense-vector"><span class="nav-number">5.4.4.9.</span> <span class="nav-text">dense vector</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#sparse-vector"><span class="nav-number">5.4.4.10.</span> <span class="nav-text">sparse vector</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#search-as-you-type"><span class="nav-number">5.4.4.11.</span> <span class="nav-text">search-as-you-type</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#alias"><span class="nav-number">5.4.4.12.</span> <span class="nav-text">alias</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#flattened"><span class="nav-number">5.4.4.13.</span> <span class="nav-text">flattened</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#shape"><span class="nav-number">5.4.4.14.</span> <span class="nav-text">shape</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#histogram"><span class="nav-number">5.4.4.15.</span> <span class="nav-text">histogram</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Arrays"><span class="nav-number">5.4.5.</span> <span class="nav-text">Arrays</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Multi-fields"><span class="nav-number">5.4.6.</span> <span class="nav-text">Multi-fields</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Meta-fields"><span class="nav-number">5.5.</span> <span class="nav-text">Meta-fields</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#index"><span class="nav-number">5.5.1.</span> <span class="nav-text">_index</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#type"><span class="nav-number">5.5.2.</span> <span class="nav-text">_type</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#id"><span class="nav-number">5.5.3.</span> <span class="nav-text">_id</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#source"><span class="nav-number">5.5.4.</span> <span class="nav-text">_source</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#size"><span class="nav-number">5.5.5.</span> <span class="nav-text">_size</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#field-names"><span class="nav-number">5.5.6.</span> <span class="nav-text">_field_names</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ignored"><span class="nav-number">5.5.7.</span> <span class="nav-text">_ignored</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#routing"><span class="nav-number">5.5.8.</span> <span class="nav-text">_routing</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#meta"><span class="nav-number">5.5.9.</span> <span class="nav-text">_meta</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mapping-parameters"><span class="nav-number">5.6.</span> <span class="nav-text">Mapping parameters</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#搜索"><span class="nav-number">6.</span> <span class="nav-text">搜索</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念"><span class="nav-number">6.1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Query-context"><span class="nav-number">6.1.1.</span> <span class="nav-text">Query context</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Filter-context"><span class="nav-number">6.1.2.</span> <span class="nav-text">Filter context</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Match-all-查询"><span class="nav-number">6.2.</span> <span class="nav-text">Match all 查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Term-level-查询"><span class="nav-number">6.3.</span> <span class="nav-text">Term-level 查询</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#exists"><span class="nav-number">6.3.1.</span> <span class="nav-text">exists</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fuzzy"><span class="nav-number">6.3.2.</span> <span class="nav-text">fuzzy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ids"><span class="nav-number">6.3.3.</span> <span class="nav-text">ids</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#prefix"><span class="nav-number">6.3.4.</span> <span class="nav-text">prefix</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#range-1"><span class="nav-number">6.3.5.</span> <span class="nav-text">range</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#regexp"><span class="nav-number">6.3.6.</span> <span class="nav-text">regexp</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#term"><span class="nav-number">6.3.7.</span> <span class="nav-text">term</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#terms"><span class="nav-number">6.3.8.</span> <span class="nav-text">terms</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#terms-set"><span class="nav-number">6.3.9.</span> <span class="nav-text">terms_set</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#type-1"><span class="nav-number">6.3.10.</span> <span class="nav-text">type</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#wildcard"><span class="nav-number">6.3.11.</span> <span class="nav-text">wildcard</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Compound-查询"><span class="nav-number">6.4.</span> <span class="nav-text">Compound 查询</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#bool"><span class="nav-number">6.4.1.</span> <span class="nav-text">bool</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#boosting"><span class="nav-number">6.4.2.</span> <span class="nav-text">boosting</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#constant-score"><span class="nav-number">6.4.3.</span> <span class="nav-text">constant_score</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dis-max"><span class="nav-number">6.4.4.</span> <span class="nav-text">dis_max</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#function-score"><span class="nav-number">6.4.5.</span> <span class="nav-text">function_score</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Full-text-查询"><span class="nav-number">6.5.</span> <span class="nav-text">Full text 查询</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#interval"><span class="nav-number">6.5.1.</span> <span class="nav-text">interval</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#match"><span class="nav-number">6.5.2.</span> <span class="nav-text">match</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#match-bool-prefix"><span class="nav-number">6.5.3.</span> <span class="nav-text">match_bool_prefix</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#match-phrase"><span class="nav-number">6.5.4.</span> <span class="nav-text">match_phrase</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#match-phrase-prefix"><span class="nav-number">6.5.5.</span> <span class="nav-text">match_phrase_prefix</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#multi-match"><span class="nav-number">6.5.6.</span> <span class="nav-text">multi_match</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#common-terms"><span class="nav-number">6.5.7.</span> <span class="nav-text">common terms</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#query-string"><span class="nav-number">6.5.8.</span> <span class="nav-text">query_string</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#simple-query-string"><span class="nav-number">6.5.9.</span> <span class="nav-text">simple_query_string</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Geo-查询"><span class="nav-number">6.6.</span> <span class="nav-text">Geo 查询</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#geo-bounding-box"><span class="nav-number">6.6.1.</span> <span class="nav-text">geo_bounding_box</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#geo-distance"><span class="nav-number">6.6.2.</span> <span class="nav-text">geo_distance</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#geo-polygon"><span class="nav-number">6.6.3.</span> <span class="nav-text">geo_polygon</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#geo-shape-1"><span class="nav-number">6.6.4.</span> <span class="nav-text">geo_shape</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Shape-查询"><span class="nav-number">6.7.</span> <span class="nav-text">Shape 查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Joining-查询"><span class="nav-number">6.8.</span> <span class="nav-text">Joining 查询</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nested-1"><span class="nav-number">6.8.1.</span> <span class="nav-text">nested</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#has-child"><span class="nav-number">6.8.2.</span> <span class="nav-text">has_child</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#has-parent"><span class="nav-number">6.8.3.</span> <span class="nav-text">has_parent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parent-ID"><span class="nav-number">6.8.4.</span> <span class="nav-text">Parent ID</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Span-查询"><span class="nav-number">6.9.</span> <span class="nav-text">Span 查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Specialized-查询"><span class="nav-number">6.10.</span> <span class="nav-text">Specialized 查询</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#聚合"><span class="nav-number">7.</span> <span class="nav-text">聚合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Metric-聚合"><span class="nav-number">7.1.</span> <span class="nav-text">Metric 聚合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Avg-聚合"><span class="nav-number">7.1.1.</span> <span class="nav-text">Avg 聚合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Weighted-Avg-聚合"><span class="nav-number">7.1.2.</span> <span class="nav-text">Weighted Avg 聚合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cardinality-聚合"><span class="nav-number">7.1.3.</span> <span class="nav-text">Cardinality 聚合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Extended-Stats-聚合"><span class="nav-number">7.1.4.</span> <span class="nav-text">Extended Stats 聚合</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sctipting-脚本"><span class="nav-number">8.</span> <span class="nav-text">Sctipting (脚本)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ILM-index生命周期管理"><span class="nav-number">9.</span> <span class="nav-text">ILM index生命周期管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Index-lifecycle"><span class="nav-number">9.1.</span> <span class="nav-text">Index lifecycle</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ILM-Phase-actions"><span class="nav-number">9.2.</span> <span class="nav-text">ILM Phase actions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rollover"><span class="nav-number">9.3.</span> <span class="nav-text">Rollover</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建生命周期策略"><span class="nav-number">9.3.1.</span> <span class="nav-text">创建生命周期策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建索引模板"><span class="nav-number">9.3.2.</span> <span class="nav-text">创建索引模板</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#索引引导"><span class="nav-number">9.3.3.</span> <span class="nav-text">索引引导</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#验证"><span class="nav-number">9.3.4.</span> <span class="nav-text">验证</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群管理"><span class="nav-number">10.</span> <span class="nav-text">集群管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#集群状态："><span class="nav-number">10.1.</span> <span class="nav-text">集群状态：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Monitor"><span class="nav-number">10.2.</span> <span class="nav-text">Monitor</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Monitoring-settings"><span class="nav-number">10.2.1.</span> <span class="nav-text">Monitoring settings</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metricbeat"><span class="nav-number">10.3.</span> <span class="nav-text">Metricbeat</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RESRful-API"><span class="nav-number">11.</span> <span class="nav-text">RESRful API</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cat-API"><span class="nav-number">11.1.</span> <span class="nav-text">cat API</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Di WANG"
+      src="/images/pasj2019.jpg">
+  <p class="site-author-name" itemprop="name">Di WANG</p>
+  <div class="site-description" itemprop="description">A place to record some information related with particle accelerator control system</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Insomnia1437" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Insomnia1437" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:sdcswd@gmail.com" title="E-Mail → mailto:sdcswd@gmail.com" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Di WANG</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">110k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:40</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">NexT.Gemini</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

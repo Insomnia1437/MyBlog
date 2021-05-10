@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/neworder.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/neworder.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="X3XC6nkOi10OiEv6p0Y1EWgoRjOngRcPrMiBtuuts-o">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sdcswd.wang","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="12345# @Time    : 2019-02-02# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com  A Short Report on YAML YAML means “YAML Ain’t a Markup Language”. It">
+<meta property="og:type" content="article">
+<meta property="og:title" content="YAML introduction">
+<meta property="og:url" content="https://www.sdcswd.wang/archives/24a5891/index.html">
+<meta property="og:site_name" content="Heterotopia">
+<meta property="og:description" content="12345# @Time    : 2019-02-02# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com  A Short Report on YAML YAML means “YAML Ain’t a Markup Language”. It">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-02-02T23:19:18.000Z">
+<meta property="article:modified_time" content="2021-05-10T20:19:50.712Z">
+<meta property="article:author" content="Di WANG">
+<meta property="article:tag" content="English">
+<meta property="article:tag" content="YAML">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.sdcswd.wang/archives/24a5891/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>YAML introduction | Heterotopia</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-155331821-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Heterotopia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">29</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://www.sdcswd.wang/archives/24a5891/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/pasj2019.jpg">
+      <meta itemprop="name" content="Di WANG">
+      <meta itemprop="description" content="A place to record some information related with particle accelerator control system">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Heterotopia">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          YAML introduction
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-02 23:19:18" itemprop="dateCreated datePublished" datetime="2020-02-02T23:19:18+00:00">2020-02-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-10 20:19:50" itemprop="dateModified" datetime="2021-05-10T20:19:50+00:00">2021-05-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Software/" itemprop="url" rel="index"><span itemprop="name">Software</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>3.4k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>3 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># @Time    : 2019-02-02</span></span><br><span class="line"><span class="comment"># @Language: Markdown</span></span><br><span class="line"><span class="comment"># @Software: VS Code</span></span><br><span class="line"><span class="comment"># @Author  : Di Wang(KEK Linac)</span></span><br><span class="line"><span class="comment"># @Email   : sdcswd@gmail.com</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="A-Short-Report-on-YAML"><a href="#A-Short-Report-on-YAML" class="headerlink" title="A Short Report on YAML"></a>A Short Report on YAML</h1><blockquote>
+<p>YAML means <strong>“YAML Ain’t a Markup Language”</strong>. It uses Python-style indentation to indicate nesting, and use <code>[]</code> for lists and <code>{}</code> for maps.</p>
+<p>Since the name is recursive, it is a better option to explain YAML by YAML.</p>
+</blockquote>
+<a id="more"></a>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">---</span> <span class="comment"># Syntax</span></span><br><span class="line"><span class="attr">basic syntax:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">whitespace</span> <span class="string">indentation</span> <span class="string">is</span> <span class="string">used</span> <span class="string">for</span> <span class="string">denoteing</span> <span class="string">structure</span> <span class="string">and</span> <span class="string">`tab`</span> <span class="string">is</span> <span class="string">not</span> <span class="string">allowed</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">comments</span> <span class="string">begin</span> <span class="string">with</span> <span class="string">the</span> <span class="string">`#`</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">List</span> <span class="string">members</span> <span class="string">are</span> <span class="string">denoted</span> <span class="string">by</span> <span class="string">leading</span> <span class="string">hyphen</span> <span class="string">(`-`)</span> <span class="string">with</span> <span class="string">one</span> <span class="string">member</span> <span class="string">per</span> <span class="string">line</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">use</span> <span class="string">key:value</span> <span class="string">to</span> <span class="string">denote</span> <span class="string">array</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">case</span> <span class="string">sensitive</span></span><br><span class="line"><span class="attr">Support data structure:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">map</span> <span class="string">(also</span> <span class="string">called</span> <span class="string">dictionary</span> <span class="string">or</span> <span class="string">hashes</span> <span class="string">or</span> <span class="string">key:value</span> <span class="string">pair)</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">array</span> <span class="string">or</span> <span class="string">list</span> <span class="string">or</span> <span class="string">sequence</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">scalars</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># basic components</span></span><br><span class="line"><span class="attr">map:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">map1:</span> <span class="string">this</span> <span class="string">is</span> <span class="string">a</span> <span class="string">map</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">map2:</span> <span class="string">&#123;name:</span> <span class="string">hello,</span> <span class="attr">id:</span> <span class="string">world&#125;</span></span><br><span class="line"><span class="attr">list:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">cat</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">dog</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">cow</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">[monkey,</span> <span class="string">elephant]</span></span><br><span class="line"><span class="attr">scalars:</span></span><br><span class="line">  <span class="attr">null:</span> <span class="string">~</span></span><br><span class="line">  <span class="attr">boolean:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="literal">TRUE</span> <span class="comment"># True (yaml1.1), string "Yes" (yaml1.2)</span></span><br><span class="line">    <span class="bullet">-</span> <span class="literal">FALSE</span></span><br><span class="line">    <span class="bullet">-</span> <span class="literal">yes</span></span><br><span class="line">    <span class="bullet">-</span> <span class="literal">no</span></span><br><span class="line">    <span class="bullet">-</span> <span class="literal">Yes</span></span><br><span class="line">    <span class="bullet">-</span> <span class="literal">YeS</span> <span class="comment"># will be recognized as a string</span></span><br><span class="line">  <span class="attr">float:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">3.14</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">2.99e+8</span></span><br><span class="line">  <span class="attr">int:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">65536</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">0b1010</span> <span class="comment"># dec: 10</span></span><br><span class="line">  <span class="attr">srting:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">apple</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">"another string"</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">'\n will be escaped'</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">"\n will not be escaped"</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">data:</span> <span class="string">|</span></span><br><span class="line">        <span class="string">There</span> <span class="string">once</span> <span class="string">was</span> <span class="string">a</span> <span class="string">tall</span> <span class="string">man</span> <span class="string">from</span> <span class="string">Ealing</span></span><br><span class="line">        <span class="string">Who</span> <span class="string">got</span> <span class="string">on</span> <span class="string">a</span> <span class="string">bus</span> <span class="string">to</span> <span class="string">Darjeeling</span></span><br><span class="line">          <span class="string">It</span> <span class="string">said</span> <span class="string">on</span> <span class="string">the</span> <span class="string">door</span></span><br><span class="line">          <span class="string">"Please don't sit on the floor"</span></span><br><span class="line">        <span class="string">So</span> <span class="string">he</span> <span class="string">carefully</span> <span class="string">sat</span> <span class="string">on</span> <span class="string">the</span> <span class="string">ceiling</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">info:</span> <span class="string">&gt;</span></span><br><span class="line">        <span class="string">this</span> <span class="string">is</span></span><br><span class="line">        <span class="string">an</span></span><br><span class="line">        <span class="string">info</span></span><br><span class="line"></span><br><span class="line">        <span class="string">\n</span></span><br><span class="line">        <span class="string">continued</span></span><br><span class="line">        <span class="string">info</span></span><br><span class="line"><span class="attr">date and time:</span></span><br><span class="line">  <span class="comment"># &#123;date&#125;t&#123;time&#125;+timezone</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">iso8601:</span> <span class="number">2001</span><span class="number">-12</span><span class="string">-25t01:23:45.54+09:00</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">date:</span> <span class="string">&amp;epoch</span> <span class="number">1970</span><span class="number">-01</span><span class="number">-01</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">epochtime:</span> <span class="meta">*epoch</span></span><br><span class="line"><span class="attr">explicit type:</span></span><br><span class="line">  <span class="attr">str_true:</span> <span class="type">!!str</span> <span class="literal">true</span> <span class="comment"># string rather than boolean</span></span><br><span class="line">  <span class="attr">str_int:</span> <span class="type">!!str</span> <span class="number">123</span> <span class="comment"># string rather than int</span></span><br><span class="line"><span class="attr">anchor and refers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">anchor:</span> <span class="meta">&amp;anchor001</span></span><br><span class="line">      <span class="attr">Manager:</span> <span class="string">Alice</span></span><br><span class="line">      <span class="attr">Programer:</span> <span class="string">Bob</span></span><br><span class="line">      <span class="attr">Teacher:</span> <span class="string">Dylan</span></span><br><span class="line">      <span class="attr">Student:</span> <span class="string">Ruby</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">refer:</span> <span class="meta">*anchor001</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">merger:</span></span><br><span class="line">      <span class="string">&lt;&lt;:</span> <span class="meta">*anchor001</span></span><br><span class="line">      <span class="attr">Student:</span> <span class="string">Python</span></span><br></pre></td></tr></table></figure>
+
+<p>Parse this YAML file by Python3.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> yaml</span><br><span class="line"><span class="keyword">import</span> pprint</span><br><span class="line"></span><br><span class="line">f = open(<span class="string">"./test.yaml"</span>)</span><br><span class="line">a = yaml.load(f)</span><br><span class="line">print(type(a))</span><br><span class="line">pprint.pprint(a)</span><br></pre></td></tr></table></figure>
+
+<p>This is the output. It seems there are some errors about the <strong>highlight</strong> color.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">dict</span>'&gt;</span></span><br><span class="line">&#123;'Support data structure': ['map (also called dictory or hashes or key:value '</span><br><span class="line">                            <span class="string">'pair)'</span>,</span><br><span class="line">                            <span class="string">'array or list or sequence'</span>,</span><br><span class="line">                            <span class="string">'scalars'</span>],</span><br><span class="line"> <span class="string">'anchor and refers'</span>: [&#123;<span class="string">'anchor'</span>: &#123;<span class="string">'Manager'</span>: <span class="string">'Alice'</span>,</span><br><span class="line">                                   <span class="string">'Programer'</span>: <span class="string">'Bob'</span>,</span><br><span class="line">                                   <span class="string">'Student'</span>: <span class="string">'Ruby'</span>,</span><br><span class="line">                                   <span class="string">'Teacher'</span>: <span class="string">'Dylan'</span>&#125;&#125;,</span><br><span class="line">                       &#123;<span class="string">'refer'</span>: &#123;<span class="string">'Manager'</span>: <span class="string">'Alice'</span>,</span><br><span class="line">                                  <span class="string">'Programer'</span>: <span class="string">'Bob'</span>,</span><br><span class="line">                                  <span class="string">'Student'</span>: <span class="string">'Ruby'</span>,</span><br><span class="line">                                  <span class="string">'Teacher'</span>: <span class="string">'Dylan'</span>&#125;&#125;,</span><br><span class="line">                       &#123;<span class="string">'merger'</span>: &#123;<span class="string">'Manager'</span>: <span class="string">'Alice'</span>,</span><br><span class="line">                                   <span class="string">'Programer'</span>: <span class="string">'Bob'</span>,</span><br><span class="line">                                   <span class="string">'Student'</span>: <span class="string">'Python'</span>,</span><br><span class="line">                                   <span class="string">'Teacher'</span>: <span class="string">'Dylan'</span>&#125;&#125;],</span><br><span class="line"> <span class="string">'basic syntax'</span>: [<span class="string">'whitespace indentation is used for denoteing structure and '</span></span><br><span class="line">                  <span class="string">'`tab` is not allowed'</span>,</span><br><span class="line">                  <span class="string">'comments begin with the `#`'</span>,</span><br><span class="line">                  <span class="string">'List members are denoted by leading hyphen (`-`) with one '</span></span><br><span class="line">                  <span class="string">'member per line'</span>,</span><br><span class="line">                  <span class="string">'use key:value to denote array'</span>,</span><br><span class="line">                  <span class="string">'case sensitive'</span>],</span><br><span class="line"> <span class="string">'date and time'</span>: [&#123;<span class="string">'iso8601'</span>: datetime.datetime(<span class="number">2001</span>, <span class="number">12</span>, <span class="number">24</span>, <span class="number">16</span>, <span class="number">23</span>, <span class="number">45</span>, <span class="number">540000</span>)&#125;,</span><br><span class="line">                   &#123;<span class="string">'date'</span>: datetime.date(<span class="number">1970</span>, <span class="number">1</span>, <span class="number">1</span>)&#125;,</span><br><span class="line">                   &#123;<span class="string">'epochtime'</span>: datetime.date(<span class="number">1970</span>, <span class="number">1</span>, <span class="number">1</span>)&#125;],</span><br><span class="line"> <span class="string">'explicit type'</span>: &#123;<span class="string">'str_int'</span>: <span class="string">'123'</span>, <span class="string">'str_true'</span>: <span class="string">'true'</span>&#125;,</span><br><span class="line"> <span class="string">'list'</span>: [<span class="string">'cat'</span>, <span class="string">'dog'</span>, <span class="string">'cow'</span>, [<span class="string">'monkey'</span>, <span class="string">'elephant'</span>]],</span><br><span class="line"> <span class="string">'map'</span>: [&#123;<span class="string">'map1'</span>: <span class="string">'this is a map'</span>&#125;, &#123;<span class="string">'map2'</span>: &#123;<span class="string">'id'</span>: <span class="string">'world'</span>, <span class="string">'name'</span>: <span class="string">'hello'</span>&#125;&#125;],</span><br><span class="line"> <span class="string">'scalars'</span>: &#123;<span class="literal">None</span>: <span class="literal">None</span>,</span><br><span class="line">             <span class="string">'boolean'</span>: [<span class="literal">True</span>, <span class="literal">False</span>, <span class="literal">True</span>, <span class="literal">False</span>, <span class="literal">True</span>, <span class="string">'YeS'</span>],</span><br><span class="line">             <span class="string">'float'</span>: [<span class="number">3.14</span>, <span class="number">299000000.0</span>],</span><br><span class="line">             <span class="string">'int'</span>: [<span class="number">65536</span>, <span class="number">10</span>],</span><br><span class="line">             <span class="string">'srting'</span>: [<span class="string">'apple'</span>,</span><br><span class="line">                        <span class="string">'another string'</span>,</span><br><span class="line">                        <span class="string">'\\n will be escaped'</span>,</span><br><span class="line">                        <span class="string">'\n will not be escaped'</span>,</span><br><span class="line">                        &#123;<span class="string">'data'</span>: <span class="string">'There once was a tall man from Ealing\n'</span></span><br><span class="line">                                 <span class="string">'Who got on a bus to Darjeeling\n'</span></span><br><span class="line">                                 <span class="string">'  It said on the door\n'</span></span><br><span class="line">                                 <span class="string">'  "Please don\'t sit on the floor"\n'</span></span><br><span class="line">                                 <span class="string">'So he carefully sat on the ceiling\n'</span>&#125;,</span><br><span class="line">                        &#123;<span class="string">'info'</span>: <span class="string">'this is an info\n\\n continued info\n'</span>&#125;]&#125;&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Di WANG
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://www.sdcswd.wang/archives/24a5891/" title="YAML introduction">https://www.sdcswd.wang/archives/24a5891/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/English/" rel="tag"># English</a>
+              <a href="/tags/YAML/" rel="tag"># YAML</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/archives/5410d8cb/" rel="prev" title="Elasticsearch+Kibana+Beats+Logstash安装">
+      <i class="fa fa-chevron-left"></i> Elasticsearch+Kibana+Beats+Logstash安装
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/archives/a44e3b13/" rel="next" title="粒子加速器控制-Linux命令整理">
+      粒子加速器控制-Linux命令整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#A-Short-Report-on-YAML"><span class="nav-number">1.</span> <span class="nav-text">A Short Report on YAML</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Di WANG"
+      src="/images/pasj2019.jpg">
+  <p class="site-author-name" itemprop="name">Di WANG</p>
+  <div class="site-description" itemprop="description">A place to record some information related with particle accelerator control system</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Insomnia1437" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Insomnia1437" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:sdcswd@gmail.com" title="E-Mail → mailto:sdcswd@gmail.com" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Di WANG</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">110k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:40</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">NexT.Gemini</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

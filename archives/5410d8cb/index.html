@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/neworder.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/neworder.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="X3XC6nkOi10OiEv6p0Y1EWgoRjOngRcPrMiBtuuts-o">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sdcswd.wang","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="12345# @Time    : 2019-01-28# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com   本博客资料来源：Elastic官网 Elasticsearch+Logstash+Kibana，合称ELK，Elasticsearch用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch+Kibana+Beats+Logstash安装">
+<meta property="og:url" content="https://www.sdcswd.wang/archives/5410d8cb/index.html">
+<meta property="og:site_name" content="Heterotopia">
+<meta property="og:description" content="12345# @Time    : 2019-01-28# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com   本博客资料来源：Elastic官网 Elasticsearch+Logstash+Kibana，合称ELK，Elasticsearch用">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-01-28T11:15:08.000Z">
+<meta property="article:modified_time" content="2021-05-10T20:19:50.708Z">
+<meta property="article:author" content="Di WANG">
+<meta property="article:tag" content="Chinese">
+<meta property="article:tag" content="Kibana">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.sdcswd.wang/archives/5410d8cb/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Elasticsearch+Kibana+Beats+Logstash安装 | Heterotopia</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-155331821-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Heterotopia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">29</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://www.sdcswd.wang/archives/5410d8cb/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/pasj2019.jpg">
+      <meta itemprop="name" content="Di WANG">
+      <meta itemprop="description" content="A place to record some information related with particle accelerator control system">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Heterotopia">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Elasticsearch+Kibana+Beats+Logstash安装
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-01-28 11:15:08" itemprop="dateCreated datePublished" datetime="2020-01-28T11:15:08+00:00">2020-01-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-10 20:19:50" itemprop="dateModified" datetime="2021-05-10T20:19:50+00:00">2021-05-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Software/" itemprop="url" rel="index"><span itemprop="name">Software</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Software/elk/" itemprop="url" rel="index"><span itemprop="name">elk</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>3.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>3 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># @Time    : 2019-01-28</span></span><br><span class="line"><span class="comment"># @Language: Markdown</span></span><br><span class="line"><span class="comment"># @Software: VS Code</span></span><br><span class="line"><span class="comment"># @Author  : Di Wang(KEK Linac)</span></span><br><span class="line"><span class="comment"># @Email   : sdcswd@gmail.com</span></span><br></pre></td></tr></table></figure>
+
+
+<p>本博客资料来源：<a href="https://www.elastic.co/" target="_blank" rel="noopener external nofollow noreferrer">Elastic官网</a></p>
+<p>Elasticsearch+Logstash+Kibana，合称ELK，Elasticsearch用来完成搜索，Logstash用于数据采集，Kibana用于数据可视化。<br>数据采集工作早期由Logstash完成，现在则使用Beats，Logstash更多用于数据汇聚处理。</p>
+<a id="more"></a>
+
+<h2 id="Elastic-Stack学习笔记"><a href="#Elastic-Stack学习笔记" class="headerlink" title="Elastic Stack学习笔记"></a>Elastic Stack学习笔记</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p><strong>Phronesis!!!</strong></p>
+<p>实践是最好的理解，先安装然后慢慢深入了解。</p>
+<ul>
+<li>Elasticsearch</li>
+<li>Kibana</li>
+<li>Beats</li>
+<li>Logstash (可选安装)</li>
+</ul>
+<p>最新版本为7.5，可以在此查看不同版本对不同的系统的支持：<a href="https://www.elastic.co/support/matrix" target="_blank" rel="noopener external nofollow noreferrer">版本以及系统支持</a>。</p>
+<p>安装Java的过程省略，JVM的版本支持：<a href="https://www.elastic.co/support/matrix#matrix_jvm" target="_blank" rel="noopener external nofollow noreferrer">可用Java版本</a>。</p>
+<p>我使用CentOS 7以及openJDK 1.8 作为测试，测试过程所有软件都安装在一台服务器上。</p>
+<blockquote>
+<p>关于不同Linux发行版本启动系统服务的命令，使用<code>ps -p 1</code>命令查看你的 SysV，如果是<code>init</code>，请使用</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo -i service elasticsearch start</span><br><span class="line">sudo -i service elasticsearch stop</span><br></pre></td></tr></table></figure>
+
+<p>如果是<code>systemd</code>，请使用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start elasticsearch.service</span><br><span class="line">sudo systemctl stop elasticsearch.service</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="Elasticsearch-安装"><a href="#Elasticsearch-安装" class="headerlink" title="Elasticsearch 安装"></a>Elasticsearch 安装</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> curl -L -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.5.2-x86_64.rpm</span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo rpm -i elasticsearch-7.5.2-x86_64.rpm</span></span><br><span class="line">warning: elasticsearch-7.5.2-x86_64.rpm: Header V4 RSA/SHA512 Signature, key ID d88e42b4: NOKEY</span><br><span class="line">Creating elasticsearch group... OK</span><br><span class="line">Creating elasticsearch user... OK</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment">## NOT starting on installation, please execute the following statements to configure elasticsearch service to start automatically using systemd</span></span></span><br><span class="line"> sudo systemctl daemon-reload</span><br><span class="line"> sudo systemctl enable elasticsearch.service</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment">## You can start elasticsearch service by executing</span></span></span><br><span class="line"> sudo systemctl start elasticsearch.service</span><br><span class="line">Created elasticsearch keystore in /etc/elasticsearch</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo systemctl start elasticsearch</span></span><br></pre></td></tr></table></figure>
+
+<p>如果服务启动成功，在浏览器中输入<code>http://localhost:9200/</code>或者执行<code>curl http://127.0.0.1:9200</code>，能看到如下Json返回值则表示成功。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span> : <span class="string">"wang.linac.kek.jp"</span>,</span><br><span class="line">  <span class="attr">"cluster_name"</span> : <span class="string">"elasticsearch"</span>,</span><br><span class="line">  <span class="attr">"cluster_uuid"</span> : <span class="string">"BSIeBQ36Trqdyj4ve6O3xQ"</span>,</span><br><span class="line">  <span class="attr">"version"</span> : &#123;</span><br><span class="line">    <span class="attr">"number"</span> : <span class="string">"7.5.2"</span>,</span><br><span class="line">    <span class="attr">"build_flavor"</span> : <span class="string">"default"</span>,</span><br><span class="line">    <span class="attr">"build_type"</span> : <span class="string">"rpm"</span>,</span><br><span class="line">    <span class="attr">"build_hash"</span> : <span class="string">"8bec50e1e0ad29dad5653712cf3bb580cd1afcdf"</span>,</span><br><span class="line">    <span class="attr">"build_date"</span> : <span class="string">"2020-01-15T12:11:52.313576Z"</span>,</span><br><span class="line">    <span class="attr">"build_snapshot"</span> : <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">"lucene_version"</span> : <span class="string">"8.3.0"</span>,</span><br><span class="line">    <span class="attr">"minimum_wire_compatibility_version"</span> : <span class="string">"6.8.0"</span>,</span><br><span class="line">    <span class="attr">"minimum_index_compatibility_version"</span> : <span class="string">"6.0.0-beta1"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"tagline"</span> : <span class="string">"You Know, for Search"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装Kibana"><a href="#安装Kibana" class="headerlink" title="安装Kibana"></a>安装Kibana</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> curl -L -O https://artifacts.elastic.co/downloads/kibana/kibana-7.5.2-x86_64.rpm</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo rpm --install kibana-7.5.2-x86_64.rpm</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo service start elasticsearch</span></span><br></pre></td></tr></table></figure>
+<p>如需关闭，kill 其pid即可。</p>
+<p>在浏览器中访问<code>http://127.0.0.1:5601</code>就能看到Kibana。</p>
+<h4 id="安装Beats"><a href="#安装Beats" class="headerlink" title="安装Beats"></a>安装Beats</h4><p>Beats可以直接传输数据到Elasticsearch或者通过Logstash。不同的Beats支持不同的数据，此处我们安装Metricbeat，使用其<code>system</code> module去收集系统级数据，如CPU使用量，内存，文件系统，磁盘IO，网络等。</p>
+<table>
+<thead>
+<tr>
+<th>Elastic Beasts</th>
+<th>捕获数据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Auditbeat</td>
+<td>audit data</td>
+</tr>
+<tr>
+<td>Filebeat</td>
+<td>log files</td>
+</tr>
+<tr>
+<td>Functionbeat</td>
+<td>cloud data</td>
+</tr>
+<tr>
+<td>Heartbeat</td>
+<td>availability monitoring</td>
+</tr>
+<tr>
+<td>Journalbeat</td>
+<td>systemd journals</td>
+</tr>
+<tr>
+<td>Metricbeat</td>
+<td>metrics</td>
+</tr>
+<tr>
+<td>Packetbeat</td>
+<td>network traffic</td>
+</tr>
+<tr>
+<td>Winlogbeat</td>
+<td>windows event logs</td>
+</tr>
+</tbody></table>
+<p>下载安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.5.2-x86_64.rpm</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo rpm -vi metricbeat-7.5.2-x86_64.rpm</span></span><br></pre></td></tr></table></figure>
+
+<p>启动<code>system</code> module之前请确保Elasticsearch和Kibana处于运行状态。执行命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo metricbeat modules <span class="built_in">enable</span> system</span></span><br><span class="line">Module system is already enabled</span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo metricbeat setup -e</span></span><br><span class="line">...省略一大堆</span><br><span class="line">2020-01-28T13:05:32.204+0900    INFO    instance/beat.go:780    Kibana dashboards successfully loaded.</span><br><span class="line">Loaded dashboards</span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo systemctl start metricbeat</span></span><br></pre></td></tr></table></figure>
+
+<p>然后打开浏览器，进入<code>http://localhost:5601/app/kibana#/dashboard/Metricbeat-system-overview-ecs</code> 或者点击左侧的<code>dashboard</code>，找到system overview，点击<code>Host Overview</code>就能看到系统数据的图表显示了。</p>
+<h4 id="安装Logstash"><a href="#安装Logstash" class="headerlink" title="安装Logstash"></a>安装Logstash</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -L -O https://artifacts.elastic.co/downloads/logstash/logstash-7.5.2.rpm</span><br><span class="line">sudo rpm -i logstash-7.5.2.rpm</span><br></pre></td></tr></table></figure>
+
+<p>配置Logstash监听beats或者直接读取日志，并添加filter，之后输出到Elasticsearch。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Di WANG
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://www.sdcswd.wang/archives/5410d8cb/" title="Elasticsearch+Kibana+Beats+Logstash安装">https://www.sdcswd.wang/archives/5410d8cb/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Chinese/" rel="tag"># Chinese</a>
+              <a href="/tags/Kibana/" rel="tag"># Kibana</a>
+              <a href="/tags/Elasticsearch/" rel="tag"># Elasticsearch</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/archives/7a8ba2cd/" rel="prev" title="Python版本管理与虚拟环境">
+      <i class="fa fa-chevron-left"></i> Python版本管理与虚拟环境
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/archives/24a5891/" rel="next" title="YAML introduction">
+      YAML introduction <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Elastic-Stack学习笔记"><span class="nav-number">1.</span> <span class="nav-text">Elastic Stack学习笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Elasticsearch-安装"><span class="nav-number">1.1.1.</span> <span class="nav-text">Elasticsearch 安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装Kibana"><span class="nav-number">1.1.2.</span> <span class="nav-text">安装Kibana</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装Beats"><span class="nav-number">1.1.3.</span> <span class="nav-text">安装Beats</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装Logstash"><span class="nav-number">1.1.4.</span> <span class="nav-text">安装Logstash</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Di WANG"
+      src="/images/pasj2019.jpg">
+  <p class="site-author-name" itemprop="name">Di WANG</p>
+  <div class="site-description" itemprop="description">A place to record some information related with particle accelerator control system</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Insomnia1437" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Insomnia1437" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:sdcswd@gmail.com" title="E-Mail → mailto:sdcswd@gmail.com" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Di WANG</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">110k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:40</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">NexT.Gemini</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

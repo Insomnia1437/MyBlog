@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/neworder.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/neworder.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="X3XC6nkOi10OiEv6p0Y1EWgoRjOngRcPrMiBtuuts-o">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sdcswd.wang","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="12345# @Time    : 2020-11-28# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com   最近折腾了一星期的VME和VxWorks，遇到了不少问题，怀疑了EPICS ioc，base版本，bootROM，kernel imag">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MVME5500-vxworks">
+<meta property="og:url" content="https://www.sdcswd.wang/archives/980566e0/index.html">
+<meta property="og:site_name" content="Heterotopia">
+<meta property="og:description" content="12345# @Time    : 2020-11-28# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com   最近折腾了一星期的VME和VxWorks，遇到了不少问题，怀疑了EPICS ioc，base版本，bootROM，kernel imag">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-12-02T20:25:14.000Z">
+<meta property="article:modified_time" content="2021-05-10T20:19:50.708Z">
+<meta property="article:author" content="Di WANG">
+<meta property="article:tag" content="EPICS">
+<meta property="article:tag" content="Control">
+<meta property="article:tag" content="Chinese">
+<meta property="article:tag" content="VxWorks">
+<meta property="article:tag" content="VME">
+<meta property="article:tag" content="Instrument">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.sdcswd.wang/archives/980566e0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>MVME5500-vxworks | Heterotopia</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-155331821-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Heterotopia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">29</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://www.sdcswd.wang/archives/980566e0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/pasj2019.jpg">
+      <meta itemprop="name" content="Di WANG">
+      <meta itemprop="description" content="A place to record some information related with particle accelerator control system">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Heterotopia">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MVME5500-vxworks
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-12-02 20:25:14" itemprop="dateCreated datePublished" datetime="2020-12-02T20:25:14+00:00">2020-12-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-10 20:19:50" itemprop="dateModified" datetime="2021-05-10T20:19:50+00:00">2021-05-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Accelerator-Control/" itemprop="url" rel="index"><span itemprop="name">Accelerator Control</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>7.3k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>7 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># @Time    : 2020-11-28</span></span><br><span class="line"><span class="comment"># @Language: Markdown</span></span><br><span class="line"><span class="comment"># @Software: VS Code</span></span><br><span class="line"><span class="comment"># @Author  : Di Wang(KEK Linac)</span></span><br><span class="line"><span class="comment"># @Email   : sdcswd@gmail.com</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>最近折腾了一星期的VME和VxWorks，遇到了不少问题，怀疑了EPICS ioc，base版本，bootROM，kernel image文件权限，甚至开始怀疑VME机箱了，最后在东日研究所公司飯塚san的帮助下解决了，记录下踩的坑。最想吐槽的是因为VME5500使用RJ45作为串口，因此需要使用RJ45转Dsub9的线，但是我MacBook的拓展坞又不支持DB9，试了下中间加一层DB9转usb，失败，最后还是找了台8年前的HP老台式搞定，但运气不好的我又遇到了台式机电源挂掉，只能又从废弃机器里拆了一个还能用的电源给它换上，得出的教训就是以后再买Windows的办公笔记本，一定要买自带串口的。</p>
+</blockquote>
+<a id="more"></a>
+
+<h2 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h2><p>因为我使用的是是MVME5500，CPU是MPC7457，PowerPC架构。要在VME5500上运行VxWorks，需要先通过串口在板卡的flash里写入bootROM。这个bootROM会初始化一些基本的服务，比如串口，然后通过串口去修改boot parameter，更改IP地址掩码，要使用的kernel文件地址等等。以下为boot parameter示例（p命令只能在boot环境使用，在VxWorks shell内还是要通过<code>bootChange</code>命令查看。）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[VxWorks Boot]: p</span><br><span class="line"></span><br><span class="line">boot device          : gei</span><br><span class="line">unit number          : 0</span><br><span class="line">processor number     : 0</span><br><span class="line">host name            : lcba10</span><br><span class="line">file name            : /mnt/misc/vxWorks/wind221/Sep2009/vxWorks</span><br><span class="line">inet on ethernet (e) : 172.19.74.28:ffffe000</span><br><span class="line">host inet (h)        : 172.19.64.190</span><br><span class="line">gateway inet (g)     : 172.19.64.1</span><br><span class="line">user (u)             : epics</span><br><span class="line">flags (f)            : 0x0</span><br><span class="line">target name (tn)     : IOCEVTEST5</span><br><span class="line">startup script (s)   : /usr/users/control/epics/MRF_EV/develop/Xapp_091201/iocBoot/iocXappApp/st-pmagtest-Main-114MHz.cmd</span><br></pre></td></tr></table></figure>
+
+<h2 id="vme地址与cpu地址"><a href="#vme地址与cpu地址" class="headerlink" title="vme地址与cpu地址"></a>vme地址与cpu地址</h2><p>板卡使用的是VME地址空间，而cpu只认识自己的地址空间，因此板卡的驱动程序需要map一下，cpu是32位，地址空间2G，具体映射在BSP的<code>config.h</code>文件中定义。我使用的BSP定义了VME A32地址空间中的128M，如下所示，VME地址<code>0x08000000</code>被映射到cpu地址空间的<code>0xe7f00000</code>，一个板卡可以只使用部分空间，比如我的板卡只用了1M的VME地址，但是要注意不同板卡之间同类地址空间不要有重叠（不同地址空间，比如有些板卡支持同时使用A16和A24，没试过）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">* VME_A32_MSTR_LOCAL &#x3D;             -----------------</span><br><span class="line">*              (0xe7f00000)       |                 &#125; Translated to VME bus</span><br><span class="line">*       LSI1.bs &#x3D;     (0xe7f00000)|                 &#125; (0x08000000) LSI1.bs</span><br><span class="line">*                                 | VME A32 space   &#125;</span><br><span class="line">*                                 |     128MB       &#125;</span><br><span class="line">*       LSI1.bd - 1 &#x3D; (0xe7f3ffff)| (0x08000000)    &#125; (0x0803ffff) LSI1.bd -1</span><br><span class="line">*       LSI0.bs &#x3D;     (0xe7f40000)| LSI0 and LSI1   &#125; (0xfb000000) LSI0.bs</span><br><span class="line">*                                 | outbound maps   &#125;</span><br><span class="line">*       LSI0.bd - 1 &#x3D; (0xe7f4ffff)| through here    &#125; (0xfb00ffff) LSI0.bd - 1</span><br><span class="line">*                     (0xe7f50000)|                 &#125; (0xfb010000)</span><br><span class="line">*                                  .................</span><br><span class="line">*                                 :   Unused A32    :</span><br></pre></td></tr></table></figure>
+
+<h2 id="VxWorks常用命令"><a href="#VxWorks常用命令" class="headerlink" title="VxWorks常用命令"></a>VxWorks常用命令</h2><p>通过telnet进入VxWorks shell之后可以输入<code>help</code>查看可用命令，除了<code>ls</code> <code>pwd</code> <code>cd</code>这些之外，查看内存命令很常用。</p>
+<p>比如我要看内存<code>0xe7f00000</code>的内容，可以使用<code>d</code>命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">-&gt; d 0xe7f00000</span><br><span class="line">NOTE: memory values are displayed in hexadecimal.</span><br><span class="line">0xe7f00000:  10e3 0000 0007 2200 0002 0680 0000 0000  *......&quot;.........*</span><br><span class="line">0xe7f00010:  c000 fff7 f001 ffff 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f00020:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f00030:  0000 0000 0000 0000 0000 0000 0100 0003  *................*</span><br><span class="line">0xe7f00040:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f00050:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f00060:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f00070:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f00080:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f00090:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f000a0:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f000b0:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f000c0:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f000d0:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f000e0:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">0xe7f000f0:  0000 0000 0000 0000 0000 0000 0000 0000  *................*</span><br><span class="line">value &#x3D; 0 &#x3D; 0x0</span><br></pre></td></tr></table></figure>
+
+<p>如果要查询一些VxWorks函数，可以：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-&gt; lkup &quot;Reset&quot;</span><br><span class="line">taskReset                 0x00258d98 text</span><br><span class="line">sysUniverseReset          0x0010cb64 text</span><br><span class="line">pciAutoDevReset           0x001035e4 text</span><br><span class="line">sysSerialReset            0x00111210 text</span><br><span class="line">pciConfigReset            0x0010244c text</span><br><span class="line">value &#x3D; 0 &#x3D; 0x0</span><br></pre></td></tr></table></figure>
+
+<h2 id="在VxWorks上编译和运行c程序"><a href="#在VxWorks上编译和运行c程序" class="headerlink" title="在VxWorks上编译和运行c程序"></a>在VxWorks上编译和运行c程序</h2><p>因为我要在VxWorks上运行epics，虽然也可以通过修改epics device support来调试，但是每次都要重新编译挺麻烦，还是单独写个c程序方便。</p>
+<p>VxWorks编程我也不熟悉，就粗暴的引用了一堆头文件，然后调用一些函数，下面的程序调用了<code>sysBusToLocalAdrs</code>函数，把VME地址映射到cpu地址，然后通过VxWorks提供的函数<code>vxMemProbe</code>去测试cpu地址是否可读。</p>
+<p>为什么写这个程序是因为我在测试reflective memory 5565模块时，地址映射成功，但是提示地址不可读。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vxWorks.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iv.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vme.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sysLib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;memLib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;intLib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;logLib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vxLib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">void</span> **pp;</span><br><span class="line">    <span class="keyword">long</span> status;</span><br><span class="line">    <span class="keyword">char</span> pValue;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> probe_addr;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="built_in">step</span> = <span class="number">0x00010000</span>;</span><br><span class="line"></span><br><span class="line">    status = sysBusToLocalAdrs(<span class="number">0x0d</span>, (<span class="keyword">char</span> *)<span class="number">0x08000000</span>, (<span class="keyword">char</span> **)pp);</span><br><span class="line">    <span class="comment">// sysBusToLocalAdrs(0x0d, 0x08000000, &amp;adr)</span></span><br><span class="line">    <span class="keyword">if</span> (status != OK)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"map 0x08000000 error\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"map: 0x08000000 to addr: %p, map status is %d\n"</span>, *pp, status);</span><br><span class="line">    probe_addr = <span class="number">0xe7f00000</span>;</span><br><span class="line">    <span class="keyword">while</span> ( probe_addr &lt;= <span class="number">0xe8000000</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        status = vxMemProbe((<span class="keyword">char</span> *)probe_addr, VX_READ, <span class="number">1</span>, &amp;pValue);</span><br><span class="line">        <span class="keyword">if</span> (status != OK)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"Cannot read addr %x\n"</span>, probe_addr);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"probe addr %x, status is %d, return read value: %d\n"</span>, probe_addr, status, pValue);</span><br><span class="line">        &#125;</span><br><span class="line">        probe_addr += <span class="built_in">step</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>要编译这个程序需要设置VxWorks环境变量来指定头文件位置，由于编译epics过程中已经设置，这里就不多讲。编译器用的是<code>ccppc</code>。<br>编译之后会生成可执行文件，比如默认文件名a.c编译生成<code>a.out</code>，然后在VxWorks中执行：<br><code>ld &lt; a.out</code><br><code>main</code><br>然后就会输出了。</p>
+<h2 id="其它命令"><a href="#其它命令" class="headerlink" title="其它命令"></a>其它命令</h2><p>一些别的常用的VxWorks命令，<code>nfs</code>会很常用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">-&gt;</span><span class="bash"> nfsHelp</span></span><br><span class="line">nfsHelp                       Print this list</span><br><span class="line">netHelp                       Print general network help list</span><br><span class="line">nfsMount "host","filesystem"[,"devname"]  Create device with</span><br><span class="line">                                file system/directory from host</span><br><span class="line">nfsUnmount "devname"          Remove an NFS device</span><br><span class="line">nfsAuthUnixShow               Print current UNIX authentication</span><br><span class="line">nfsAuthUnixPrompt             Prompt for UNIX authentication</span><br><span class="line">nfsIdSet id                   Set user ID for UNIX authentication</span><br><span class="line">nfsDevShow                    Print list of NFS devices</span><br><span class="line">nfsExportShow "host"          Print a list of NFS file systems which</span><br><span class="line">                                are exported on the specified host</span><br><span class="line">mkdir "dirname"               Create directory</span><br><span class="line">rm "file"                     Remove file</span><br><span class="line"></span><br><span class="line">EXAMPLE:  -&gt; hostAdd "wrs", "90.0.0.2"</span><br><span class="line">          -&gt; nfsMount "wrs","/disk0/path/mydir","/mydir/"</span><br><span class="line">          -&gt; cd "/mydir/"</span><br><span class="line">          -&gt; nfsAuthUnixPrompt     /* fill in user ID, etc. *</span><br><span class="line">          -&gt; ls                    /* list /disk0/path/mydir *</span><br><span class="line">          -&gt; copy &lt; foo            /* copy foo to standard out *</span><br><span class="line">          -&gt; ld &lt; foo.o            /* load object module foo.o *</span><br><span class="line">          -&gt; nfsUnmount "/mydir/"  /* remove NFS device /mydir/ *</span><br></pre></td></tr></table></figure>
+
+<p>对于VxWorks的时间，通过<code>*sysClkRateSet*( )</code>和<code>*sysClkRateGet*( )</code>获取的是system clock rate，默认值可以在BSP中修改，默认为60，即每秒钟时钟发生60次中断。</p>
+<p>记住这个对于分析task的delay很重要。查看task的TCB命令为<code>taskShow()</code>，在shell中可以简单的使用<code>i</code>命令显示所有task：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">-&gt;</span><span class="bash"> i</span></span><br><span class="line"></span><br><span class="line">  NAME         ENTRY       TID    PRI   STATUS      PC       SP     ERRNO  DELAY</span><br><span class="line">----------  ------------ -------- --- ---------- -------- -------- ------- -----</span><br><span class="line">tJobTask    1d08cc         3fd960   0 PEND         250fd4   3fd880       0     0</span><br><span class="line">tExcTask    1cfc6c         3050f0   0 PEND         250fd4   304ff0       0     0</span><br><span class="line">tLogTask    logTask        400d00   0 PEND         24f190   400bc0       0     0</span><br><span class="line">tNbioLog    1d15a0         404620   0 PEND         250fd4   404500       0     0</span><br><span class="line">tShell0     shellTask      51c340   1 PEND         250fd4   51c010       0     0</span><br><span class="line"><span class="meta">tShellRem5&gt;</span><span class="bash"> shellTask      714ee0   1 READY        2596a0   7130e0       0     0</span></span><br><span class="line"><span class="meta">ipcom_tick&gt;</span><span class="bash"> 263e48         4de3a0  20 DELAY        2584c4   4de320       0     2</span></span><br><span class="line">tNet0       ipcomNetTask   409740  50 READY        250fd4   409630  3d0001     0</span><br><span class="line"><span class="meta">ipcom_sysl&gt;</span><span class="bash"> 1786b4         4c55b0  50 PEND         2518f0   4c5400       0     0</span></span><br><span class="line"><span class="meta">ipcom_teln&gt;</span><span class="bash"> ipcom_telnet   4ffb30  50 PEND         250fd4   4ff930       0     0</span></span><br><span class="line">ipsntps     1bcee8         502cb0  50 PEND+T       250fd4   502b30      33    69</span><br><span class="line"><span class="meta">ipcom_teln&gt;</span><span class="bash"> ipcom_telnet   51f600  50 PEND         250fd4   51f3e0       0     0</span></span><br><span class="line"><span class="meta">tStdioProx&gt;</span><span class="bash"> 183bd4         521860  50 READY        250dcc   521360       0     0</span></span><br><span class="line"><span class="meta">tLogin51f6&gt;</span><span class="bash"> 183e58         538ea0  50 PEND         2518f0   538dd0       0     0</span></span><br><span class="line">tPortmapd   portmapd       509920  54 PEND         250fd4   5096d0      16     0</span><br><span class="line"><span class="meta">NTPTimeSyn&gt;</span><span class="bash"> 10e0d7c        7aea20 109 PEND+T       250fd4   7ae8b0  3d0004   942</span></span><br><span class="line"><span class="meta">ClockTimeS&gt;</span><span class="bash"> 10e0d7c        7b1dd0 109 PEND+T       250fd4   7b1c40  3d0004   522</span></span><br><span class="line">cbHigh      10e0d7c        5a8580 128 PEND         250fd4   5a8460       0     0</span><br><span class="line">timerQueue  10e0d7c        7d1fb0 129 PEND         250fd4   7d1e30       0     0</span><br><span class="line">scanOnce    10e0d7c        5bfb60 132 PEND         250fd4   5bfa30       0     0</span><br><span class="line">scan-0.1    10e0d7c        67b4f0 133 PEND+T       250fd4   67b330  3d0004     5</span><br><span class="line">scan-0.2    10e0d7c        674c30 134 PEND+T       250fd4   674a70  3d0004     5</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NAME</td>
+<td>task 名称</td>
+</tr>
+<tr>
+<td>ENTRY</td>
+<td>symbol name 或 task开始地址</td>
+</tr>
+<tr>
+<td>TID</td>
+<td>task ID</td>
+</tr>
+<tr>
+<td>PRI</td>
+<td>优先级</td>
+</tr>
+<tr>
+<td>STATUS</td>
+<td>task状态</td>
+</tr>
+<tr>
+<td>PC</td>
+<td>程序计数器</td>
+</tr>
+<tr>
+<td>SP</td>
+<td>Stack pointer</td>
+</tr>
+<tr>
+<td>ERRNO</td>
+<td>error code</td>
+</tr>
+<tr>
+<td>DELAY</td>
+<td>0的话代表没有delay，否则为clock ticks</td>
+</tr>
+</tbody></table>
+<p>比如上面<code>scan-0.1</code>这个task，是epics record scan 为 0.1 second任务，delay ticks为5，换算一下也就是delay了大约0.1秒，对于<code>scan-0.1</code>来说，已经是影响record process的delay值了。</p>
+<p>task的状态有这么几种：</p>
+<table>
+<thead>
+<tr>
+<th>String</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>READY</td>
+<td>等待CPU</td>
+</tr>
+<tr>
+<td>PEND</td>
+<td>等待资源</td>
+</tr>
+<tr>
+<td>DELAY</td>
+<td>Task is asleep for some duration.</td>
+</tr>
+<tr>
+<td>SUSPEND</td>
+<td>Task is unavailable for execution (but not suspended, delayed, or pended).</td>
+</tr>
+<tr>
+<td>DELAY+S</td>
+<td>delay+suspend</td>
+</tr>
+<tr>
+<td>PEND+S</td>
+<td>pend+suspend</td>
+</tr>
+<tr>
+<td>PEND+T</td>
+<td>Task is pended with a timeout.</td>
+</tr>
+<tr>
+<td>PEND+S+T</td>
+<td>Task is pended with a timeout, and also suspended.</td>
+</tr>
+<tr>
+<td>…+I</td>
+<td>Task has inherited priority (+I may be appended to any string above).</td>
+</tr>
+<tr>
+<td>DEAD</td>
+<td>Task no longer exists.</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Di WANG
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://www.sdcswd.wang/archives/980566e0/" title="MVME5500-vxworks">https://www.sdcswd.wang/archives/980566e0/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/EPICS/" rel="tag"># EPICS</a>
+              <a href="/tags/Control/" rel="tag"># Control</a>
+              <a href="/tags/Chinese/" rel="tag"># Chinese</a>
+              <a href="/tags/VxWorks/" rel="tag"># VxWorks</a>
+              <a href="/tags/VME/" rel="tag"># VME</a>
+              <a href="/tags/Instrument/" rel="tag"># Instrument</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/archives/7f1fc6ab/" rel="prev" title="数据采集与测量设备控制">
+      <i class="fa fa-chevron-left"></i> 数据采集与测量设备控制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/archives/19f95635/" rel="next" title="LaTeX 基础语法">
+      LaTeX 基础语法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本介绍"><span class="nav-number">1.</span> <span class="nav-text">基本介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vme地址与cpu地址"><span class="nav-number">2.</span> <span class="nav-text">vme地址与cpu地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VxWorks常用命令"><span class="nav-number">3.</span> <span class="nav-text">VxWorks常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在VxWorks上编译和运行c程序"><span class="nav-number">4.</span> <span class="nav-text">在VxWorks上编译和运行c程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其它命令"><span class="nav-number">5.</span> <span class="nav-text">其它命令</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Di WANG"
+      src="/images/pasj2019.jpg">
+  <p class="site-author-name" itemprop="name">Di WANG</p>
+  <div class="site-description" itemprop="description">A place to record some information related with particle accelerator control system</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Insomnia1437" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Insomnia1437" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:sdcswd@gmail.com" title="E-Mail → mailto:sdcswd@gmail.com" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Di WANG</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">110k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:40</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">NexT.Gemini</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

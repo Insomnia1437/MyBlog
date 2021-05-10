@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/neworder.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/neworder.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="X3XC6nkOi10OiEv6p0Y1EWgoRjOngRcPrMiBtuuts-o">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sdcswd.wang","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="12345# @Time    : 2020-12-28# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com  因为要准备写大论文了，之前写 JACoW 论文都是直接拿template往里填充，对TeX语法也并不熟悉，决定稍微学习下，文章基于over">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LaTeX 基础语法">
+<meta property="og:url" content="https://www.sdcswd.wang/archives/19f95635/index.html">
+<meta property="og:site_name" content="Heterotopia">
+<meta property="og:description" content="12345# @Time    : 2020-12-28# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com  因为要准备写大论文了，之前写 JACoW 论文都是直接拿template往里填充，对TeX语法也并不熟悉，决定稍微学习下，文章基于over">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-12-28T15:38:28.000Z">
+<meta property="article:modified_time" content="2021-05-10T20:19:50.708Z">
+<meta property="article:author" content="Di WANG">
+<meta property="article:tag" content="Chinese">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.sdcswd.wang/archives/19f95635/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>LaTeX 基础语法 | Heterotopia</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-155331821-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Heterotopia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">29</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://www.sdcswd.wang/archives/19f95635/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/pasj2019.jpg">
+      <meta itemprop="name" content="Di WANG">
+      <meta itemprop="description" content="A place to record some information related with particle accelerator control system">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Heterotopia">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LaTeX 基础语法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-12-28 15:38:28" itemprop="dateCreated datePublished" datetime="2020-12-28T15:38:28+00:00">2020-12-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-10 20:19:50" itemprop="dateModified" datetime="2021-05-10T20:19:50+00:00">2021-05-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MEMO/" itemprop="url" rel="index"><span itemprop="name">MEMO</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MEMO/LaTex/" itemprop="url" rel="index"><span itemprop="name">LaTex</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>6.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>6 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># @Time    : 2020-12-28</span></span><br><span class="line"><span class="comment"># @Language: Markdown</span></span><br><span class="line"><span class="comment"># @Software: VS Code</span></span><br><span class="line"><span class="comment"># @Author  : Di Wang(KEK Linac)</span></span><br><span class="line"><span class="comment"># @Email   : sdcswd@gmail.com</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>因为要准备写大论文了，之前写 <a href="https://www.jacow.org/" target="_blank" rel="noopener external nofollow noreferrer">JACoW</a> 论文都是直接拿template往里填充，对TeX语法也并不熟悉，决定稍微学习下，文章基于<a href="https://www.overleaf.com/learn" target="_blank" rel="noopener external nofollow noreferrer">overleaf</a>的教程和<code>&lt;latex入门-简版&gt;-刘海洋</code>。</p>
+</blockquote>
+<a id="more"></a>
+
+<h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><p>类似于HTML 和 CSS , <code>tex</code>文件可以有两种格式定义：<code>class</code>和<code>style</code>，前者是针对一个特定文档类型，后者则主要是添加某种feature。</p>
+<h2 id="BibTeX"><a href="#BibTeX" class="headerlink" title="BibTeX"></a>BibTeX</h2><p>参考文献管理是个麻烦事。<br>BibTeX涉及两种格式：<code>bst</code>和<code>bib</code>。</p>
+<p><code>bst</code>代表<code>Bibliography Style</code>，和<code>tex</code>文件的<code>style</code>类似，定义了参考文献的格式，比如期刊名怎么缩写，作者名字是名在前还是姓在前等等。</p>
+<p><code>bib</code>文件就是一个<em>参考文献数据库文件</em>，在一个<code>bib</code>文件里放一堆reference就构成了一个数据库，然后需要在文字哪个部分用哪个就在<code>tex</code>正文中用<code>\cite{label}</code>命令去引用，其中label是自定义的某个文献的别名。不引用的话默认不会出现在PDF文件中，除非用了<code>\nocite{label}</code>，表示“我没有在正文中引用这个文献，但依然要在文末的reference section里显示它”。</p>
+<p>大致了解LaTeX的都知道，需要多次编译，过程如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(xe&#x2F;pdf)latex foo.tex   # 表示使用 latex, pdflatex 或 xelatex 编译</span><br><span class="line">bibtex foo.aux</span><br><span class="line">(xe&#x2F;pdf)latex foo.tex</span><br><span class="line">(xe&#x2F;pdf)latex foo.tex</span><br></pre></td></tr></table></figure>
+
+<p>为什么需要四次编译？<a href="https://liam.page/2016/01/23/using-bibtex-to-generate-reference/" target="_blank" rel="noopener external nofollow noreferrer">具体细节参考这篇</a></p>
+<ol>
+<li>LaTeX读取<code>tex</code>文件，找里面出现的<code>cite</code>命令，然后创建一个<code>aux</code>后缀的辅助文件，表示要引用某个label的文献，但此时还不知道是哪个文献。</li>
+<li>由BibTex读取<code>aux</code>文件，去参考文献数据库里找名为label的文献，然后生成一个<code>bbl</code>文件，bbl文件里就是latex格式的<code>bibitem</code>列表。</li>
+<li>LaTeX这时候去读<code>bbl</code>文件，把文献列表在PDF中显示，然后更新<code>aux</code>文件，建立label和文献编号的关系。</li>
+<li>最后一步，再读取<code>aux</code>文件，把正文中引用部分的label也替换成编号。</li>
+</ol>
+<p><code>bib</code>文件大概长这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@book&#123;adams1995hitchhiker,</span><br><span class="line">  title&#x3D;&#123;The Hitchhiker&#39;s Guide to the Galaxy&#125;,</span><br><span class="line">  author&#x3D;&#123;Adams, D.&#125;,</span><br><span class="line">  isbn&#x3D;&#123;9781417642595&#125;,</span><br><span class="line">  url&#x3D;&#123;http:&#x2F;&#x2F;books.google.com&#x2F;books?id&#x3D;W-xMPgAACAAJ&#125;,</span><br><span class="line">  year&#x3D;&#123;1995&#125;,</span><br><span class="line">  publisher&#x3D;&#123;San Val&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而通过bibtex编译生成的<code>bbl</code>文件长这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">\begin&#123;thebibliography&#125;&#123;9&#125; % Use for 1-9 references</span><br><span class="line">	\bibitem&#123;SuperKEKB&#125;</span><br><span class="line">	    Y. Ohnishi et al., </span><br><span class="line">	    \textquotedblleft&#123;Accelerator design at SuperKEKB&#125;\textquotedblright,</span><br><span class="line">        \emph&#123;Prog. Theor. Exp. Phys.&#125;, 2013, 03A011.</span><br><span class="line">    ...</span><br><span class="line">	\end&#123;thebibliography&#125;</span><br></pre></td></tr></table></figure>
+<p>当然也可以直接在<code>tex</code>文件里自己写<code>bibitem</code>，不过写的多了估计就意识到为什么要发明BibTeX这个东西了。</p>
+<h2 id="基础语法"><a href="#基础语法" class="headerlink" title="基础语法"></a>基础语法</h2><p>在前言（preamble）中添加一些设置值，然后<code>\maketitle</code>，正文中的一些基础语法，斜体，加黑，下划线，插入图片表格，标签以及如何引用。</p>
+<p>数学公式可以是<code>inline mode</code>或者<code>displayed mode</code>，后者可以添加公式编号。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line">\documentclass[12pt, letterpaper, twoside]&#123;article&#125;</span><br><span class="line">\usepackage[utf8]&#123;inputenc&#125;</span><br><span class="line">\usepackage&#123;graphicx&#125;</span><br><span class="line">\graphicspath&#123; &#123;images&#x2F;&#125; &#125;</span><br><span class="line"></span><br><span class="line">\usepackage&#123;amsmath&#125;</span><br><span class="line"></span><br><span class="line">\title&#123;First document&#125;</span><br><span class="line">\author&#123;Hubert Farnsworth \thanks&#123;funded by the Overleaf team&#125;&#125;</span><br><span class="line">\date&#123;February 2017&#125;</span><br><span class="line"></span><br><span class="line">\begin&#123;document&#125;</span><br><span class="line"></span><br><span class="line">\maketitle</span><br><span class="line">\tableofcontents</span><br><span class="line"></span><br><span class="line">\begin&#123;abstract&#125;</span><br><span class="line">This is a simple paragraph at the beginning of the </span><br><span class="line">document. A brief introduction about the main subject.</span><br><span class="line">\end&#123;abstract&#125;</span><br><span class="line"></span><br><span class="line">We have now added a title, author and date to our first \LaTeX&#123;&#125; document!</span><br><span class="line"></span><br><span class="line">Some of the \textbf&#123;greatest&#125;</span><br><span class="line">discoveries in \underline&#123;science&#125; </span><br><span class="line">were made by \textbf&#123;\textit&#123;accident&#125;&#125;.</span><br><span class="line"></span><br><span class="line">\begin&#123;figure&#125;[h]</span><br><span class="line">    \centering</span><br><span class="line">    \includegraphics[width&#x3D;0.25\textwidth]&#123;mesh&#125;</span><br><span class="line">    \caption&#123;a nice plot&#125;</span><br><span class="line">    \label&#123;fig:mesh1&#125;</span><br><span class="line">\end&#123;figure&#125;</span><br><span class="line"></span><br><span class="line">As you can see in the figure \ref&#123;fig:mesh1&#125;, the </span><br><span class="line">function grows near 0. Also, in the page \pageref&#123;fig:mesh1&#125; </span><br><span class="line">is the same example.</span><br><span class="line"></span><br><span class="line">\begin&#123;itemize&#125;</span><br><span class="line">  \item The individual entries are indicated with a black dot, a so-called bullet.</span><br><span class="line">  \item The text in the entries may be of any length.</span><br><span class="line">\end&#123;itemize&#125;</span><br><span class="line"></span><br><span class="line">\begin&#123;enumerate&#125;</span><br><span class="line">  \item This is the first entry in our list</span><br><span class="line">  \item The list numbers increase with each entry we add</span><br><span class="line">\end&#123;enumerate&#125;</span><br><span class="line"></span><br><span class="line">The mass-energy equivalence is described by the famous equation</span><br><span class="line">\[ E&#x3D;mc^2 \]</span><br><span class="line">discovered in 1905 by Albert Einstein. </span><br><span class="line">In natural units ($c &#x3D; 1$), the formula expresses the identity</span><br><span class="line">\begin&#123;equation&#125;</span><br><span class="line">E&#x3D;m</span><br><span class="line">\end&#123;equation&#125;</span><br><span class="line"></span><br><span class="line">\begin&#123;center&#125;</span><br><span class="line"> \begin&#123;tabular&#125;&#123;||c c c c||&#125; </span><br><span class="line"> \hline</span><br><span class="line"> Col1 &amp; Col2 &amp; Col2 &amp; Col3 \\ [0.5ex] </span><br><span class="line"> \hline\hline</span><br><span class="line"> 1 &amp; 6 &amp; 87837 &amp; 787 \\ </span><br><span class="line"> \hline</span><br><span class="line"> 2 &amp; 7 &amp; 78 &amp; 5415 \\</span><br><span class="line"> \hline</span><br><span class="line"> 3 &amp; 545 &amp; 778 &amp; 7507 \\</span><br><span class="line"> \hline</span><br><span class="line"> 4 &amp; 545 &amp; 18744 &amp; 7560 \\</span><br><span class="line"> \hline</span><br><span class="line"> 5 &amp; 88 &amp; 788 &amp; 6344 \\ [1ex] </span><br><span class="line"> \hline</span><br><span class="line">\end&#123;tabular&#125;</span><br><span class="line">\end&#123;center&#125;</span><br><span class="line"></span><br><span class="line">\end&#123;document&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="对于分段："><a href="#对于分段：" class="headerlink" title="对于分段："></a>对于分段：</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">0	\chapter&#123;chapter&#125;</span><br><span class="line">1	\section&#123;section&#125;</span><br><span class="line">2	\subsection&#123;subsection&#125;</span><br><span class="line">3	\subsubsection&#123;subsubsection&#125;</span><br><span class="line">4	\paragraph&#123;paragraph&#125;</span><br><span class="line">5	\subparagraph&#123;subparagraph&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="对于特殊字符："><a href="#对于特殊字符：" class="headerlink" title="对于特殊字符："></a>对于特殊字符：</h3><table>
+<thead>
+<tr>
+<th>字符</th>
+<th>功能</th>
+<th>打印字符本身</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>#</td>
+<td>宏参数</td>
+<td><code>\#</code></td>
+</tr>
+<tr>
+<td>$</td>
+<td>数学公式</td>
+<td><code>$</code></td>
+</tr>
+<tr>
+<td>%</td>
+<td>注释</td>
+<td><code>\%</code></td>
+</tr>
+<tr>
+<td>^</td>
+<td>公式上标</td>
+<td><code>\^{}</code> or <code>\textasciicircum</code></td>
+</tr>
+<tr>
+<td>&amp;</td>
+<td>表格中分列</td>
+<td><code>\&amp;</code></td>
+</tr>
+<tr>
+<td>_</td>
+<td>公式下标</td>
+<td><code>\_</code></td>
+</tr>
+<tr>
+<td>{ }</td>
+<td>processing block</td>
+<td><code>\{ \}</code></td>
+</tr>
+<tr>
+<td>~</td>
+<td>不可</td>
+<td><code>\textasciitilde</code> or <code>\~{}</code></td>
+</tr>
+<tr>
+<td>\</td>
+<td>符号后接命令</td>
+<td><code>\textbackslash</code></td>
+</tr>
+</tbody></table>
+<h3 id="自定义命令："><a href="#自定义命令：" class="headerlink" title="自定义命令："></a>自定义命令：</h3><p>对于<code>\newcommand{\plusbinomial}[3][2]{(#2 + #3)^#1}</code>，<code>[3]</code>代表总共三个参数，<code>[2]</code>代表第一个参数的默认值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">\newcommand&#123;\plusbinomial&#125;[3][2]&#123;(#2 + #3)^#1&#125;</span><br><span class="line"></span><br><span class="line">To save some time when writing too many expressions </span><br><span class="line">with exponents is by defining a new command to make simpler:</span><br><span class="line"></span><br><span class="line">\[ \plusbinomial&#123;x&#125;&#123;y&#125; \]</span><br><span class="line"></span><br><span class="line">And even the exponent can be changed</span><br><span class="line"></span><br><span class="line">\[ \plusbinomial[4]&#123;y&#125;&#123;y&#125; \]</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义environment："><a href="#自定义environment：" class="headerlink" title="自定义environment："></a>自定义environment：</h3><p>以下示例用了两种方法定义了带编号的environment</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">%In the preamble</span><br><span class="line">---------------------------------</span><br><span class="line">%Numbered environment</span><br><span class="line">\newcounter&#123;example&#125;[section]</span><br><span class="line">\newenvironment&#123;example&#125;[1][]&#123;\refstepcounter&#123;example&#125;\par\medskip</span><br><span class="line">   \noindent \textbf&#123;Example~\theexample. #1&#125; \rmfamily&#125;&#123;\medskip&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">%Numbered environment defined with Newtheorem</span><br><span class="line">\usepackage&#123;amsmath&#125;</span><br><span class="line">\newtheorem&#123;SampleEnv&#125;&#123;Sample Environment&#125;[section]</span><br><span class="line">--------------------------------------------------------------------</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">\begin&#123;example&#125;</span><br><span class="line">User-defined numbered environment</span><br><span class="line">\end&#123;example&#125;</span><br><span class="line"></span><br><span class="line">\begin&#123;SampleEnv&#125;</span><br><span class="line">User-defined environment created with the \texttt&#123;newtheorem&#125; command.</span><br><span class="line">\end&#123;SampleEnv&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义class"><a href="#自定义class" class="headerlink" title="自定义class"></a>自定义class</h2><p>一个class文件的通常分为四个部分：</p>
+<h3 id="identification"><a href="#identification" class="headerlink" title="identification"></a>identification</h3><p>定义了版本，class的名称为<code>Thesis</code>，时间。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">\NeedsTeXFormat&#123;LaTeX2e&#125;[1996&#x2F;12&#x2F;01]</span><br><span class="line">\ProvidesClass&#123;Thesis&#125;</span><br><span class="line">              [2007&#x2F;22&#x2F;02 v1.0</span><br><span class="line">   LaTeX document class]</span><br></pre></td></tr></table></figure>
+
+<h3 id="preliminary-declarations"><a href="#preliminary-declarations" class="headerlink" title="preliminary declarations"></a>preliminary declarations</h3><p>在这个部分定义新命令，引入继承的基础class，引入别的package，以及一些其他声明。</p>
+<h3 id="options"><a href="#options" class="headerlink" title="options"></a>options</h3><p><code>\DeclareOption</code>命令接受两个参数，第一个代表option，第二个代表如果接受这个option需要执行的代码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">\DeclareOption&#123;onecolumn&#125;&#123;\OptionNotUsed&#125;</span><br><span class="line">\DeclareOption&#123;green&#125;&#123;\renewcommand&#123;\headlinecolor&#125;&#123;\color&#123;green&#125;&#125;&#125;</span><br><span class="line">\DeclareOption&#123;red&#125;&#123;\renewcommand&#123;\headlinecolor&#125;&#123;\color&#123;slcolor&#125;&#125;&#125;</span><br><span class="line">\DeclareOption*&#123;\PassOptionsToClass&#123;\CurrentOption&#125;&#123;article&#125;&#125;</span><br><span class="line">\ProcessOptions\relax</span><br><span class="line">\LoadClass[twocolumn]&#123;article&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="more-declarations"><a href="#more-declarations" class="headerlink" title="more declarations"></a>more declarations</h3><p>其他的一些命令定义等。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Di WANG
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://www.sdcswd.wang/archives/19f95635/" title="LaTeX 基础语法">https://www.sdcswd.wang/archives/19f95635/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Chinese/" rel="tag"># Chinese</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/archives/980566e0/" rel="prev" title="MVME5500-vxworks">
+      <i class="fa fa-chevron-left"></i> MVME5500-vxworks
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基础概念"><span class="nav-number">1.</span> <span class="nav-text">基础概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BibTeX"><span class="nav-number">2.</span> <span class="nav-text">BibTeX</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基础语法"><span class="nav-number">3.</span> <span class="nav-text">基础语法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对于分段："><span class="nav-number">3.1.</span> <span class="nav-text">对于分段：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对于特殊字符："><span class="nav-number">3.2.</span> <span class="nav-text">对于特殊字符：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义命令："><span class="nav-number">3.3.</span> <span class="nav-text">自定义命令：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义environment："><span class="nav-number">3.4.</span> <span class="nav-text">自定义environment：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义class"><span class="nav-number">4.</span> <span class="nav-text">自定义class</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#identification"><span class="nav-number">4.1.</span> <span class="nav-text">identification</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#preliminary-declarations"><span class="nav-number">4.2.</span> <span class="nav-text">preliminary declarations</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#options"><span class="nav-number">4.3.</span> <span class="nav-text">options</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#more-declarations"><span class="nav-number">4.4.</span> <span class="nav-text">more declarations</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Di WANG"
+      src="/images/pasj2019.jpg">
+  <p class="site-author-name" itemprop="name">Di WANG</p>
+  <div class="site-description" itemprop="description">A place to record some information related with particle accelerator control system</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Insomnia1437" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Insomnia1437" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:sdcswd@gmail.com" title="E-Mail → mailto:sdcswd@gmail.com" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Di WANG</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">110k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:40</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">NexT.Gemini</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

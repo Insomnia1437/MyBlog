@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/neworder.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/neworder.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="X3XC6nkOi10OiEv6p0Y1EWgoRjOngRcPrMiBtuuts-o">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sdcswd.wang","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="12345# @Time    : 2020-02-07# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com  本系列主目录： 粒子加速器控制    这周把前段时间积累的一些工作给完成了，包括：  使用Elastic Stack对EPICS控制系统网">
+<meta property="og:type" content="article">
+<meta property="og:title" content="粒子加速器控制-Linux命令整理">
+<meta property="og:url" content="https://www.sdcswd.wang/archives/a44e3b13/index.html">
+<meta property="og:site_name" content="Heterotopia">
+<meta property="og:description" content="12345# @Time    : 2020-02-07# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com  本系列主目录： 粒子加速器控制    这周把前段时间积累的一些工作给完成了，包括：  使用Elastic Stack对EPICS控制系统网">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-02-07T17:50:46.000Z">
+<meta property="article:modified_time" content="2021-05-10T20:19:50.708Z">
+<meta property="article:author" content="Di WANG">
+<meta property="article:tag" content="Control">
+<meta property="article:tag" content="Chinese">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.sdcswd.wang/archives/a44e3b13/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>粒子加速器控制-Linux命令整理 | Heterotopia</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-155331821-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Heterotopia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">29</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://www.sdcswd.wang/archives/a44e3b13/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/pasj2019.jpg">
+      <meta itemprop="name" content="Di WANG">
+      <meta itemprop="description" content="A place to record some information related with particle accelerator control system">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Heterotopia">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          粒子加速器控制-Linux命令整理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-02-07 17:50:46" itemprop="dateCreated datePublished" datetime="2020-02-07T17:50:46+00:00">2020-02-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-10 20:19:50" itemprop="dateModified" datetime="2021-05-10T20:19:50+00:00">2021-05-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Accelerator-Control/" itemprop="url" rel="index"><span itemprop="name">Accelerator Control</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># @Time    : 2020-02-07</span></span><br><span class="line"><span class="comment"># @Language: Markdown</span></span><br><span class="line"><span class="comment"># @Software: VS Code</span></span><br><span class="line"><span class="comment"># @Author  : Di Wang(KEK Linac)</span></span><br><span class="line"><span class="comment"># @Email   : sdcswd@gmail.com</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>本系列主目录：<br> <a href="/archives/f5b5e0fc/" title="粒子加速器控制">粒子加速器控制</a></p>
+</blockquote>
+<hr>
+<blockquote>
+<p>这周把前段时间积累的一些工作给完成了，包括：</p>
+<ul>
+<li>使用Elastic Stack对EPICS控制系统网络进行监控与可视化</li>
+<li>编写了程序调用caSnooper自动检测网络内PV请求状况并发送邮件提醒，源码已托管在GitHub</li>
+<li>对定时系统Bucket Selection的程序处理逻辑bug fix，还没有更新到运行环境</li>
+<li>花了一晚上更新了博客，添加了一部分功能，本想添加豆瓣读书和电影模块，但似乎模块有bug，已提交了issue，等作者解决。在源码中添加了Travis CI支持，以后可以在页面上写博客了。</li>
+<li>这几天发生了很糟糕的事情，哀悼之余着手用Amazon 免费的云服务器EC2搭了一个v2ray的服务，便于仍在墙内的朋友去接受多样的信息。</li>
+</ul>
+</blockquote>
+<a id="more"></a>
+<blockquote>
+<p>这个周末决定先努力把我常用的Linux命令以及一些不熟悉的命令给整理一下，如果有时间的话再读一读科大师兄早就发给我的定时系统的论文，以及几个同门师兄的博士毕业论文，看看对于自己的课题有没有什么启发；如果还有时间就再去研究下 <a href="https://github.com/ChannelFinder" target="_blank" rel="noopener external nofollow noreferrer">https://github.com/ChannelFinder</a>  似乎BNL和ANL都在使用，正好看看是自己造轮子还是复用。本文内容主要基于 <a href="https://linuxtools-rst.readthedocs.io/zh_CN/latest/" target="_blank" rel="noopener external nofollow noreferrer">此文章</a>，向作者表示感谢！</p>
+<p>最后，引用陶渊明的诗寄托哀思。</p>
+<p>《拟挽歌辞》 其三</p>
+<p>荒草何茫茫，  白杨亦萧萧。<br>严霜九月中，  送我出远郊。<br>四面无人居，  高坟正嶕峣。<br>马为仰天鸣，  风为自萧条。<br>幽室一已闭，  千年不复朝。<br>千年不复朝，  贤达无奈何。<br>向来相送人，  各自还其家。<br>亲戚或余悲，  他人亦已歌。<br>死去何所道，  托体同山阿。</p>
+</blockquote>
+<hr>
+<p>几个很好的查询网站</p>
+<ul>
+<li>显示命令以及参数的作用 <a href="https://www.explainshell.com/" target="_blank" rel="noopener external nofollow noreferrer">https://www.explainshell.com/</a></li>
+<li>学习正则表达式 <a href="https://github.com/ziishaned/learn-regex" target="_blank" rel="noopener external nofollow noreferrer">https://github.com/ziishaned/learn-regex</a></li>
+<li>测试正则表达式 <a href="https://regex101.com/" target="_blank" rel="noopener external nofollow noreferrer">https://regex101.com/</a><h2 id="文件与目录管理"><a href="#文件与目录管理" class="headerlink" title="文件与目录管理"></a>文件与目录管理</h2></li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查找文件或目录</span></span><br><span class="line">find ./ -name "core*" | xargs file</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查找到文件之后执行某些命令， -<span class="built_in">exec</span>参数后跟<span class="built_in">command</span>，以semicolon结尾，同时加backslash转义</span></span><br><span class="line">find ./ -name "*.o" -exec rm &#123;&#125; \;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 或者</span></span><br><span class="line">find ./ -name "*.o" | xargs rm</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查找文件内容</span></span><br><span class="line">egrep linux *</span><br><span class="line"><span class="meta">#</span><span class="bash"> -i 忽略大小写，-n显示行号，-H显示命中行以及文件名，-C显示前后几行的内容</span></span><br><span class="line">find ./ -name "*.log" | xargs grep -inH -c2 "linux"</span><br><span class="line">find ./ -name "*.log" -exec grep -inH -c2 "linux" &#123;&#125; \;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 管道和重定向</span></span><br><span class="line">ls /proc/* &gt; list 2&gt;&amp;l</span><br><span class="line">ls /proc/* &amp;&gt; list</span><br><span class="line"><span class="meta">#</span><span class="bash"> 清空文件</span></span><br><span class="line">:&gt; a.txt</span><br></pre></td></tr></table></figure>
+
+<h2 id="文本处理"><a href="#文本处理" class="headerlink" title="文本处理"></a>文本处理</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查找txt和<span class="built_in">log</span>文件</span></span><br><span class="line">find . \( -name "*.txt" -o -name "*.log" \) -print</span><br><span class="line"><span class="meta">#</span><span class="bash"> 否定参数</span></span><br><span class="line">find . ! -name "*.txt"</span><br><span class="line"><span class="meta">#</span><span class="bash"> 七天内被访问过的文件 atime mtime ctime, amin mmin cmin，</span></span><br><span class="line">find . -type f -atime -7</span><br><span class="line"><span class="meta">#</span><span class="bash"> 权限</span></span><br><span class="line">find . -type f -perm 777</span><br><span class="line">find . -type f -name "*.php" ! -perm 644</span><br><span class="line">find . -type f -user tom</span><br><span class="line">find . -type f -group sunk</span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">exec</span></span></span><br><span class="line">find . -type f -mtime +30 -name "*.log" -exec cp &#123;&#125; old \;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> xargs -n多行输出</span></span><br><span class="line">echo "1 2 3" | xargs -n1</span><br><span class="line"><span class="meta">#</span><span class="bash"> -d指定分隔符</span></span><br><span class="line">echo "nameXnameXnameXname" | xargs -dX -n2</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 递归搜索</span></span><br><span class="line">grep "class" . -R -n</span><br><span class="line"><span class="meta">#</span><span class="bash"> 排序 -n按数字 -d按字典序 -r逆序 -k N按第N列 -t指定分隔符 -b忽略行首空格 -u去重复</span></span><br><span class="line">sort -nrk 1 data.txt</span><br><span class="line"><span class="meta">#</span><span class="bash"> 行出现次数</span></span><br><span class="line">sort file.txt | uniq -c</span><br><span class="line"><span class="meta">#</span><span class="bash"> 重复行</span></span><br><span class="line">sort file.txt | uniq -d</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> tr</span></span><br><span class="line">cat file | tr -d '0-9'</span><br><span class="line">cat text | tr '\t' ' '</span><br><span class="line"><span class="meta">#</span><span class="bash"> 只保留数字 -c代表补集</span></span><br><span class="line">echo "aa.,a 1 b#$bb 2 c*/cc 3 ddd 4" | tr -d -c '0-9 \n'</span><br><span class="line"><span class="meta">#</span><span class="bash"> -s表示压缩</span></span><br><span class="line">echo "thissss is      a text linnnnnnne." | tr -s ' sn'</span><br><span class="line"><span class="meta">#</span><span class="bash"> 通用字符</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:alnum:]：字母和数字</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:alpha:]：字母</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:cntrl:]：控制（非打印）字符</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:digit:]：数字</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:graph:]：图形字符</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:lower:]：小写字母</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:<span class="built_in">print</span>:]：可打印字符</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:punct:]：标点符号</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:space:]：空白字符</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:upper:]：大写字母</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> [:xdigit:]：十六进制字符</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> cut截取非第二列</span></span><br><span class="line">cut -f2 --complement filename</span><br><span class="line"><span class="meta">#</span><span class="bash"> 指定分隔符</span></span><br><span class="line">cut -f1,3 -d";" filename</span><br><span class="line"><span class="meta">#</span><span class="bash"> -b以byte为单位，-c以character为单位 </span></span><br><span class="line">cut -c-5 file</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 拼接文件 注意cat是直接连接俩文件 paste是每一行连接在一起</span></span><br><span class="line">paste file1 file2 -d ","</span><br><span class="line"><span class="meta">#</span><span class="bash"> cat</span></span><br><span class="line">cat f1 f2</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">a</span><br><span class="line">b</span><br><span class="line"><span class="meta">#</span><span class="bash"> paste</span></span><br><span class="line">paste f1 f2</span><br><span class="line">1       a</span><br><span class="line">2       b</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> sed 替换每一行的第2处匹配</span></span><br><span class="line">sed 's/text/replace_text/2' file</span><br><span class="line"><span class="meta">#</span><span class="bash"> 替换第3到10行第二个以后的匹配</span></span><br><span class="line">sed '3,10s/text/replace_text/2g'</span><br><span class="line"><span class="meta">#</span><span class="bash"> 替换全局匹配 默认输出替换后的内容 -i会覆盖原文件</span></span><br><span class="line">sed 's/text/replace_text/g' file</span><br><span class="line"><span class="meta">#</span><span class="bash"> 移除空白行 /d代表删除</span></span><br><span class="line">sed '/^$/d' file</span><br><span class="line"><span class="meta">#</span><span class="bash"> 变量转换</span></span><br><span class="line">echo this is en example | sed 's/\w+/[&amp;]/g'</span><br><span class="line">[this]  [is] [en] [example]</span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果想给markdown中有些关键词加粗，可以直接使用sed命令</span></span><br><span class="line">echo 'go to directory /usr/bin' | sed 's/\/usr\/bin/**&amp;**/g'</span><br><span class="line">go to directory **/usr/bin**</span><br><span class="line"><span class="meta">#</span><span class="bash"> 可以实现批量注释，在第三行到第六行开头加上`<span class="comment">#`</span></span></span><br><span class="line">sed '3,6s/^/#/g' file</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在<span class="keyword">function</span>和<span class="built_in">return</span>之间的所有行，行首加上`<span class="comment">#`</span></span></span><br><span class="line">sed '/function/,/return/s/^/#/' file</span><br><span class="line"><span class="meta">#</span><span class="bash"> 子串匹配标记 \1 \2等表示capturing group（正则表达式概念） </span></span><br><span class="line">echo "/proc/cpuinfo" | sed 's,/\(.*\)/\(.*\),\1:\2,'</span><br><span class="line">proc:cpuinfo</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> awk</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> NF 表示多少个字段 -F指定分隔符</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> NR 表示记录数量 即行号</span></span><br><span class="line">awk -F ':' '&#123;print $1, $(NF-1)&#125;' /etc/passwd | head</span><br><span class="line">root /root</span><br><span class="line">daemon /usr/sbin</span><br><span class="line">bin /bin</span><br><span class="line">sys /dev</span><br><span class="line">sync /bin</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 文件有多少行 等同于 wc -l file</span></span><br><span class="line">awk 'END &#123;print NR&#125;' file</span><br><span class="line"><span class="meta">#</span><span class="bash"> 文本过滤</span></span><br><span class="line">awk 'NR &lt; 5' file</span><br><span class="line">awk 'NR==1,NR==4 &#123;print&#125;' file</span><br><span class="line">awk '/cpu/'</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 内置函数</span></span><br><span class="line">tolower()：字符转为小写。</span><br><span class="line">length()：返回字符串长度。</span><br><span class="line">substr()：返回子字符串。</span><br><span class="line">sin()：正弦。</span><br><span class="line">cos()：余弦。</span><br><span class="line">sqrt()：平方根。</span><br><span class="line">rand()：随机数。</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 打印指定列 awk 和 cut</span></span><br><span class="line">ls -lrt | cut -f6</span><br><span class="line">ls -lrt | awk '&#123;print $6&#125;'</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 读文件</span></span><br><span class="line">while read line;</span><br><span class="line">do</span><br><span class="line">echo $line;</span><br><span class="line">done &lt; file.txt</span><br><span class="line"><span class="meta">#</span><span class="bash"> 改成子shell:</span></span><br><span class="line">cat file.txt | (while read line;do echo $line;done)</span><br></pre></td></tr></table></figure>
+
+<h2 id="系统管理"><a href="#系统管理" class="headerlink" title="系统管理"></a>系统管理</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 按文件大小排序目录下文件</span></span><br><span class="line">ls | xargs du | sort -rn </span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看目录空间 s代表递归计算，也可以设置--max-depth</span></span><br><span class="line">du -sh</span><br><span class="line">du -h --max-depth=1</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查进程 </span></span><br><span class="line">ps -ef</span><br><span class="line">ps aux</span><br><span class="line"></span><br><span class="line">lsof -i:5064</span><br><span class="line">lsof -u username</span><br><span class="line">lsof -c python</span><br><span class="line">lsof -p 43210</span><br><span class="line">lsof +d mydir/</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看进程内存情况</span></span><br><span class="line">pmap PID</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> CPU</span></span><br><span class="line">sar -u</span><br><span class="line"><span class="meta">#</span><span class="bash"> 每秒采样一次 输出5次</span></span><br><span class="line">sar -q 1 5 </span><br><span class="line"><span class="meta">#</span><span class="bash"> 内存</span></span><br><span class="line">free -h</span><br><span class="line">sar -r 1 2</span><br><span class="line">vmstat 1 5</span><br><span class="line"><span class="meta">#</span><span class="bash"> 网络 -t tcp -l listen状态的端口</span></span><br><span class="line">netstat -at</span><br><span class="line">netstat -antp | grep 6379</span><br><span class="line">scp</span><br><span class="line">sftp</span><br><span class="line">rsync</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Di WANG
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://www.sdcswd.wang/archives/a44e3b13/" title="粒子加速器控制-Linux命令整理">https://www.sdcswd.wang/archives/a44e3b13/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Control/" rel="tag"># Control</a>
+              <a href="/tags/Chinese/" rel="tag"># Chinese</a>
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/archives/24a5891/" rel="prev" title="YAML introduction">
+      <i class="fa fa-chevron-left"></i> YAML introduction
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/archives/4362c88b/" rel="next" title="粒子加速器控制-粒子加速器定时系统常见概念">
+      粒子加速器控制-粒子加速器定时系统常见概念 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#文件与目录管理"><span class="nav-number">1.</span> <span class="nav-text">文件与目录管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文本处理"><span class="nav-number">2.</span> <span class="nav-text">文本处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统管理"><span class="nav-number">3.</span> <span class="nav-text">系统管理</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Di WANG"
+      src="/images/pasj2019.jpg">
+  <p class="site-author-name" itemprop="name">Di WANG</p>
+  <div class="site-description" itemprop="description">A place to record some information related with particle accelerator control system</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Insomnia1437" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Insomnia1437" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:sdcswd@gmail.com" title="E-Mail → mailto:sdcswd@gmail.com" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Di WANG</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">110k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:40</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">NexT.Gemini</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

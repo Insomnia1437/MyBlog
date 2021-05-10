@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/neworder.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/neworder.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="X3XC6nkOi10OiEv6p0Y1EWgoRjOngRcPrMiBtuuts-o">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.sdcswd.wang","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="12345# @Time    : 2020-05-27# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com  把EPICS PV存入ES后，为了方便搜索，需要自定义analyzer。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="配置基于Elasticsearch的EPICS PV分析器">
+<meta property="og:url" content="https://www.sdcswd.wang/archives/94c24f0b/index.html">
+<meta property="og:site_name" content="Heterotopia">
+<meta property="og:description" content="12345# @Time    : 2020-05-27# @Language: Markdown# @Software: VS Code# @Author  : Di Wang(KEK Linac)# @Email   : sdcswd@gmail.com  把EPICS PV存入ES后，为了方便搜索，需要自定义analyzer。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-05-27T17:45:41.000Z">
+<meta property="article:modified_time" content="2021-05-10T20:19:50.708Z">
+<meta property="article:author" content="Di WANG">
+<meta property="article:tag" content="EPICS">
+<meta property="article:tag" content="Chinese">
+<meta property="article:tag" content="Elasticsearch">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.sdcswd.wang/archives/94c24f0b/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>配置基于Elasticsearch的EPICS PV分析器 | Heterotopia</title>
+  
+    <script>
+      function sendPageView() {
+        if (CONFIG.hostname !== location.hostname) return;
+        var uid = localStorage.getItem('uid') || (Math.random() + '.' + Math.random());
+        localStorage.setItem('uid', uid);
+        navigator.sendBeacon('https://www.google-analytics.com/collect', new URLSearchParams({
+          v  : 1,
+          tid: 'UA-155331821-1',
+          cid: uid,
+          t  : 'pageview',
+          dp : encodeURIComponent(location.pathname)
+        }));
+      }
+      document.addEventListener('pjax:complete', sendPageView);
+      sendPageView();
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Heterotopia</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">29</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">11</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://www.sdcswd.wang/archives/94c24f0b/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/pasj2019.jpg">
+      <meta itemprop="name" content="Di WANG">
+      <meta itemprop="description" content="A place to record some information related with particle accelerator control system">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Heterotopia">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          配置基于Elasticsearch的EPICS PV分析器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-05-27 17:45:41" itemprop="dateCreated datePublished" datetime="2020-05-27T17:45:41+00:00">2020-05-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-10 20:19:50" itemprop="dateModified" datetime="2021-05-10T20:19:50+00:00">2021-05-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Software/" itemprop="url" rel="index"><span itemprop="name">Software</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Software/elk/" itemprop="url" rel="index"><span itemprop="name">elk</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>6.7k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>6 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># @Time    : 2020-05-27</span></span><br><span class="line"><span class="comment"># @Language: Markdown</span></span><br><span class="line"><span class="comment"># @Software: VS Code</span></span><br><span class="line"><span class="comment"># @Author  : Di Wang(KEK Linac)</span></span><br><span class="line"><span class="comment"># @Email   : sdcswd@gmail.com</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>把EPICS PV存入ES后，为了方便搜索，需要自定义analyzer。</p>
+</blockquote>
+<a id="more"></a>
+
+
+<h1 id="ES-文本分析"><a href="#ES-文本分析" class="headerlink" title="ES 文本分析"></a>ES 文本分析</h1><p>基于<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis.html" target="_blank" rel="noopener external nofollow noreferrer">https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis.html</a>完成本文。</p>
+<p>ES默认使用<code>standard analyzer</code>对一段文本进行操作，如分词（根据空格拆分），单词还原（<code>foxes</code>还原为<code>fox</code>），去除停用词（移除<code>the</code>,<code>a</code>等冠词）等。除默认分析器还有一系列内置分析器（<code>built-in analyzer</code>），用户也可以自定义分析器。</p>
+<h2 id="Analyzer概述"><a href="#Analyzer概述" class="headerlink" title="Analyzer概述"></a>Analyzer概述</h2><h3 id="文本分析器结构"><a href="#文本分析器结构" class="headerlink" title="文本分析器结构"></a>文本分析器结构</h3><p><code>character filters, tokenizers, and token filters</code>，顾名思义，第一个是去除那些不想要的character，第二个是根据分隔符得到一组token，第三个是设置token的过滤和处理，下面详细讲。</p>
+<h3 id="使用时机"><a href="#使用时机" class="headerlink" title="使用时机"></a>使用时机</h3><ol>
+<li>索引一个<code>text</code>的field时进行分析，称为 <code>index analyzer</code></li>
+<li>调用search API进行检索时对要搜索的文本进行分析<code>search analyzer</code></li>
+</ol>
+<p>大多数情况，使用同一个分析器。</p>
+<h3 id="如何设置分析器"><a href="#如何设置分析器" class="headerlink" title="如何设置分析器"></a>如何设置分析器</h3><p>对于<code>index analyzer</code>，可以直接设置<code>index</code>的默认分词器，也可以在<code>mapping</code>里设置<code>field</code>的分词器。</p>
+<p>对于<code>search analyzer</code>，可以在查询语句里指定分析器，也可以设置<code>index</code> 和 <code>field</code>的搜索分析器，这其中有优先级，按顺序：</p>
+<ol>
+<li>查询语句中指定的分析器</li>
+<li><code>field</code>中指定的搜索分析器</li>
+<li><code>index</code>中指定的搜索分析器</li>
+<li><code>field</code>中指定的索引分析器</li>
+<li>默认的<code>standard analyzer</code></li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "title": &#123;</span><br><span class="line">        "type": "text",</span><br><span class="line">        "analyzer": "whitespace",</span><br><span class="line">        "search_analyzer": "simple"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">  "settings": &#123;</span><br><span class="line">    "analysis": &#123;</span><br><span class="line">      "analyzer": &#123;</span><br><span class="line">        "default": &#123;</span><br><span class="line">          "type": "simple"</span><br><span class="line">        &#125;,</span><br><span class="line">        "default_search": &#123;</span><br><span class="line">          "type": "whitespace"</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">GET my_index/_search</span><br><span class="line">&#123;</span><br><span class="line">  "query": &#123;</span><br><span class="line">    "match": &#123;</span><br><span class="line">      "message": &#123;</span><br><span class="line">        "query": "Quick foxes",</span><br><span class="line">        "analyzer": "stop"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Stemming"><a href="#Stemming" class="headerlink" title="Stemming"></a>Stemming</h3><p>把单词还原到其词根，<code>be, are, and am</code>， <code>mouse and mice</code>， <code>foot and feet</code>有很多细节，不展开了。</p>
+<h3 id="如何测试分析器"><a href="#如何测试分析器" class="headerlink" title="如何测试分析器"></a>如何测试分析器</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">POST _analyze</span><br><span class="line">&#123;</span><br><span class="line">  "analyzer": "whitespace",</span><br><span class="line">  "text":     "The quick brown fox."</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="如何配置ES自带的分析器"><a href="#如何配置ES自带的分析器" class="headerlink" title="如何配置ES自带的分析器"></a>如何配置ES自带的分析器</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">  "settings": &#123;</span><br><span class="line">    "analysis": &#123;</span><br><span class="line">      "analyzer": &#123;</span><br><span class="line">        "std_english": &#123; </span><br><span class="line">          "type":      "standard",</span><br><span class="line">          "stopwords": "_english_"</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "my_text": &#123;</span><br><span class="line">        "type":     "text",</span><br><span class="line">        "analyzer": "standard", </span><br><span class="line">        "fields": &#123;</span><br><span class="line">          "english": &#123;</span><br><span class="line">            "type":     "text",</span><br><span class="line">            "analyzer": "std_english" </span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">POST my_index/_analyze</span><br><span class="line">&#123;</span><br><span class="line">  "field": "my_text", </span><br><span class="line">  "text": "The old brown cow"</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">POST my_index/_analyze</span><br><span class="line">&#123;</span><br><span class="line">  "field": "my_text.english", </span><br><span class="line">  "text": "The old brown cow"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果一个去除了<code>the</code>，一个保留。</p>
+<h3 id="如何自定义分析器"><a href="#如何自定义分析器" class="headerlink" title="如何自定义分析器"></a>如何自定义分析器</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">PUT my_index</span><br><span class="line">&#123;</span><br><span class="line">  "settings": &#123;</span><br><span class="line">    "analysis": &#123;</span><br><span class="line">      "analyzer": &#123;</span><br><span class="line">        "my_custom_analyzer": &#123; </span><br><span class="line">          "type": "custom",</span><br><span class="line">          "char_filter": [</span><br><span class="line">            "emoticons"</span><br><span class="line">          ],</span><br><span class="line">          "tokenizer": "punctuation",</span><br><span class="line">          "filter": [</span><br><span class="line">            "lowercase",</span><br><span class="line">            "english_stop"</span><br><span class="line">          ]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "tokenizer": &#123;</span><br><span class="line">        "punctuation": &#123; </span><br><span class="line">          "type": "pattern",</span><br><span class="line">          "pattern": "[ .,!?]"</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "char_filter": &#123;</span><br><span class="line">        "emoticons": &#123; </span><br><span class="line">          "type": "mapping",</span><br><span class="line">          "mappings": [</span><br><span class="line">            ":) =&gt; _happy_",</span><br><span class="line">            ":( =&gt; _sad_"</span><br><span class="line">          ]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "filter": &#123;</span><br><span class="line">        "english_stop": &#123; </span><br><span class="line">          "type": "stop",</span><br><span class="line">          "stopwords": "_english_"</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">POST my_index/_analyze</span><br><span class="line">&#123;</span><br><span class="line">  "analyzer": "my_custom_analyzer",</span><br><span class="line">  "text": "I'm a :) person, and you?"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>自定义内容：</p>
+<ul>
+<li>字符过滤器，把颜文字替换掉</li>
+<li>分词器：根据标点符号分词</li>
+<li>过滤器：大写字母变小写，然后去除英语停用词</li>
+</ul>
+<p>输出结果： <code>[ i&#39;m, _happy_, person, you ]</code></p>
+<p>看完这个其实就可以自定义了，毕竟EPICS PV一般都长这样：</p>
+<blockquote>
+<p><code>LIiEV:evg0-EvtClk:FracSynFreq-SP</code></p>
+</blockquote>
+<p>似乎设置<code>:</code>作为分词器，然后大写转小写就搞定了。</p>
+<h2 id="内置分析器"><a href="#内置分析器" class="headerlink" title="内置分析器"></a>内置分析器</h2><ul>
+<li><p>Standard Analyzer</p>
+<ul>
+<li>根据一个叫<code>Unicode Text Segmentation algorithm</code>的算法分隔单词，转小写，支持移除停用词。</li>
+</ul>
+</li>
+<li><p>Simple Analyzer</p>
+<ul>
+<li>不可配置，遇到不是字母的字符就分隔，转小写</li>
+</ul>
+</li>
+<li><p>Whitespace Analyzer</p>
+<ul>
+<li>不可配置，遇到空格就分隔。</li>
+</ul>
+</li>
+<li><p>Stop Analyzer</p>
+<ul>
+<li>比Simple Analyzer 多了移除停用词</li>
+</ul>
+</li>
+<li><p>Keyword Analyzer</p>
+<ul>
+<li>什么也不干，把整段文字当作一个keyword，不可配置。就和<code>keyword</code> field一样。</li>
+</ul>
+</li>
+<li><p>Pattern Analyzer</p>
+<ul>
+<li>基于正则表达式，默认用的Java <code>\W+</code>，匹配任何non-word的字符，也就是<code>[^a-zA-Z0-9_]</code>，用别的正则官方说可能导致速度很慢。支持转小写，设置停用词，设置停用词文件路径。</li>
+</ul>
+</li>
+<li><p>Language Analyzer</p>
+<ul>
+<li>支持不同的语言，懒得看细节了。</li>
+</ul>
+</li>
+<li><p>Fingerprint Analyzer</p>
+<ul>
+<li>支持小写，去重，排序，移除停用词，以及<code>concatenated into a single token</code>（没懂）。</li>
+</ul>
+</li>
+</ul>
+<h2 id="Character-filter"><a href="#Character-filter" class="headerlink" title="Character filter"></a>Character filter</h2><ul>
+<li>HTML Strip Char Filter<ul>
+<li>处理HTML的，把<code>&lt;p&gt;I&amp;apos;m so &lt;b&gt;happy&lt;/b&gt;!&lt;/p&gt;</code>  —&gt; <code>I&#39;m, so, happy</code></li>
+</ul>
+</li>
+<li>Mapping Character Filter<ul>
+<li>看上面自定义分析器的例子</li>
+</ul>
+</li>
+<li>Pattern Replace Character Filter<ul>
+<li>用正则表达式进行替换，可能很慢</li>
+</ul>
+</li>
+</ul>
+<h2 id="Tokenizer"><a href="#Tokenizer" class="headerlink" title="Tokenizer"></a>Tokenizer</h2><p>分词器分为三大类：面向单词的，面向单词内的，面向结构型文本的。</p>
+<h3 id="Word-Oriented-Tokenizers"><a href="#Word-Oriented-Tokenizers" class="headerlink" title="Word Oriented Tokenizers"></a>Word Oriented Tokenizers</h3><ul>
+<li>Standard Tokenizer<ul>
+<li>用<code>Unicode Text Segmentation algorithm</code>去分隔字符，官方说它是最佳之选。</li>
+</ul>
+</li>
+<li>Letter Tokenizer<ul>
+<li>遇到不是字母的就分隔</li>
+</ul>
+</li>
+<li>Lowercase Tokenizer<ul>
+<li>比letter tokenizer 多了转小写</li>
+</ul>
+</li>
+<li>Whtespace Tokenizer<ul>
+<li>遇到空格就分隔</li>
+</ul>
+</li>
+<li>UAX URL Email Tokenizer<ul>
+<li>把URL和Email地址当成一个token</li>
+</ul>
+</li>
+<li>Classic Tokenizer<ul>
+<li>针对英语语法的分词器</li>
+</ul>
+</li>
+<li>Thai Tokenizer<ul>
+<li>泰语分词（那么多语言，ES居然专门把泰语分词器列出来，why）</li>
+</ul>
+</li>
+</ul>
+<h3 id="Partial-Word-Tokenizers"><a href="#Partial-Word-Tokenizers" class="headerlink" title="Partial Word Tokenizers"></a>Partial Word Tokenizers</h3><ul>
+<li>N-Gram Tokenizer<ul>
+<li>默认使用2-gram，<code>quick</code> —&gt; <code>[qu, ui, ic, ck]</code></li>
+</ul>
+</li>
+<li>Edge N-gram Tokenizer<ul>
+<li>在单词头设置anchor，如果5-gram的话，<code>quick</code> —&gt; <code>[q, qu, qui, quic, quick]</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="Structured-Text-Tokenizers"><a href="#Structured-Text-Tokenizers" class="headerlink" title="Structured Text Tokenizers"></a>Structured Text Tokenizers</h3><ul>
+<li>Keyword Tokenizer<ul>
+<li>啥也不干</li>
+</ul>
+</li>
+<li>Pattern Tokenizer<ul>
+<li>正则</li>
+</ul>
+</li>
+<li>Simple Pattern Tokenizer<ul>
+<li>支持简单的正则，更快，返回匹配的项</li>
+</ul>
+</li>
+<li>Char Group Tokenizer<ul>
+<li>设置一组字符进行分隔，比正则快</li>
+</ul>
+</li>
+<li>Simple Pattern Split Tokenizer<ul>
+<li>遇到正则匹配的项就分隔，和上面那个的区别跑一下下面的例子就明白了</li>
+</ul>
+</li>
+<li>Path_hierarchy Tokenizer<ul>
+<li>根据路径分隔，<code>/one/two/three</code> —&gt; <code>[ /one, /one/two, /one/two/three ]</code></li>
+</ul>
+</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">POST _analyze</span><br><span class="line">&#123;</span><br><span class="line">  "tokenizer": &#123;</span><br><span class="line">    "type": "simple_pattern_split",</span><br><span class="line">    "pattern": "[0123456789]&#123;3&#125;"</span><br><span class="line">  &#125;,</span><br><span class="line">  "text": "fd-786-335-514-x"</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">POST _analyze</span><br><span class="line">&#123;</span><br><span class="line">  "tokenizer": &#123;</span><br><span class="line">    "type": "simple_pattern",</span><br><span class="line">    "pattern": "[0123456789]&#123;3&#125;"</span><br><span class="line">  &#125;,</span><br><span class="line">  "text": "fd-786-335-514-x"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Token-filter"><a href="#Token-filter" class="headerlink" title="Token filter"></a>Token filter</h2><p>太多了，常用的有：</p>
+<ul>
+<li>ASCII folding token filter<ul>
+<li>把一些拉丁字母转成ASCII字符</li>
+</ul>
+</li>
+<li>Lowercase token filter<ul>
+<li>转小写</li>
+</ul>
+</li>
+<li>Length token filter<ul>
+<li>移除长度超过设定值的，可以设置最小或者最大。</li>
+</ul>
+</li>
+<li>Truncate token filter<ul>
+<li>超过设定长度的就截短</li>
+</ul>
+</li>
+<li>Stop token filter<ul>
+<li>移除停用词</li>
+</ul>
+</li>
+</ul>
+<h2 id="EPICS-PV"><a href="#EPICS-PV" class="headerlink" title="EPICS PV"></a>EPICS PV</h2><p>直接上代码，添加了<code>epics_pv_analyzer</code>，并在<code>PVNAME</code>这个field上使用，在mapping里设置了几个常见的EPICS PV field的映射。把<code>PVTYPE</code>设置为<code>keyword</code>就可以做聚合了，看看哪种类型的PV最多（好像没什么用）。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line">PUT linac-epics-pv</span><br><span class="line">&#123;</span><br><span class="line">  "settings": &#123;</span><br><span class="line">    "number_of_shards": 1,</span><br><span class="line">    "number_of_replicas": 0,</span><br><span class="line">    "analysis": &#123;</span><br><span class="line">      "analyzer": &#123;</span><br><span class="line">        "epics_pv_analyzer": &#123;</span><br><span class="line">          "type": "custom",</span><br><span class="line">          "tokenizer": "pv_tokenizer",</span><br><span class="line">          "filter": [</span><br><span class="line">            "lowercase"</span><br><span class="line">          ]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      "tokenizer": &#123;</span><br><span class="line">        "pv_tokenizer": &#123;</span><br><span class="line">          "type": "char_group",</span><br><span class="line">          "tokenize_on_chars": [</span><br><span class="line">            ":",</span><br><span class="line">            "-",</span><br><span class="line">            "_",</span><br><span class="line">            " "</span><br><span class="line">          ]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  "mappings": &#123;</span><br><span class="line">    "properties": &#123;</span><br><span class="line">      "PVNAME": &#123;</span><br><span class="line">        "type": "text",</span><br><span class="line">        "analyzer": "epics_pv_analyzer",</span><br><span class="line">        "search_analyzer": "epics_pv_analyzer"</span><br><span class="line">      &#125;,</span><br><span class="line">      "PVTYPE": &#123;</span><br><span class="line">        "type": "keyword",</span><br><span class="line">        "ignore_above": 256</span><br><span class="line">      &#125;,</span><br><span class="line">      "DTYP": &#123;</span><br><span class="line">        "type": "text"</span><br><span class="line">      &#125;,</span><br><span class="line">      "NELM": &#123;</span><br><span class="line">        "type": "integer"</span><br><span class="line">      &#125;,</span><br><span class="line">      "PINI": &#123;</span><br><span class="line">        "type": "keyword"</span><br><span class="line">      &#125;,</span><br><span class="line">      "FLNK": &#123;</span><br><span class="line">        "type": "text",</span><br><span class="line">        "analyzer": "epics_pv_analyzer",</span><br><span class="line">        "search_analyzer": "epics_pv_analyzer"</span><br><span class="line">      &#125;,</span><br><span class="line">      "FTVL": &#123;</span><br><span class="line">        "type": "keyword"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"># 测试分析器</span><br><span class="line">POST linac-epics-pv/_analyze</span><br><span class="line">&#123;</span><br><span class="line">  "analyzer": "epics_pv_analyzer",</span><br><span class="line">  "text": "LIiBM:SP_61_F5_1:Y1PK:ZRE:1S:INP"</span><br><span class="line">&#125;</span><br><span class="line"># 修改mapping</span><br><span class="line">PUT linac-epics-pv/_mapping</span><br><span class="line">&#123;</span><br><span class="line">  "properties": &#123;</span><br><span class="line">    "PVNAME": &#123;</span><br><span class="line">      "type": "text",</span><br><span class="line">      "analyzer": "epics_pv_analyzer",</span><br><span class="line">      "search_analyzer": "epics_pv_analyzer"</span><br><span class="line">    &#125;,</span><br><span class="line">    "PVTYPE": &#123;</span><br><span class="line">      "type": "keyword",</span><br><span class="line">      "ignore_above": 256</span><br><span class="line">    &#125;,</span><br><span class="line">    "DTYP": &#123;</span><br><span class="line">      "type": "text",</span><br><span class="line">    &#125;,</span><br><span class="line">    "NELM": &#123;</span><br><span class="line">      "type": "integer",</span><br><span class="line">    &#125;,</span><br><span class="line">    "PINI": &#123;</span><br><span class="line">      "type": "keyword",</span><br><span class="line">    &#125;,</span><br><span class="line">    "FLNK": &#123;</span><br><span class="line">      "type": "text",</span><br><span class="line">      "analyzer": "epics_pv_analyzer",</span><br><span class="line">      "search_analyzer": "epics_pv_analyzer"</span><br><span class="line">    &#125;,</span><br><span class="line">    "FTVL": &#123;</span><br><span class="line">      "type": "keyword",</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"># 搜索</span><br><span class="line">GET linac-epics-pv/_search</span><br><span class="line">&#123;</span><br><span class="line">  "size": 20, </span><br><span class="line">  "query": &#123;</span><br><span class="line">    "match": &#123;</span><br><span class="line">      "PVNAME": &#123;</span><br><span class="line">        "query": "liibm zre inp",</span><br><span class="line">        "operator": "and"</span><br><span class="line">      &#125; </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:  </strong>Di WANG
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link: </strong>
+    <a href="https://www.sdcswd.wang/archives/94c24f0b/" title="配置基于Elasticsearch的EPICS PV分析器">https://www.sdcswd.wang/archives/94c24f0b/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/EPICS/" rel="tag"># EPICS</a>
+              <a href="/tags/Chinese/" rel="tag"># Chinese</a>
+              <a href="/tags/Elasticsearch/" rel="tag"># Elasticsearch</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/archives/d1e427b6/" rel="prev" title="ELK配置">
+      <i class="fa fa-chevron-left"></i> ELK配置
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/archives/9135e595/" rel="next" title="Real time performance">
+      Real time performance <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ES-文本分析"><span class="nav-number">1.</span> <span class="nav-text">ES 文本分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Analyzer概述"><span class="nav-number">1.1.</span> <span class="nav-text">Analyzer概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#文本分析器结构"><span class="nav-number">1.1.1.</span> <span class="nav-text">文本分析器结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用时机"><span class="nav-number">1.1.2.</span> <span class="nav-text">使用时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何设置分析器"><span class="nav-number">1.1.3.</span> <span class="nav-text">如何设置分析器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stemming"><span class="nav-number">1.1.4.</span> <span class="nav-text">Stemming</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何测试分析器"><span class="nav-number">1.1.5.</span> <span class="nav-text">如何测试分析器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何配置ES自带的分析器"><span class="nav-number">1.1.6.</span> <span class="nav-text">如何配置ES自带的分析器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何自定义分析器"><span class="nav-number">1.1.7.</span> <span class="nav-text">如何自定义分析器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内置分析器"><span class="nav-number">1.2.</span> <span class="nav-text">内置分析器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Character-filter"><span class="nav-number">1.3.</span> <span class="nav-text">Character filter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tokenizer"><span class="nav-number">1.4.</span> <span class="nav-text">Tokenizer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Word-Oriented-Tokenizers"><span class="nav-number">1.4.1.</span> <span class="nav-text">Word Oriented Tokenizers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Partial-Word-Tokenizers"><span class="nav-number">1.4.2.</span> <span class="nav-text">Partial Word Tokenizers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Structured-Text-Tokenizers"><span class="nav-number">1.4.3.</span> <span class="nav-text">Structured Text Tokenizers</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Token-filter"><span class="nav-number">1.5.</span> <span class="nav-text">Token filter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EPICS-PV"><span class="nav-number">1.6.</span> <span class="nav-text">EPICS PV</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Di WANG"
+      src="/images/pasj2019.jpg">
+  <p class="site-author-name" itemprop="name">Di WANG</p>
+  <div class="site-description" itemprop="description">A place to record some information related with particle accelerator control system</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/Insomnia1437" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;Insomnia1437" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:sdcswd@gmail.com" title="E-Mail → mailto:sdcswd@gmail.com" rel="noopener external nofollow noreferrer" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Di WANG</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">110k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:40</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener external nofollow noreferrer" target="_blank">NexT.Gemini</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
