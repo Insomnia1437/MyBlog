@@ -1,0 +1,157 @@
+baseURL: "https://sdcswd.wang/"
+title: Heterotopia
+languageCode: "zh-CN"
+paginate: 10
+hasCJKLanguage: true
+theme: PaperMod
+
+enableRobotsTXT: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+
+enableEmoji: true
+googleAnalytics: ""
+
+minify:
+  disableXML: true
+  minifyOutput: true
+
+outputs:
+    home:
+        - HTML
+        - RSS
+        - JSON # is necessary
+
+params:
+  env: production # to enable google analytics, opengraph, twitter-cards and schema.
+  title: ExampleSite
+  description: "ExampleSite description"
+  keywords: [Blog, PaperMod]
+  author: "Me"
+  # author: ["Me", "You"] # multiple authors
+  # images: ["<link or path of image for opengraph, twitter-cards>"]
+  DateFormat: "January 2, 2006"
+  defaultTheme: light # dark, light
+  disableThemeToggle: false
+
+  ShowReadingTime: true
+  ShowShareButtons: false
+  ShowPostNavLinks: false
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowWordCount: true
+  ShowRssButtonInSectionTermList: true
+  UseHugoToc: true
+  disableSpecial1stPost: false
+  disableScrollToTop: false
+  comments: false
+  hidemeta: false
+  hideSummary: false
+  showtoc: false
+  tocopen: false
+
+  assets:
+    # disableHLJS: true # to disable highlight.js
+    # disableFingerprinting: true
+    favicon: "/images/neworder.jpg"
+    favicon16x16: "/images/neworder.jpg"
+    favicon32x32: "/images/neworder.jpg"
+    apple_touch_icon: "/images/neworder.jpg"
+    safari_pinned_tab: "/images/neworder.jpg"
+
+  label:
+    text: "Heterotopia"
+    icon: /apple-touch-icon.png
+    iconHeight: 35
+
+  # profile-mode
+  profileMode:
+    enabled: false # needs to be explicitly set
+    title: ExampleSite
+    subtitle: "This is subtitle"
+    imageUrl: "<img location>"
+    imageWidth: 120
+    imageHeight: 120
+    imageTitle: my image
+    buttons:
+      - name: Posts
+        url: posts
+      - name: Tags
+        url: tags
+
+  # home-info mode
+  homeInfoParams:
+    Title: "解放受困之人"
+    Content: "送你苹果会腐烂, 送你玫瑰会枯萎, 送你葡萄会压坏, 给你一滴我的泪水, 聆听稻子和稗子的区别"
+
+  socialIcons:
+    - name: github
+      url: "https://github.com/Insomnia1437"
+
+  analytics:
+    google:
+      SiteVerificationTag: "XYZabc"
+    bing:
+      SiteVerificationTag: "XYZabc"
+    yandex:
+      SiteVerificationTag: "XYZabc"
+
+  cover:
+    hidden: true # hide everywhere but not in structured data
+    hiddenInList: true # hide on list pages and home
+    hiddenInSingle: true # hide on single page
+
+  editPost:
+    # URL: "https://github.com/Insomnia1437/MyBlog/tree/master/content"
+    # URL: "https://github.com/<gitlab user>/<repo name>/tree/<branch name>/<path to content>/"
+    URL: ""
+    Text: "Source file" # edit text
+    appendFilePath: true # to append file path to Edit link
+
+  # for search
+  # https://fusejs.io/api/options.html
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 0
+    keys: ["title", "permalink", "summary", "content"]
+menu:
+  main:
+    # - identifier: categories
+    #   name: Categories
+    #   url: /categories/
+    #   weight: 10
+    - identifier: tags
+      name: 📌Tags
+      url: /tags/
+      weight: 20
+    - identifier: search
+      name: 🔍Search
+      url: /search/
+      weight: 30
+    - identifier: archives
+      name: 📂Archives
+      url: /archives/
+      weight: 40
+    - identifier: about
+      name: 👽About
+      url: /about/
+      weight: 50
+    # - identifier: example
+    #   name: example.org
+    #   url: https://example.org
+    #   weight: 50
+# Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
+pygmentsUseClasses: true
+markup:
+  highlight:
+    noClasses: false
+    anchorLineNos: true
+    codeFences: true
+    guessSyntax: true
+    # lineNos: true
+    style: monokai
