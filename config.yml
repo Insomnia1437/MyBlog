@@ -141,10 +141,10 @@ menu:
       name: 👽About
       url: /about/
       weight: 50
-    # - identifier: example
-    #   name: example.org
-    #   url: https://example.org
-    #   weight: 50
+    - identifier: example
+      name: 🚩RSS
+      url: https://sdcswd.wang/index.xml
+      weight: 50
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true
 markup:
