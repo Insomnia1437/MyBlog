@@ -15,7 +15,7 @@ date: 2019-11-19 01:51:40
 # @Time    : 2019-11-19
 # @Language: Markdown
 # @Software: Typora
-# @Author  : Di Wang(KEK Linac)
+# @Author  : Di Wang
 # @Email   : sdcswd@gmail.com
 ```
 

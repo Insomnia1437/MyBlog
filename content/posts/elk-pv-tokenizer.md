@@ -15,7 +15,7 @@ date: 2020-05-27 17:45:41
 # @Time    : 2020-05-27
 # @Language: Markdown
 # @Software: VS Code
-# @Author  : Di Wang(KEK Linac)
+# @Author  : Di Wang
 # @Email   : sdcswd@gmail.com
 ```
 > 把EPICS PV存入ES后，为了方便搜索，需要自定义analyzer。

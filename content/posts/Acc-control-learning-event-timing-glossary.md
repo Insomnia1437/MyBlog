@@ -15,7 +15,7 @@ abbrlink: 4362c88b
 # @Time    : 2020-02-10
 # @Language: Markdown
 # @Software: VS Code
-# @Author  : Di Wang(KEK Linac)
+# @Author  : Di Wang
 # @Email   : sdcswd@gmail.com
 ```
 # 粒子加速器定时系统

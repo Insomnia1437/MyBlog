@@ -11,7 +11,7 @@ date: 1984-06-04 12:00:00
 # @Time    : 2019-11-18
 # @Language: Markdown
 # @Software: VS Code
-# @Author  : Di Wang(KEK Linac)
+# @Author  : Di Wang
 # @Email   : sdcswd@gmail.com
 ```
 ## 第一篇博文，关于异托邦

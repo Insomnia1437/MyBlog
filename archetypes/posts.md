@@ -3,15 +3,15 @@ title: "{{ replace .Name "-" " " | title }}"
 date:  {{ .Date }}
 # weight: 1
 # aliases: ["/first"]
-tags: ["default"]
-author: "Me"
+tags: ["Chinese"]
+author: "DW"
 # author: ["Me", "You"] # multiple authors
 showToc: false
 TocOpen: false
 draft: false
 hidemeta: false
 comments: false
-description: "Desc Text."
+# description: "Desc Text."
 # canonicalURL: "https://canonical.url/to/page"
 disableHLJS: false # to disable highlightjs
 disableShare: true
@@ -30,7 +30,14 @@ cover:
     relative: false # when using page bundles set this to true
     hidden: true # only hide on current single page
 editPost:
-    URL: "https://github.com/Insomnia1437/MyBlog/tree/master/content"
+    # URL: "https://github.com/Insomnia1437/MyBlog/tree/master/content"
+    URL: ""
     Text: "Source" # edit text
     appendFilePath: true # to append file path to Edit link
 ---
+```python
+# @Language: Markdown
+# @Software: VS Code
+# @Author  : Di Wang
+# @Email   : sdcswd@gmail.com
+```

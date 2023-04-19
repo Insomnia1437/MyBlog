@@ -13,7 +13,7 @@ date: 2020-01-15 12:58:43
 # @Time    : 2020-01-15
 # @Language: Markdown
 # @Software: VS Code
-# @Author  : Di Wang(KEK Linac)
+# @Author  : Di Wang
 # @Email   : sdcswd@gmail.com
 ```
 

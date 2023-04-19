@@ -13,7 +13,7 @@ date: 2021-05-25 06:34:09
 # @Time    : 2021-05-25
 # @Language: Markdown
 # @Software: VS Code
-# @Author  : Di Wang(KEK Linac)
+# @Author  : Di Wang
 # @Email   : sdcswd@gmail.com
 ```
 # ssh key

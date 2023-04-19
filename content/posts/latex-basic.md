@@ -13,7 +13,7 @@ date: 2020-12-28 15:38:28
 # @Time    : 2020-12-28
 # @Language: Markdown
 # @Software: VS Code
-# @Author  : Di Wang(KEK Linac)
+# @Author  : Di Wang
 # @Email   : sdcswd@gmail.com
 ```
 > 因为要准备写大论文了，之前写 [JACoW](https://www.jacow.org/) 论文都是直接拿template往里填充，对TeX语法也并不熟悉，决定稍微学习下，文章基于[overleaf](https://www.overleaf.com/learn)的教程和`<latex入门-简版>-刘海洋`。
