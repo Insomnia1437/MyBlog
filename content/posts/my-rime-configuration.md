@@ -3,7 +3,7 @@ title: "My Rime configuration"
 date:  2023-04-18T22:15:20+09:00
 # weight: 1
 # aliases: ["/first"]
-tags: ["Software", "Rime", "Chinese"]
+tags: ["Software", "Rime", "Chinese", "Japanese"]
 author: "DW"
 # author: ["Me", "You"] # multiple authors
 showToc: false
