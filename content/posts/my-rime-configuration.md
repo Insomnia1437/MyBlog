@@ -59,6 +59,8 @@ BTW, Windows下可以在注册表中修改输中文入法使用日语键盘配�
 Change "Layout File"="KBDUS.DLL"
 To     "Layout File"="KBD106.dll"
 ```
+> 20231221增补
+> 在把小狼毫设置为Windows默认输入法后, 有时小狼毫使用的键盘配列会自动恢复为US keyboard (个人四台Windows机器中其中一台有此问题, 原因未知.), 解决方法: 在注册表中搜索"KBDUS.DLL", 找到小狼毫的项, 将"Layout File"修改为"KBD106.dll"即可.
 
 ## Rime
 
