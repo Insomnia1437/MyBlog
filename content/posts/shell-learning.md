@@ -144,3 +144,23 @@ n <& m | 输入文件n m合并
 <<tag  | tag之间的内容作为输入
 
 待补充...
+
+
+> **20240320更新：**
+
+
+## Default values
+
+- `${foo:-val}` 	$foo, or val if unset (or null)
+- `${foo:=val}` 	Set $foo to val if unset (or null)
+- `${foo:+val}` 	val if $foo is set (and not null)
+- `${foo:?message}` 	Show error message and exit if $foo is unset (or null)
+
+> Omitting the : removes the (non)nullity checks, e.g. ${foo-val} expands to val if unset otherwise $foo.
+
+在[这里](https://devhints.io/bash)看到对于shell中的默认值, 有两种写法: `${foo-val}`, 对于带不带`:`二者的区别有点难以理解. 测试后发现区别在于
+
+- 当`foo`未定义, 二者相同
+- 当 `foo=""`定义为空, 带`:`的情况下, `foo=val`; 不带情况下`foo=""`.
+
+也就是说, 带`:`应该是更好的习惯.
