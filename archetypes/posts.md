@@ -37,7 +37,7 @@ editPost:
 ---
 ```python
 # @Language: Markdown
-# @Software: VS Code
+# @Software: VS Code/MacDown/Typora/Vim
 # @Author  : Di Wang
 # @Email   : sdcswd@gmail.com
 ```
