@@ -148,7 +148,36 @@ record init时候调用`registerInterruptUser`, 虽然函数是个接口, 但各
 
 ## asynTrace
 
-三种mask, 分别用于定义日志级别, 日志打印格式, 日志额外信息
+三种mask, 分别用于定义日志级别, 日志打印格式, 日志额外信息, marco定义值如下:
+
+```c
+#define ASYN_TRACE_ERROR     0x0001
+#define ASYN_TRACEIO_DEVICE  0x0002
+#define ASYN_TRACEIO_FILTER  0x0004
+#define ASYN_TRACEIO_DRIVER  0x0008
+#define ASYN_TRACE_FLOW      0x0010
+#define ASYN_TRACE_WARNING   0x0020
+
+/* traceIO mask definitions*/
+#define ASYN_TRACEIO_NODATA 0x0000
+#define ASYN_TRACEIO_ASCII  0x0001
+#define ASYN_TRACEIO_ESCAPE 0x0002
+#define ASYN_TRACEIO_HEX    0x0004
+
+/* traceInfo mask definitions*/
+#define ASYN_TRACEINFO_TIME 0x0001
+#define ASYN_TRACEINFO_PORT 0x0002
+#define ASYN_TRACEINFO_SOURCE 0x0004
+#define ASYN_TRACEINFO_THREAD 0x0008
+```
+
+example usage, R4-35之后, 参数设置可以更加灵活, 不止可以使用数字, 还可以用不区分大小写的字符串.
+```c
+asynSetTraceMask port,0,ASYN_TRACE_ERROR
+asynSetTraceIOMask port,0,ascii+escape
+asynSetTraceInfoMask port,0,1+port+TRACEINFO_SOURCE|ASYN_TRACEINFO_THREAD
+```
+
 ### 日志级别 TraceMask
 默认为`ASYN_TRACE_ERROR`
 
