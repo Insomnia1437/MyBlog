@@ -13,7 +13,7 @@ hidemeta: false
 comments: false
 # description: "Desc Text."
 # canonicalURL: "https://canonical.url/to/page"
-disableHLJS: false # to disable highlightjs
+disableHLJS: true # to disable highlightjs
 disableShare: true
 hideSummary: false
 searchHidden: false
@@ -86,7 +86,7 @@ Rime有点像Zsh, 刚推出的时候都非常灵活且有诸多配置项, 但灵
 
 但日语输入的麻烦在于日语动词变形与鼻音. kani可以是日语的**カニ/かに**🦀, 也可以是**簡易/かんい**, 对于鼻音可以使用分隔符, 一方面也可以在候选项中同时提示(如大多数商用日语输入法所做的那样).
 
-而对于动词活用, 如**買う**需要输入`kau`,  而过去时态的**買った**则需要输入`katta`, 目前没发现有Rime配置能处理日语的动词变形, 趁着还没开始搜索答案, 我也在猜想, 商用日语输入法如ATOK是如何处理的呢. 对每个动词的不同活用形都生成多个码表自然是简单易懂, 但未免费事费力; 如果是使用类似Rime的Lua脚本实现, 那程序的替换逻辑改如何实现呢?
+而对于动词活用, 如**買う**需要输入`kau`,  而过去时态的**買った**则需要输入`katta`, 目前没发现有Rime配置能处理日语的动词变形, 趁着还没开始搜索答案, 我也在猜想, 商用日语输入法如 [ATOK](https://atok.com/) 是如何处理的呢. 对每个动词的不同活用形都生成多个码表自然是简单易懂, 但未免费事费力; 如果是使用类似Rime的Lua脚本实现, 那程序的替换逻辑改如何实现呢?
 
 自然, 谜题的揭晓还需要我本人按耐得住性子, 唔...此事应当不难. ╮(￣▽￣")╭
 

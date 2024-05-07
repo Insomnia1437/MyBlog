@@ -1,5 +1,5 @@
 ---
-title: "EPICS aysn"
+title: "epics aysn"
 date:  2024-04-01T17:11:20+02:00
 # weight: 1
 # aliases: ["/first"]
@@ -13,7 +13,7 @@ hidemeta: false
 comments: false
 # description: "Desc Text."
 # canonicalURL: "https://canonical.url/to/page"
-disableHLJS: false # to disable highlightjs
+disableHLJS: true # to disable highlightjs
 disableShare: true
 hideSummary: false
 searchHidden: false
@@ -66,7 +66,7 @@ asyn如何解决这些问题?
 - user, 在epics环境下, 就是指某个record type的device support.
 - port driver, 也就是hardware driver, 表示实际与hardware交互的代码. port driver必须实现asynCommon, 然后实现多个communication interface, 比如asynOctet, asynInt32.
 
-在asyn中, user指使用asyn port的一端，一般来说就是epics record. 而port driver则是与各式各样hardware交互的底层驱动, 在port driver中，需要实现一些接口, 比如标准接口`asynCommon`, 命令读写接口`asynOctet`。但如果协议比较复杂, 可以继续添加中间层, 减少port driver的编写代码量. 
+在asyn中, user指使用asyn port的一端，一般来说就是epics record. 而port driver则是与各式各样hardware交互的底层驱动, 在port driver中，需要实现一些接口, 比如标准接口`asynCommon`, 命令读写接口`asynOctet`。但如果协议比较复杂, 可以继续添加中间层, 减少port driver的编写代码量.
 
 例如gpib, 就添加了`asynGpib`和`asynGpibPort`两个接口, 前者由epics record support调用, 然后会调用`asynGpibPort`中的函数, 而`asynGpibPort`中的函数由port driver实现. 这样的话就可以把一些不涉及具体GPIB硬件的函数移到asynGpib中.
 ## asyn 流程
@@ -75,17 +75,17 @@ asynManager作为中间层. 服务于epics device support和hardware driver.
 ### 对于epics device support
 - 在epics record init过程中会调用`pasynManager->createAsynUser(processCallback, 0)`, 获取一个没有绑定port的asynUser
 - 解析record的INP或者OUT field 指定的port name和port addr
-- 调用`connectDevice`来让asynUser连接上这个port. 因为asynManager知道所有的port driver, 所以它依靠port name就能顺利把port的信息放到asynUser里. 
-- 这时候asynUser就可以调用`pasynInterface = pasynManager->findInterface(pasynUser, asynInt32Type, 1)` 得到想调用的interface. 比如此时的`pasynInterface->pinterface` 就是一个`asynInt32`的接口, 使用这个接口才可以与hardware通信. 
+- 调用`connectDevice`来让asynUser连接上这个port. 因为asynManager知道所有的port driver, 所以它依靠port name就能顺利把port的信息放到asynUser里.
+- 这时候asynUser就可以调用`pasynInterface = pasynManager->findInterface(pasynUser, asynInt32Type, 1)` 得到想调用的interface. 比如此时的`pasynInterface->pinterface` 就是一个`asynInt32`的接口, 使用这个接口才可以与hardware通信.
 - 对于asynchronous的设备, 肯定不能直接读取, 于是就在record被process(例如通过`caput`)的时候, 调用`pasynManager->queueRequest(pasynUser, 0, 0)`, 把请求放到port thread里
-- asynManager调用Callback函数`processCallback`(`createAsynUser`时候注册的). 
+- asynManager调用Callback函数`processCallback`(`createAsynUser`时候注册的).
 - 在Callback函数中会调用`pasynInterface->pinterface->read`来读写hardware.
 
 
 ### 对于port driver
 - 实现与hardware交互的接口, 比如connect serial的时候就要使用OS API连接到tty.
 - 注册一个iocsh函数, 方便启动ioc时候用户设置port的名字和各种参数(比如IP或serial的baud rate)
-- 这个iocsh函数会调用`registerPort`, 在`asynManager`中, 会新生成一个线程, 用来处理这个port. 
+- 这个iocsh函数会调用`registerPort`, 在`asynManager`中, 会新生成一个线程, 用来处理这个port.
 - 调用`registerInterface`注册实现的接口, 其中asynCommon接口必须提供. 在port thread中会调用`asynCommon`提供的`pasynCommon->connect(drvPvt,pasynUser)`方法连接hardware. 常用的还有`aysnOctet`接口中的read, write函数, `asynInt32`中的read, write函数
 
 ## asyn interface
@@ -125,9 +125,9 @@ typedef struct asynInt32 {
 
 record init时候调用`registerInterruptUser`, 虽然函数是个接口, 但各个asynXXXBase已经实现了, 可以在port driver中覆盖, 但似乎都使用默认值即可. 不像read write函数一样需要被覆盖. `registerInterruptUser`函数在asynXXXBase中实现, 该版本会调用`pasynManager->addInterruptUser(pasynUser,pinterruptNode)`, 其中`interruptNode`内部包含了一个Callback函数. 把这个Callback函数加入到一个链表中. 这样interrupt发生时, 就可以用Callback来process自己.
 ### 对于port driver
-注册interface时候, 也注册了interface的`registerInterruptUser`函数. 
+注册interface时候, 也注册了interface的`registerInterruptUser`函数.
 
-调用`pasynManager->registerInterruptSource(portName,&pdrvPvt->asynInt32, &pdrvPvt->asynInt32Pvt);` 其实就是由asynManager生成一个`interruptBase`类型的变量, 然后分配给`asynInt32Pvt`. 
+调用`pasynManager->registerInterruptSource(portName,&pdrvPvt->asynInt32, &pdrvPvt->asynInt32Pvt);` 其实就是由asynManager生成一个`interruptBase`类型的变量, 然后分配给`asynInt32Pvt`.
 
 当interrupt发生时, 会依次调用这个链表中所有的Callback函数. 这个过程一般发生在isr里, 而isr自然是由port driver实现. 在isr里调用`interruptStart`函数, 得到这个链表, 然后调用Callback去process这个record.
 ## asynXXXBase
@@ -191,7 +191,7 @@ asynSetTraceInfoMask port,0,1+port+TRACEINFO_SOURCE|ASYN_TRACEINFO_THREAD
 ### 打印级别 TraceIOMask
 默认为`ASYN_TRACEIO_NODATA`
 
-- `ASYN_TRACEIO_NODATA`, 
+- `ASYN_TRACEIO_NODATA`,
 - `ASYN_TRACEIO_ASCII`
 - `ASYN_TRACEIO_ESCAPE`
 - `ASYN_TRACEIO_HEX`
