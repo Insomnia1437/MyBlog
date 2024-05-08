@@ -79,6 +79,9 @@ editPost:
 
 ## Others
 
+### Access Security
+- [epics access security](/posts/epics-access)
+
 ## Database (record type)
 -------------
 ### Analog Array Input Record (aai)
@@ -91,20 +94,20 @@ editPost:
 可以用`HIGH`field来判断ioc是否存活. 如下例, `i_am_alive`持续写入`deadIfZero`, 如果使用hardware interrupt来process`i_am_alive`, 当持续5秒未收到interrupt, 则`deadIfZero`会因为`HIGH`field, 在5秒后自动归零.
 ```epics
 record(bo, "i_am_alive") {
-  field(DTYP, "Soft Channel")
-  field(SCAN, "1 second")
-  field(DOL, "1")
-  field(UDF, "0")
-  field(ZNAM, "0")
-  field(ONAM, "1")
-  field(OUT, "deadIfZero.VAL PP")
+    field(DTYP, "Soft Channel")
+    field(SCAN, "1 second")
+    field(DOL, "1")
+    field(UDF, "0")
+    field(ZNAM, "0")
+    field(ONAM, "1")
+    field(OUT, "deadIfZero.VAL PP")
 }
 
 record(bo, "deadIfZero") {
-  field(DTYP, "Soft Channel")
-  field(ZNAM, "0")
-  field(ONAM, "1")
-  field(HIGH, "$(DEAD_SECONDS=5)")
+    field(DTYP, "Soft Channel")
+    field(ZNAM, "0")
+    field(ONAM, "1")
+    field(HIGH, "$(DEAD_SECONDS=5)")
 }
 ```
 ### Calculation Output Record (calcout)
