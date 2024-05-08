@@ -82,6 +82,36 @@ editPost:
 ### Access Security
 - [epics access security](/posts/epics-access)
 
+### record patch
+可以把record定义在一个db file中, 然后在另一个db file中添加这个record的一些field (比如逻辑处理相关field). 但是要注意, `dbLoadRecords`的先后顺序.
+
+也可以不写record的type, 用"*"来代替.
+> 最近在GitHub issue上看到有人在提议添加功能来反向patch(即删除某些record), 估计不久后会加入主线.
+
+### field modifiers
+历史包袱又一例, 具体因果暂时未能厘清, 但大致源于以下一些限制:
+- epics record name 长度限制 40 -> 60
+- epicsString 大小限制为 `MAX_STRING_SIZEP` (40)
+- CA 使用的`DBR_STRING`大小限制为`MAX_STRING_SIZEP` (40)
+
+而record name又会被使用在db link中, (INP, DOL, OUT, FWD), 所以就出现了一个问题, 当某个link field使用了大于40字节的record name时, 无法通过caget caput来读写. 于是引入了`$`作为field modifier. 当在link field后面加上`$`后, 就不会使用string, 而是使用char数组.
+```shell
+$ caput -S long_string.INP$  SomeReallyLongRecordNameThatExceeds40Characters
+Old : long_string.INP$ SomeReallyLongRecordNameThatExceeds40Ch NPP NMS
+New : long_string.INP$ SomeReallyLongRecordNameThatExceeds40Characters NPP NMS
+
+$ caput -S long_string.INP  SomeReallyLongRecordNameThatExceeds40Characters
+Old : long_string.INP                SomeReallyLongRecordNameThatExceeds40Ch
+Error from put operation: Invalid element count requested
+
+$ caget -S long_string.INP$
+long_string.INP$ SomeReallyLongRecordNameThatExceeds40Characters NPP NMS
+
+$ caget -S long_string.INP
+long_string.INP                SomeReallyLongRecordNameThatExceeds40Ch
+```
+
+类似的, `lsi`和`lso` record的VAL field也可以使用`$`来修改CA的行为.
 ## Database (record type)
 -------------
 ### Analog Array Input Record (aai)
