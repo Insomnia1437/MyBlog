@@ -76,6 +76,7 @@ editPost:
 ### busy
 
 ### sequencer
+- [epics sequencer](/posts/epics-sequencer)
 
 ## Others
 
