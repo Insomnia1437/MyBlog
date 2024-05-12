@@ -74,6 +74,7 @@ editPost:
 ### calc
 
 ### busy
+- [epics busy](/posts/epics-busy)
 
 ### sequencer
 - [epics sequencer](/posts/epics-sequencer)
@@ -113,6 +114,12 @@ long_string.INP                SomeReallyLongRecordNameThatExceeds40Ch
 ```
 
 类似的, `lsi`和`lso` record的VAL field也可以使用`$`来修改CA的行为.
+
+### Channel Filters and IOC Database Link types
+
+- [filter](https://epics.anl.gov/base/R7-0/8-docs/filters.html)
+- [links](https://epics.anl.gov/base/R7-0/8-docs/links.html)
+
 ## Database (record type)
 -------------
 ### Analog Array Input Record (aai)

@@ -42,6 +42,8 @@ editPost:
 # @Email   : sdcswd@gmail.com
 ```
 
+> See [epics examples](/posts/epics-examples)
+
 ## 介绍
 自从去年夏天[bessy](http://www-csr.bessy.de/)被网络攻击之后, sequencer的网站 (http://www-csr.bessy.de/control/SoftDist/sequencer/) 就打不开了. Ralph建立了一个镜像仓库, 可以从此处下载源码. (http://www-csr.bessy.de/control/SoftDist/sequencer/)
 
