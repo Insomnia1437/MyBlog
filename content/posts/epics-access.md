@@ -212,4 +212,8 @@ epics>
 ASG(private) {
     RULE(1, NONE)
 }
+ASG(DEFAULT) {
+   RULE(1,READ)
+   RULE(1,WRITE,TRAPWRITE)
+}
 ```
