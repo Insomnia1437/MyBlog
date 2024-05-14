@@ -59,11 +59,11 @@ editPost:
 
 由于内容较多, 会在闲暇时陆续更新, 此文大概会花费数年才能完成.
 
+-------------
 ## Module
-
 ### autosave
 - [epics autosave](/posts/epics-autosave)
-
+-------------
 ### caputlog
 #### 用法
 log可以有JSON格式, 需要epics 7.0.1以上.
@@ -153,8 +153,9 @@ localhost:55142 Sun May 12 15:26:47 2024 iocexample iocRun: IOC restarted
 localhost:55128 Sun May 12 15:26:57 2024 iocexample 12-May-24 15:26:51 zephyrus sdcswd sdcswd:circle:step new=2 old=1
 localhost:55128 Sun May 12 15:27:02 2024 iocexample 12-May-24 15:26:57 zephyrus sdcswd sdcswd:circle:step new=1 old=2
 ```
+-------------
 ### iocstats
-
+-------------
 ### recsync
 用于Channel Finder. 也就是把ioc中的record信息, epics environment以及info tag发送到一个数据库.
 
@@ -219,26 +220,27 @@ zope.interface     6.3
 $ export PYTHONPATH=${PWD}:${PWD}/build/lib:${channelfinder_path}
 $ twistd -r poll -n recceiver -f demo.conf
 ```
-
+-------------
 ### calc
-
+-------------
 ### busy
 - [epics busy](/posts/epics-busy)
-
+-------------
 ### sequencer
 - [epics sequencer](/posts/epics-sequencer)
 
 ## Others
-
+-------------
 ### Access Security
 - [epics access security](/posts/epics-access)
-
+-------------
 ### record patch
 可以把record定义在一个db file中, 然后在另一个db file中添加这个record的一些field (比如逻辑处理相关field). 但是要注意, `dbLoadRecords`的先后顺序.
 
-也可以不写record的type, 用"*"来代替.
+也可以不写record的type, 用`*`来代替.
 > 最近在GitHub issue上看到有人在提议添加功能来反向patch(即删除某些record), 估计不久后会加入主线.
 
+-------------
 ### field modifiers
 历史包袱又一例, 具体因果暂时未能厘清, 但大致源于以下一些限制:
 - epics record name 长度限制 40 -> 60
@@ -246,6 +248,7 @@ $ twistd -r poll -n recceiver -f demo.conf
 - CA 使用的`DBR_STRING`大小限制为`MAX_STRING_SIZEP` (40)
 
 而record name又会被使用在db link中, (INP, DOL, OUT, FWD), 所以就出现了一个问题, 当某个link field使用了大于40字节的record name时, 无法通过caget caput来读写. 于是引入了`$`作为field modifier. 当在link field后面加上`$`后, 就不会使用string, 而是使用char数组.
+
 ```shell
 $ caput -S long_string.INP$  SomeReallyLongRecordNameThatExceeds40Characters
 Old : long_string.INP$ SomeReallyLongRecordNameThatExceeds40Ch NPP NMS
@@ -264,19 +267,250 @@ long_string.INP                SomeReallyLongRecordNameThatExceeds40Ch
 
 类似的, `lsi`和`lso` record的VAL field也可以使用`$`来修改CA的行为.
 
+-------------
 ### Channel Filters and IOC Database Link types
 
 - [filter](https://epics.anl.gov/base/R7-0/8-docs/filters.html)
 - [links](https://epics.anl.gov/base/R7-0/8-docs/links.html)
 
+-------------
+### breakpoint table
+**TODO**
+
+-------------
 ## Database (record type)
+### dbCommon
+| field   | information                                                                      |
+| :------ | :------------------------------------------------------------------------------- |
+| `NAME`  | 60 characters                                                                    |
+| `DESC`  | 40 characters                                                                    |
+| `ASG`   | 29 characters                                                                    |
+| `SCAN`  | `menuScan`                                                                       |
+| `PINI`  | `menuPini`                                                                       |
+| `PHAS`  | 不建议使用                                                                       |
+| `EVNT`  | `Event` scan类型                                                                 |
+| `DTYP`  | Device Type                                                                      |
+| `TSE`   | Time Stamp Event, 0, -1, -2, \[1-255\]                                           |
+| `TSEL`  | Time Stamp Link                                                                  |
+| `TIME`  | epicsTimeStamp time                                                              |
+| `DISS`  | Disable Alarm Sevrty, `menuAlarmSevr`                                            |
+| `DISV`  | Disable Value, 只是不process, value依然可以改变                                  |
+| `DISA`  | Disable, DBF_SHORT                                                               |
+| `SDIS`  | Scanning Disable, INLINK, 读取后放入`DISA`                                       |
+| `MLOK`  | Monitor lock, epicsMutexId                                                       |
+| `MLIS`  | Monitor List, ELLLIST                                                            |
+| `BKLNK` | Backwards link tracking, ELLLIST                                                 |
+| `DISP`  | Disable putField, 非0时不可通过CA或PVA修改field(除DISP)                          |
+| `PROC`  | Force Processing, 写入时process record, 写0也可                                  |
+| `STAT`  | Alarm Status, `menuAlarmStat`                                                    |
+| `SEVR`  | Alarm Severity, `menuAlarmSevr`                                                  |
+| `AMSG`  | Alarm Message                                                                    |
+| `NSTA`  | New Alarm Status, 用于内部处理过程, 处理完成后将最严重的级别更新到`STAT`         |
+| `NSEV`  | New Alarm Severity                                                               |
+| `NAMSG` | New Alarm Message                                                                |
+| `ACKS`  | Alarm Ack Severity, highest unacknowledged alarm severity                        |
+| `ACKT`  | Alarm Ack Transient, Alarm Ack Transient, `menuYesNo`                            |
+| `LCNT`  | Lock Count, 记录`PACT`为`TRUE`时的数量, 超过10, 那就触发`SCAN_ALARM`             |
+| `PACT`  | Record active, 为`TRUE`时代表record正被process, 类型是`DBF_UCHAR`而非`menuYesNo` |
+| `PUTF`  | dbPutField process, 不详                                                         |
+| `RPRO`  | Reprocess, 不祥                                                                  |
+| `ASP`   | Access Security Pvt, struct asgMember                                            |
+| `PPN`   | pprocessNotify, putNotify callback, struct processNotify                         |
+| `PPNR`  | pprocessNotifyRecord, next record for PutNotify, struct processNotifyRecord      |
+| `SPVT`  | Scan Private,  struct scan_element                                               |
+| `RSET`  | struct typed_rset                                                                |
+| `DSET`  | unambiguous_dset                                                                 |
+| `DPVT`  | Device Private, void *dpvt                                                       |
+| `RDES`  | Address of dbRecordType, struct dbRecordType                                     |
+| `LSET`  | Lock Set, struct lockRecord                                                      |
+| `PRIO`  | Scheduling Priority, `menuPriority`                                              |
+| `TPRO`  | Trace Processing, 非0时打印trace信息                                             |
+| `BKPT`  | Break Point, 调试用断点, epicsUInt8 bkpt                                         |
+| `UDF`   | Undefined                                                                        |
+| `UDFS`  | Undefined Alarm Severity, `menuAlarmSevr`                                        |
+| `UTAG`  | Time Tag                                                                         |
+| `FLNK`  | Forward Process Link                                                             |
+
+对于`TSE`与`TSEL`:
+
+1. 当`TSEL`指向另一个record的`TIME` field时, 使用获取到的`TIME`作为本record的timestamp. 如果是同一个ioc, `UTAG`也被复用.
+2. 当`TSEL`指向另一个record其它field时, 那个field的值被放到`TSE`中.
+   1. 当`TSE`为0, 会从current time providers中找到优先级最高的, 获取timestamp.
+   2. 当`TSE`为-1, 会从event time providers中找到优先级最高的, 然后由这个provider来提供`event=-1`的timestamp. 需要调用`generalTimeEventTpRegister`来注册event provider.
+   3. 当`TSE`为-2, 从device support中获取timestamp和user tag, 由device support来决定读取time provider还是event provider还是不注册provider直接读硬件.
+   4. 当`TSE`为\[1, 255\], 从event providers中找到优先级最高的, 然后由这个 provider提供对应event发生时的timestamp.
+
+相关函数
+```c
+// base中的一些macro
+#define generalTimeCurrentTpName generalTimeCurrentProviderName
+#define generalTimeEventTpName generalTimeEventProviderName
+
+#define epicsTimeEventCurrentTime 0
+#define epicsTimeEventBestTime -1
+#define epicsTimeEventDeviceTime -2
+
+int epicsShareAPI epicsTimeGetEvent(epicsTimeStamp *pDest, int eventNumber)
+{
+    if (eventNumber == epicsTimeEventCurrentTime) {
+        // TSE为0的情况
+        return epicsTimeGetCurrent(pDest);
+    } else {
+        // TSE为-1或[1-255]的情况
+        return generalTimeGetEventPriority(pDest, eventNumber, NULL);
+    }
+}
+
+// mrfioc2 处理longout record中TSE=-2的情况
+static long process_longout(longoutRecord *prec)
+{
+    priv *p=static_cast<priv*>(prec->dpvt);
+    long ret=0;
+
+    if (prec->val>=0 && prec->val<=255)
+        post_event(prec->val);
+
+    if(prec->tse==epicsTimeEventDeviceTime){
+        p->evr->getTimeStamp(&prec->time,p->event);
+    }
+}
+```
+
+#### Mostly Common
+| field  | information                                                                        |
+| ------ | ---------------------------------------------------------------------------------- |
+| `RVAL` | 对于input, 从hardware中读取的原始值, 待转换; 对于output, 转换后发送给hardware的值. |
+| `OVAL` | Output Value                                                                       |
+| `RBV`  | Readback Value                                                                     |
+| `DOL`  | Desired Output Link                                                                |
+| `OMSL` | `supervisory` or `closed_loop`                                                     |
+| `ORAW` | Previous Raw Value                                                                 |
+
+#### Simulation
+开启simulation mode时, 会忽略device support. 不知道有什么实际用处.
+
+| field     | information                      |
+| --------- | -------------------------------- |
+| `SIOL`    | Simulation Input/Output Link     |
+| `SVAL`    | Simulation Value                 |
+| `SIML`    | Simulation Mode Link             |
+| `SIMM`    | Simulation Mode                  |
+| `SIMS`    | Simulation Mode Severity         |
+| `OLDSIMM` | Prev. Simulation Mode            |
+| `SSCN`    | Sim. Mode Scan                   |
+| `SDLY`    | Sim. Mode Async Delay            |
+| `SIMPVT`  | Sim. Mode Private, epicsCallback |
+```
+           --  (SIMM = NO?)
+         /         (if supported and directed by device support,
+        /              INP -> RVAL -- convert -> VAL),
+                   (else INP -> VAL)
+ SIML -> SIMM
+
+         \
+           --  (SIMM = YES?) SIOL -> SVAL -> VAL
+           \
+             -- (SIMM = RAW?) SIOL -> SVAL -> RVAL -- convert -> VAL
+```
+
+-------------
+### Analog Input Record (ai)
+#### Unit conversion
+当device support为`Raw Soft Channel`时才会转换.
+
+| field  | information                       |
+| ------ | --------------------------------- |
+| `RVAL` | Current Raw Value                 |
+| `ROFF` | Raw Offset                        |
+| `ASLO` | Adjustment Slope                  |
+| `AOFF` | Adjustment Offset                 |
+| `LINR` | Linearization	MENU, `menuConvert` |
+| `ESLO` | Raw to EGU Slope                  |
+| `EOFF` | Raw to EGU Offset                 |
+| `EGUL` | Engineer Units Low                |
+| `EGUF` | Engineer Units Full               |
+| `PBRK` | Pointer to brkTable               |
+| `LBRK` | Last brkTable                     |
+
+
+1. (`RVAL` + `ROFF`)
+2. 如果ASLO不为0, 乘以`ASLO`
+3. 再加上`AOFF`
+4. 判断`LINR`的值:
+   1. 如果为`NO CONVERSION`, 结束转换
+   2. 如果为`SLOPE`, 乘以`ESLO`, 再加上`EOFF`
+   3. 如果为`LINEAR`, 由`special_linconv`函数根据用户设置的`EGUL`和`EGUF`, 以及hardware的实际量程来计算出`ESLO`和`EOFF`, 具体计算规则根据不祥.
+   4. 其它选项, 使用breakpoint table.
+
+
+#### Smoothing Filter
+`SMOO`值为0-1, 0的话代表不使用filter, 1的话代表infinite smoothing, 计算公式如下.
+
+`VAL = VAL * SMOO + (1 - SMOO) * New Data`
+
+
+#### Display
+| field  | information                                                                                                                                      |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `PREC` | Display Precision                                                                                                                                |
+| `EGU`  | Engineering Units                                                                                                                                |
+| `HOPR` | High Operating Range, 设置一些控件的上限                                                                                                         |
+| `LOPR` | Low Operating Range, 设置一些控件的下限                                                                                                          |
+| `HIHI` |                                                                                                                                                  |
+| `LOLO` |                                                                                                                                                  |
+| `HIGH` |                                                                                                                                                  |
+| `LOW`  |                                                                                                                                                  |
+| `HHSV` |                                                                                                                                                  |
+| `LLSV` |                                                                                                                                                  |
+| `HSV`  |                                                                                                                                                  |
+| `LSV`  |                                                                                                                                                  |
+| `HYST` | 加入hysteresis, 比如low limit是10, `HYST`为1, 当val从11降为10.5时无alarm, 但当val从9升为10.5时, 依然触发alarm, 直到vale > 10 + 1时, alarm才消失. |
+| `AFTC` | Alarm Filter Time Constant, 类似与`HYST`, 不过是当val持续一定时间后再触发alarm.                                                                  |
+| `AFVL` | Alarm Filter Value, `AFTC`计算过程中使用的变量.                                                                                                  |
+| `MDEL` | Monitor Deadband, value monitors, 当val变化超过deadband时才会发送monitor. 0的话每次val改变都触发, -1时record process时触发.                      |
+| `ADEL` | Archive Deadband, archive monitors                                                                                                               |
+| `LALM` | Last Value Alarmed                                                                                                                               |
+| `ALST` | Last Value Archived                                                                                                                              |
+| `MLST` | Last Val Monitored                                                                                                                               |
+| `INIT` | Initialized?                                                                                                                                     |
+
+#### 示例
+
+```epics
+record(ai, ai){
+  field(VAL,  "13")
+  field(HOPR, "0")
+  field(LOPR, "100")
+  field(PREC, "3")
+  field(HIHI, "90")
+  field(HIGH, "80")
+  field(LOW,  "20")
+  field(LOLO, "10")
+  field(HHSV, "MAJOR")
+  field(HSV,  "MINOR")
+  field(LSV,  "MINOR")
+  field(LLSV, "MAJOR")
+  field(PINI, "RUNNING")
+  field(HYST, "1")
+}
+```
+
+以下为`HSYT`的示例, 可以看到VAL从13变为21时, 依然有low alarm.
+![ai record alarm](/images/epics-example-ai.png)
+
+-------------
+### Analog Output Record (ao)
+
+ao的field和ai基本相同.
 -------------
 ### Analog Array Input Record (aai)
+-------------
 ### Analog Array Output Record (aao)
-### Analog Input Record (ai)
-### Analog Output Record (ao)
+-------------
 ### Array Subroutine Record (aSub)
+-------------
 ### Binary Input Record (bi)
+-------------
 ### Binary Output Record (bo)
 可以用`HIGH`field来判断ioc是否存活. 如下例, `i_am_alive`持续写入`deadIfZero`, 如果使用hardware interrupt来process`i_am_alive`, 当持续5秒未收到interrupt, 则`deadIfZero`会因为`HIGH`field, 在5秒后自动归零.
 ```epics
@@ -297,30 +531,57 @@ record(bo, "deadIfZero") {
     field(HIGH, "$(DEAD_SECONDS=5)")
 }
 ```
+-------------
 ### Calculation Output Record (calcout)
+-------------
 ### Calculation Record (calc)
+-------------
 ### Compression Record (compress)
+-------------
 ### Data Fanout Record (dfanout)
+-------------
 ### Event Record (event)
+-------------
 ### Fanout Record (fanout)
+-------------
 ### Histogram Record (histogram)
+-------------
 ### 64bit Integer Input Record (int64in)
+-------------
 ### 64bit Integer Output Record (int64out)
+-------------
 ### Long Input Record (longin)
+-------------
 ### Long Output Record (longout)
+-------------
 ### Long String Input Record (lsi)
+-------------
 ### Long String Output Record (lso)
+-------------
 ### Multi-Bit Binary Input Direct Record (mbbiDirect)
+-------------
 ### Multi-Bit Binary Input Record (mbbi)
+-------------
 ### Multi-Bit Binary Output Direct Record (mbboDirect)
+-------------
 ### Multi-Bit Binary Output Record (mbbo)
+-------------
 ### Permissive Record (permissive)
+-------------
 ### Printf Record (printf)
+-------------
 ### Select Record (sel)
+-------------
 ### Sequence Record (seq)
+-------------
 ### State Record (state)
+-------------
 ### String Input Record (stringin)
+-------------
 ### String Output Record (stringout)
+-------------
 ### Sub-Array Record (subArray)
+-------------
 ### Subroutine Record (sub)
+-------------
 ### Waveform Record (waveform)
