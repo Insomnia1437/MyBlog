@@ -377,14 +377,17 @@ static long process_longout(longoutRecord *prec)
 ```
 
 #### Mostly Common
-| field  | information                                                                        |
-| ------ | ---------------------------------------------------------------------------------- |
-| `RVAL` | 对于input, 从hardware中读取的原始值, 待转换; 对于output, 转换后发送给hardware的值. |
-| `OVAL` | Output Value                                                                       |
-| `RBV`  | Readback Value                                                                     |
-| `DOL`  | Desired Output Link                                                                |
-| `OMSL` | `supervisory` or `closed_loop`                                                     |
-| `ORAW` | Previous Raw Value                                                                 |
+| field  | information                                                                                     |
+| ------ | ----------------------------------------------------------------------------------------------- |
+| `RVAL` | 对于input, 从hardware中读取的原始值, 待转换; 对于output, 转换后发送给hardware的值.              |
+| `OVAL` | Output Value                                                                                    |
+| `RBV`  | Readback Value                                                                                  |
+| `DOL`  | Desired Output Link                                                                             |
+| `OMSL` | `supervisory` or `closed_loop`                                                                  |
+| `ORAW` | Previous Raw Value                                                                              |
+| `PVAL` | Previous value                                                                                  |
+| `IVOA` | INVALID output action, 三个选项`Continue normally`, `Don't drive outputs`和`Set output to IVOV` |
+| `IVOV` | INVALID output value                                                                            |
 
 #### Simulation
 开启simulation mode时, 会忽略device support. 不知道有什么实际用处.
@@ -453,7 +456,7 @@ static long process_longout(longoutRecord *prec)
 | field  | information                                                                                                                                      |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `PREC` | Display Precision                                                                                                                                |
-| `EGU`  | Engineering Units                                                                                                                                |
+| `EGU`  | Engineering Units, 16 characters                                                                                                                 |
 | `HOPR` | High Operating Range, 设置一些控件的上限                                                                                                         |
 | `LOPR` | Low Operating Range, 设置一些控件的下限                                                                                                          |
 | `HIHI` |                                                                                                                                                  |
@@ -501,7 +504,17 @@ record(ai, ai){
 -------------
 ### Analog Output Record (ao)
 
-ao的field和ai基本相同.
+ao的field和ai基本相同. 一些特殊的field:
+- `OIF`: 可选项为`Incremental`和`Full`, 也就是output之前加上`PVAL`的值.
+- `DRVL`: Drive Low Limit, 输出的下限
+- `DRVH`: Drive High Limit 输出的上限
+- `OROC`: Output Rate of Change, 设置与上次输出的`OVAL` field相比能改变的最大值.
+
+
+对于record中的一些preview value, 命名有些奇怪, 有时候是`PVAL`, 有时候又是`OVAL`, 即Old value.
+在ao record中, `OVAL`代表Output value, 所以不称呼为Old value可以理解.
+但又把`ORAW`叫Previous Raw Value, 把`ORBV`叫Previous Readback Value. 真是很让人困惑
+
 -------------
 ### Analog Array Input Record (aai)
 -------------
