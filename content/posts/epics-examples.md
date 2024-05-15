@@ -658,6 +658,42 @@ record(calc, "calc"){
 
 -------------
 ### Calculation Output Record (calcout)
+相比与`calc`, 增加了一些output选项.
+- `OOPT`: Output Execute Opt, 可选`Every Time`, `On Change`, `When Zero`, `When Non-zero`, `Transition To Zero`, `Transition To Non-zero`
+- `DOPT`: Output Data Opt, 可选`CALC`, `OCAL`
+- `OCAL`: Output Calculation, 和`CALC`一样包含运算表达式
+- `OVAL`: Output Value, `OCAL`的输出结果
+- `OEVT`: Event To Issue, 要触发的event
+- `ODLY`: Output Execute Delay, 触发event和输出前的delay
+- `DLYA`: Output Delay Active, delay过程中这个field会被设为1
+- `INAV`-`INIV`: Input PV Status, 会被设为`Ext PV NC`, `Ext PV OK`, `Local PV`, `Constant`
+- `OUTV`: Output PV Status, 同上
+- `CLCV`: CALC Valid,
+- `OCLV`: OCAL Valid,
+
+1. 首先计算`CALC`, 得到的结果放到`VAL`里;
+2. 然后判断`OOPT`
+   1. 不满足什么也不做;
+   2. 如果满足再判断`DOPT`,
+      1. 如果用`CALC`, 那就把`VAL`赋值给`OVAL`
+      2. 如果要用`OCAL`, 那就再计算得到`OVAL`
+   3. 将`OVAL`输出到`OUT`
+
+```
+record(calcout, "co"){
+  field(CALC, "VAL<10?VAL+1:0")
+  field(OCAL, "90-89")
+  field(OOPT, "When Zero")
+  field(DOPT, "Use OCAL")
+  field(OUT,  "res PP")
+  field(SCAN, "1 second")
+}
+
+record(ao, "res") {
+  field(TPRO, "1")
+}
+```
+
 -------------
 ### Compression Record (compress)
 -------------
