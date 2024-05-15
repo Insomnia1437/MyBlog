@@ -278,6 +278,31 @@ long_string.INP                SomeReallyLongRecordNameThatExceeds40Ch
 **TODO**
 
 -------------
+### Echoless IOC Comments
+启动ioc时, 可以在st.cmd文件中使用`#-`来不让注释行输出. 非常有用.
+示例
+```shell
+$ cat st.cmd
+# print this comment
+#- not print this comment
+dbLoadRecords a.db
+
+$ softIocPVA st.cmd
+# print this comment
+dbLoadRecords a.db
+iocInit
+Starting iocInit
+############################################################################
+## EPICS R7.0.8
+## Rev. 2024-03-27T10:23+0100
+## Rev. Date build date/time:
+############################################################################
+iocRun: All initialization complete
+epics>
+iocInit
+```
+
+-------------
 ## Database (record type)
 ### dbCommon
 | field   | information                                                                      |
@@ -294,7 +319,7 @@ long_string.INP                SomeReallyLongRecordNameThatExceeds40Ch
 | `TSEL`  | Time Stamp Link                                                                  |
 | `TIME`  | epicsTimeStamp time                                                              |
 | `DISS`  | Disable Alarm Sevrty, `menuAlarmSevr`                                            |
-| `DISV`  | Disable Value, 只是不process, value依然可以改变                                  |
+| `DISV`  | Disable Value, 只是不process, value依然可以改变, 与`DISA`比较, 相当的话disable   |
 | `DISA`  | Disable, DBF_SHORT                                                               |
 | `SDIS`  | Scanning Disable, INLINK, 读取后放入`DISA`                                       |
 | `MLOK`  | Monitor lock, epicsMutexId                                                       |
@@ -313,7 +338,7 @@ long_string.INP                SomeReallyLongRecordNameThatExceeds40Ch
 | `LCNT`  | Lock Count, 记录`PACT`为`TRUE`时的数量, 超过10, 那就触发`SCAN_ALARM`             |
 | `PACT`  | Record active, 为`TRUE`时代表record正被process, 类型是`DBF_UCHAR`而非`menuYesNo` |
 | `PUTF`  | dbPutField process, 不详                                                         |
-| `RPRO`  | Reprocess, 不祥                                                                  |
+| `RPRO`  | Reprocess, 不详                                                                  |
 | `ASP`   | Access Security Pvt, struct asgMember                                            |
 | `PPN`   | pprocessNotify, putNotify callback, struct processNotify                         |
 | `PPNR`  | pprocessNotifyRecord, next record for PutNotify, struct processNotifyRecord      |
@@ -376,6 +401,21 @@ static long process_longout(longoutRecord *prec)
 }
 ```
 
+对于disable record, 使用Access security可以禁止record被读写, 也可以用`DISV`和`SDIS`禁止record被process.
+```
+record(ai, ai){
+  field(DISV, "1")
+  field(DISS, "MAJOR")
+  field(VAL,  "311")
+  field(SDIS, "bi PP")
+}
+
+record(bi, bi){
+  field(INP, "1")
+  field(PINI, "YES")
+}
+```
+
 #### Mostly Common
 | field  | information                                                                                     |
 | ------ | ----------------------------------------------------------------------------------------------- |
@@ -388,6 +428,7 @@ static long process_longout(longoutRecord *prec)
 | `PVAL` | Previous value                                                                                  |
 | `IVOA` | INVALID output action, 三个选项`Continue normally`, `Don't drive outputs`和`Set output to IVOV` |
 | `IVOV` | INVALID output value                                                                            |
+| `NORD` | Number elements read, 用于waveform和aai                                                         |
 
 #### Simulation
 开启simulation mode时, 会忽略device support. 不知道有什么实际用处.
@@ -442,7 +483,7 @@ static long process_longout(longoutRecord *prec)
 4. 判断`LINR`的值:
    1. 如果为`NO CONVERSION`, 结束转换
    2. 如果为`SLOPE`, 乘以`ESLO`, 再加上`EOFF`
-   3. 如果为`LINEAR`, 由`special_linconv`函数根据用户设置的`EGUL`和`EGUF`, 以及hardware的实际量程来计算出`ESLO`和`EOFF`, 具体计算规则根据不祥.
+   3. 如果为`LINEAR`, 由`special_linconv`函数根据用户设置的`EGUL`和`EGUF`, 以及hardware的实际量程来计算出`ESLO`和`EOFF`, 具体计算规则根据不详.
    4. 其它选项, 使用breakpoint table.
 
 
@@ -517,12 +558,64 @@ ao的field和ai基本相同. 一些特殊的field:
 
 -------------
 ### Analog Array Input Record (aai)
+初始化时可以用支持JSON的link. 引号在使用Relaxed JSON时可以省略, 但规则不详.
+
+`MPST`与`APST`控制何时触发monitor, 他们使用了`HASH`field来判断值是否发生变化.
+但鉴于可能的哈希碰撞(Hash Collision), 所以最好使用`Always`, 也就是每次process就会触发monitor.
+```
+record(aai, aai){
+  field(NELM, "10")
+  field(FTVL, "SHORT")
+  field(APST, "On Change")
+  field(MPST, "Always")
+#  field(INP,  "[3,1,1]")
+  field(INP,  "{const: [315, 10, 0, 0, 1]}")
+}
+
+record(aao, aao){
+  field(OMSL, "closed_loop")
+  field(DOL,  "aai")
+  field(PINI, "RUNNING")
+  field(FTVL, "SHORT")
+  field(NELM, "10")
+  field(OUT,  "wf")
+}
+record(waveform, wf){
+  field(FTVL, "LONG")
+  field(NELM, "20")
+}
+```
+
 -------------
 ### Analog Array Output Record (aao)
+示例见`aai`
+
 -------------
-### Array Subroutine Record (aSub)
+### Waveform Record (waveform)
+示例见`aai`
+
+比`aai`多的field: 基本都不再使用了.
+- `RARM`: Rearm the waveform
+- `BUSY`: Busy Indicator
+
 -------------
 ### Binary Input Record (bi)
+`COSV`可以用来设置value改变时的alarm, 可以设置为`MINOR or MAJOR`.
+如下例, 当value为0时, 触发MAJOR, value从0变1时, 触发MINOR, value从1变1时, 触发NO_ALARM.
+
+device support可以使用`MASK`field. 不详.
+```
+record(bi, bi){
+  field(VAL,  "0")
+  field(ZNAM, "OFF")
+  field(ONAM, "ON")
+  field(ZSV,  "MAJOR")
+  field(OSV,  "NO_ALARM")
+  field(COSV, "MINOR")
+  field(PINI, "YES")
+}
+```
+
 -------------
 ### Binary Output Record (bo)
 可以用`HIGH`field来判断ioc是否存活. 如下例, `i_am_alive`持续写入`deadIfZero`, 如果使用hardware interrupt来process`i_am_alive`, 当持续5秒未收到interrupt, 则`deadIfZero`会因为`HIGH`field, 在5秒后自动归零.
@@ -532,22 +625,39 @@ record(bo, "i_am_alive") {
     field(SCAN, "1 second")
     field(DOL, "1")
     field(UDF, "0")
-    field(ZNAM, "0")
-    field(ONAM, "1")
+    field(ZNAM, "Dead")
+    field(ONAM, "Alive")
     field(OUT, "deadIfZero.VAL PP")
 }
 
 record(bo, "deadIfZero") {
     field(DTYP, "Soft Channel")
-    field(ZNAM, "0")
-    field(ONAM, "1")
+    field(ZNAM, "Dead")
+    field(ONAM, "Alive")
     field(HIGH, "$(DEAD_SECONDS=5)")
 }
 ```
 -------------
-### Calculation Output Record (calcout)
--------------
 ### Calculation Record (calc)
+有12个input links.
+
+```
+# 简单的例子, heartbeat
+record(calc, "calc"){
+  field(VAL,  "0")
+  field(CALC, "VAL?0:1")
+  field(SCAN, "1 second")
+}
+# 复杂的例子, 产生连续正弦波, 初始相位可调
+record(calc, "calc"){
+  field(INPA, "1.57079632679489661923") # 初始相位为pi/2
+  field(CALC, "A:=(A+D2R)>(2*PI)?0:(A+D2R); sin(A)")
+  field(SCAN, ".1 second")
+}
+```
+
+-------------
+### Calculation Output Record (calcout)
 -------------
 ### Compression Record (compress)
 -------------
@@ -597,4 +707,5 @@ record(bo, "deadIfZero") {
 -------------
 ### Subroutine Record (sub)
 -------------
-### Waveform Record (waveform)
+### Array Subroutine Record (aSub)
+
