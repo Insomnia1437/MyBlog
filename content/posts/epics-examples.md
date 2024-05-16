@@ -737,8 +737,78 @@ cbHigh: dbProcess of 'calc'
 ```
 -------------
 ### Fanout Record (fanout)
+对于fanout类的record, 有三种`SELM`, 即Select Mechanism
+- `All`:
+- `Specified`: 从`SELL`得到值, 放到`SELN`, 然后加上`OFFS`, 然后触发对应的link. e.g., 1 -> LNK1.
+- `Mask`: 把`SELN`右移`SHFT`位, 对应bit为1的会触发. e.g., 0x01 -> LNK0. 注意`SHFT`默认值为-1, 也就是默认会把`SELN`左移一位. 当`SELN`为2时, bit 3为1, `LNK2`被触发.
+
+`fanout`有16个输出link.
+
+**Q**: 为什么`SHFT`默认值为-1?
+
+**A**: 历史兼容性. 早期fanout的link是从1开始的, 而且只有6个输出link, 当新增`LNK0`后, 需要增加`SHFT`来兼容旧的record.
+
+```epics
+record(fanout, fo){
+  # Specified, LNK1被触发
+  field(SELM, "Specified")
+  field(SELN, "0")
+  field(OFFS, "1")
+
+  # Mask, LNK1和LNK2被触发
+  # field(SELM, "Mask")
+  # field(SELN, "6")
+  # field(SHFT, "0")
+
+  field(LNK0, "calc0")
+  field(LNK1, "calc1")
+  field(LNK2, "calc2")
+  field(LNK3, "calc3")
+  field(LNK4, "calc4")
+}
+record(calc, calc0){
+  field(CALC, "VAL+1")
+}
+record(calc, calc1){
+  field(CALC, "VAL+1")
+}
+record(calc, calc2){
+  field(CALC, "VAL+1")
+}
+record(calc, calc3){
+  field(CALC, "VAL+1")
+}
+record(calc, calc4){
+  field(CALC, "VAL+1")
+}
+```
 -------------
 ### Data Fanout Record (dfanout)
+对比`fanout`, 多了数据转发, 但是少了bit shift和offset field. 而且link field的命名也变为了`OUTA` -> `OUTH`. 只有8个输出link.
+
+对于`Specified`, 当`SELN`为0时, 不会输出, 为1时, 输出到`OUTA`, 和`fanout`不同.
+
+对于`Mask`, LSB为1时, 输出到`OUTA`
+```
+record(dfanout, dfo){
+  field(OMSL, "closed_loop")
+  field(DOL,  "19")
+
+  # Specified, SELN为0时无输出
+  # field(SELM, "Specified")
+  # field(SELN, "0")
+
+  # Mask, 二进制为`101`, 所以输出到OUTA和OUTC
+  field(SELM, "Mask")
+  field(SELN, "5")
+
+  field(OUTA, "calc0")
+  field(OUTB, "calc1")
+  field(OUTC, "calc2")
+  field(OUTD, "calc3")
+  field(OUTE, "calc4")
+}
+```
 -------------
 ### Histogram Record (histogram)
 -------------
