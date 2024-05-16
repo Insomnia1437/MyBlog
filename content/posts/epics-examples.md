@@ -737,12 +737,13 @@ cbHigh: dbProcess of 'calc'
 ```
 -------------
 ### Fanout Record (fanout)
+`fanout`有16个输出link.
+
 对于fanout类的record, 有三种`SELM`, 即Select Mechanism
 - `All`:
 - `Specified`: 从`SELL`得到值, 放到`SELN`, 然后加上`OFFS`, 然后触发对应的link. e.g., 1 -> LNK1.
 - `Mask`: 把`SELN`右移`SHFT`位, 对应bit为1的会触发. e.g., 0x01 -> LNK0. 注意`SHFT`默认值为-1, 也就是默认会把`SELN`左移一位. 当`SELN`为2时, bit 3为1, `LNK2`被触发.
 
-`fanout`有16个输出link.
 
 **Q**: 为什么`SHFT`默认值为-1?
 
@@ -784,11 +785,14 @@ record(calc, calc4){
 ```
 -------------
 ### Data Fanout Record (dfanout)
-对比`fanout`, 多了数据转发, 但是少了bit shift和offset field. 而且link field的命名也变为了`OUTA` -> `OUTH`. 只有8个输出link.
+有8个输出link.
 
-对于`Specified`, 当`SELN`为0时, 不会输出, 为1时, 输出到`OUTA`, 和`fanout`不同.
+对比`fanout`, 多了数据转发, 但是少了bit shift和offset field. 而且link field的命名也变为了`OUTA` -> `OUTH`.
 
-对于`Mask`, LSB为1时, 输出到`OUTA`
+- 对于`All`, 用于把一个value写到多个record.
+- 对于`Specified`, 当`SELN`为0时, 不会输出, 为1时, 输出到`OUTA`, 和`fanout`不同.
+- 对于`Mask`, LSB为1时, 输出到`OUTA`
+
 ```
 record(dfanout, dfo){
   field(OMSL, "closed_loop")
@@ -811,18 +815,92 @@ record(dfanout, dfo){
 ```
 -------------
 ### Histogram Record (histogram)
--------------
-### 64bit Integer Input Record (int64in)
--------------
-### 64bit Integer Output Record (int64out)
+计算histogram, 用到的field:
+- `NELM`: Num of Array Elements
+- `SVL`: Signal Value Location, 数据源
+- `SGNL`: Signal Value, 数据
+- `ULIM`: Upper Signal Limit, 低于上限才会被收录
+- `LLIM`: Lower Signal Limit, 高于下限才会被收录
+- `MDEL`: Monitor Count Deadband, 何时触发monitor, 与`MCNT`进行比较, `MCNT`大于`MDEL`时才触发monitor, 比如每收集100个数据触发一次monitor.
+- `SDEL`: Monitor Seconds Dband, 定时检测`MCNT`, 当`MCNT`大于0时就触发monitor, 应该是用于数据稀少或非周期性到来的场景.
+- `MCNT`: Counts Since Monitor, 每次有新数据就加1, 触发monitor之后就置0.
+- `CMD`: Collection Control, 控制histogram, 清空或者暂停或者恢复读取. `Read`, `Clear`, `Start`, `Stop`
+- `CSTA`: Collection Status, 内部状态位, 当它为`TRUE`时才会采集数据. 只有`Start`会设置它为`TRUE`. 而`Read`和`Clear`都只会清除已采集的数据, 也就是使用`Stop`的话必须使用`Start`才能开启采集. 当然也可以只用`Clear`来重新采集. `Read`命令和`Clear`没区别.
+- `WDTH`: Element Width, 由`(ULIM - LLIM) / NELM` 计算width, 比如下限为4, 上限12, 四个bin, 那每个bin的`WDTH`就是2.
+
+```
+record(calc, "calc"){
+  field(INPA, "1.57079632679489661923") # Phase
+  field(CALC, "A:=(A+D2R)>(2*PI)?0:(A+D2R); sin(A)")
+  field(SCAN, ".1 second")
+  field(FLNK, "hist")
+}
+
+record(histogram, hist){
+  field(SVL,  "calc NPP")
+  field(NELM, "10")
+  field(ULIM, "1")
+  field(LLIM, "-1")
+  field(MDEL, "20")
+  field(SDEL, "0")
+  field(CMD,  "Read")
+}
+```
+以下为一个正弦波的直方图示例, 横坐标应该是从-1到1的十组, 但我不知道怎么修改Phoebus的横轴😞.
+![histogram record](/images/epics-example-hist.png)
+另外, 发现了bug, 虽然的确停止采集了, 但返回值是错误的.
+```shell
+$ caput hist.CMD "Stop"
+Old : hist.CMD                       Read
+New : hist.CMD                       Read
+```
+
 -------------
 ### Long Input Record (longin)
+32位整数, 支持`AFTC`.
+
 -------------
 ### Long Output Record (longout)
+32为整数, 支持`DRVH`和`DRVL`.
+
+ 支持`OOPT`. 不知为什么, `ao`, `int64out`都不支持`OOPT`.
+
 -------------
-### Long String Input Record (lsi)
+### 64bit Integer Input Record (int64in)
+和`longin`相似, 只不过支持64位长度.
+```
+record(longin, li){
+}
+record(int64in, i64){
+}
+```
+允许超过32位上限
+```shell
+$ caput li 2147483647
+Old : li                             111
+New : li                             2147483647
+sdcswd @ zephyrus in  ~/epics/R7.0.8/base [11:47]
+$ caput li 2147483649
+Old : li                             2147483647
+CA.Client.Exception...............................................
+New : li                             2147483647
+    Warning: "Channel write request failed"
+    Context: "op=1, channel=li, type=DBR_STRING, count=1, ctx="li""
+    Source File: ../oldChannelNotify.cpp line 159
+    Current Time: Thu May 16 2024 11:47:58.193643892
+..................................................................
+$ caput i64 2147483647
+Old : i64                            0
+New : i64                            2.14748e+09
+sdcswd @ zephyrus in  ~/epics/R7.0.8/base [11:48]
+$ caput i64 2147483999
+Old : i64                            2.14748e+09
+New : i64                            2.14748e+09
+```
 -------------
-### Long String Output Record (lso)
+### 64bit Integer Output Record (int64out)
+类似`longout`, 但`R7.0.8`依然不支持`OOPT`, 也许将来会加上.
+
 -------------
 ### Multi-Bit Binary Input Direct Record (mbbiDirect)
 -------------
@@ -833,18 +911,85 @@ record(dfanout, dfo){
 ### Multi-Bit Binary Output Record (mbbo)
 -------------
 ### Permissive Record (permissive)
+**deprecated**
+
 -------------
 ### Printf Record (printf)
 -------------
 ### Select Record (sel)
+12个输入link.
+
+从`INPA-INPL`中得到数据放到field`A-L`中, 然后依据`SELM`来决定`VAL`.
+- `Specified`: 使用`SELN`中的值(0-11), 决定使用哪个input link的值. 也可以使用`NVL`这个link来获得`SELN`. **此处为什么不继续使用`SELL`这个名称而要改为`NVL`呢?**
+- `High Signal`: 选择`A-L`中的最大值
+- `Low Signal`: 选择`A-L`中的最小值
+- `Median Signal`: 选择`A-L`中的中位数
+
 -------------
 ### Sequence Record (seq)
+16个输入输出link, 相当于16个`ao`集成在一起.
+
+从`DOL0-DOLF`得到value放到`DO0-DOF`中, 然后输出到`LNK0-LNKF`. 支持`SHFT`和`OFFS`. 支持delay field, `DLY0-DLYF`, 在取数之前等待一段时间.
+
+如下例, 会输出10到`LNK0`, 11到`LNK1`.
+```
+record(seq, seq){
+  field(SELM, "Mask")
+  field(SELN, "3")
+  field(SHFT, "0")
+  field(OFFS, "0")
+
+  field(DOL0, "10")
+  field(DOL1, "11")
+  field(DOL2, "12")
+  field(DOL3, "13")
+  field(DOL4, "14")
+  field(LNK0, "calc0")
+  field(LNK1, "calc1")
+  field(LNK2, "calc2")
+  field(LNK3, "calc3")
+  field(LNK4, "calc4")
+}
+```
 -------------
 ### State Record (state)
+**deprecated**
+
 -------------
 ### String Input Record (stringin)
+40 characters
+
 -------------
 ### String Output Record (stringout)
+40 characters
+
+-------------
+### Long String Input Record (lsi)
+65535 characters
+
+`SIZV`: 默认41, 不能超过65535
+
+有bug, 当设置`SIZV`大于32767时, 使用CA读取时会导致ioc segmentation fault.
+```
+record(lsi, lsi){
+  field(SIZV, "32768")
+  field(INP,  {const: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa})
+  field(PINI, "YES")
+}
+```
+-------------
+### Long String Output Record (lso)
+65535 characters
+
+同样, SIZV大于32767时候就出问题
+```
+record(lso, lso){
+  field(OMSL, "closed_loop")
+  field(DOL,  {const: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb})
+  field(SIZV, "32768")
+  field(PINI, "YES")
+}
+```
 -------------
 ### Sub-Array Record (subArray)
 -------------
