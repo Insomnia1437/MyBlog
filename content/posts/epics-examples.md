@@ -697,11 +697,48 @@ record(ao, "res") {
 -------------
 ### Compression Record (compress)
 -------------
-### Data Fanout Record (dfanout)
--------------
 ### Event Record (event)
+用来触发一个epics event, 比如下例会触发event 14.
+```
+record(event, event){
+  field(INP, "14")
+  field(TPRO, "1")
+}
+
+record(calc, calc){
+  field(CALC, "VAL+1")
+  field(SCAN, "Event")
+  field(EVNT, "14")
+  field(TPRO, "1")
+  field(PRIO, "HIGH")
+}
+record(ai, ai){
+  field(INP, "calc")
+  field(SCAN, "Event")
+  field(EVNT, "14")
+  field(TPRO, "1")
+}
+```
+如下所示`ai`和`calc`都被触发了, 但`ai`先触发, 所以`calc`变为1, 而`ai`依然为0.
+
+即使加上`PRIO`也不影响, 可能与record load时的先后顺序有关, 不详.
+
+所以event适用于无数据流关系的一些record触发, 而强数据流关系的还是用link合适.
+```shell
+epics> dbpf event.PROC 0
+_main_: dbProcess of 'event'
+DBF_UCHAR:          0 = 0x0
+cbLow: dbProcess of 'ai'
+cbHigh: dbProcess of 'calc'
+# caput event.PROC 0
+epics> ca:sdcswd@zephyrus: dbProcess of 'event'
+cbLow: dbProcess of 'ai'
+cbHigh: dbProcess of 'calc'
+```
 -------------
 ### Fanout Record (fanout)
+-------------
+### Data Fanout Record (dfanout)
 -------------
 ### Histogram Record (histogram)
 -------------
