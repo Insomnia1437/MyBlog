@@ -904,13 +904,99 @@ New : i64                            2.14748e+09
 类似`longout`, 但`R7.0.8`依然不支持`OOPT`, 也许将来会加上.
 
 -------------
-### Multi-Bit Binary Input Direct Record (mbbiDirect)
--------------
 ### Multi-Bit Binary Input Record (mbbi)
--------------
-### Multi-Bit Binary Output Direct Record (mbboDirect)
+读取32位无符号数或者字符串, 然后匹配对应的值.
+
+因为是从hardware中读取值, 所以类似`ai`, 也要raw value和value的区分, raw value经过转换然后放入value. 具体转换规则要依据device support而定.
+
+对于16个匹配项, 每个都有一个值, 一个string, 一个severity.
+1-16的前缀分别为: `ZR, ON, TW, TH, FR, FV, SX, SV, EI, NI, TE, EL, TV, TT, FT, FF`. 分别加上`VL`, `ST`, `SV`就可以.
+
+使用的field:
+- `NOBT`: Number of Bits, 由此得到`MASK`, `((1 << NOBT) - 1)`
+- `SHFT`: 移位, 对于raw value是右移位, **也会把`MASK`左移`SHFT`位**
+- `RVAL`: 原始值&`MASK`的值
+- `UNSV`: Unknown State Severity, 无匹配时的severity
+- `COSV`: Change of State Svr
+
+如下例, mbbi的值为`VAL&0xf0`, 因为设置了`SHFT`, 所以`MASK`移位为`0xf0`. 然后raw value就是原始值与`MASK`与操作的结果, 也就是`0x30. `. 然后把RVAL右移4位后进行匹配, 也就是`0x3`, 与`ONVL`匹配成功.
+
+可以看到同时使用`SHFT`和`NOBT`的逻辑显得令人困惑. 所以感觉应该谨慎使用`SHFT`.
+```
+record(mbbi, mbbi){
+  field(NOBT, "4")
+  field(DTYP, "Raw Soft Channel")
+  field(INP,  "0x1234")
+  field(SHFT, "4")
+  field(ZRVL, "0x4")
+  field(ZRST, "VAL&0xf")
+  field(ZRSV, "MINOR")
+  field(ONVL, "0x3")
+  field(ONST, "VAL&0xf0")
+  field(ONSV, "MINOR")
+  field(FFVL, "0x1234")
+  field(FFST, "All")
+  field(PINI, "RUNNING")
+}
+```
+
 -------------
 ### Multi-Bit Binary Output Record (mbbo)
+类似于`mbbi`, 输出32位无符号数. 但是多了output相关的一些field, 比如`DOL, OMSL, IVOA, IVOV`
+
+例子: 用`DOL`来决定输出哪个匹配项, 也可以直接`caput mbbo 1`来选择.
+```
+record(mbbo, mbbo){
+  field(DTYP, "Raw Soft Channel")
+  field(DOL,  "15")
+  field(OMSL, "closed_loop")
+  field(PINI, "RUNNING")
+  field(OUT,  "li")
+  field(ZRVL, "111")
+  field(ZRST, "aaa")
+  field(ZRSV, "MINOR")
+  field(ONVL, "222")
+  field(ONST, "bbb")
+  field(ONSV, "MINOR")
+  field(FFVL, "32768")
+  field(FFST, "fff")
+}
+record(longin, li){}
+```
+
+-------------
+### Multi-Bit Binary Input Direct Record (mbbiDirect)
+`mbbi`是匹配, `mbbiDirect`则是直接映射/操作bit.
+
+把一个32位 **有符号数** 的每一位放到`B0-B1F`中. 当然mbbiDirect主要用于寄存器操作, 也无所谓有无符号.
+
+同样也支持`NOBT`, `MASK`, `SHFT`.
+```
+record(mbbiDirect, mbbidir){
+  #field(NOBT, "4")
+  field(DTYP, "Raw Soft Channel")
+  field(INP,  "0xaaaa")
+  #field(SHFT, "4")
+  field(PINI, "RUNNING")
+}
+```
+
+-------------
+### Multi-Bit Binary Output Direct Record (mbboDirect)
+从DOL中取数, 然后输出.
+
+从`R7.0.6.1`开始, 当`OMSL`为`closed_loop`时, 禁止直接`caput mbbodir.BO 1`. 需要先修改成`supervisory`. 然后直接写`B0-B1F`这些field. 直接`caput mbbo 0xffff`无效.
+```
+record(longout, lo){}
+record(mbboDirect, mbbodir){
+  field(PINI, "YES")
+  field(DOL,  "0xaaaa")
+  field(OMSL, "closed_loop")
+  field(DTYP, "Raw Soft Channel")
+  field(OUT,  "lo PP")
+}
+```
+
 -------------
 ### Permissive Record (permissive)
 **deprecated**
