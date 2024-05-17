@@ -696,6 +696,53 @@ record(ao, "res") {
 
 -------------
 ### Compression Record (compress)
+两种工作模式, 当input link是数组时, 取所有数据然后计算. 如果不是, 那就每次process一次就把数据加入环形缓冲区进行计算.
+
+使用的field, 其中关键的就是`NSAM`和`N`, 前者决定compress中存多少数据, 后者决定每多少个输入进行一次计算. `ILIL IHIL OFF`都只在`N to 1`类的算法中使用.
+- `NSAM`: Number of Values
+- `N`: N to 1 Compression
+- `ILIL`: Init Low Interest Lim, 过滤数据的下限
+- `IHIL`: Init High Interest Lim, 过滤数据的上限
+- `OFF`: Offset, 从哪个数据开始算,
+- `RES`: Reset
+
+支持的compression algorithm, 也就是`ALG` field的值:
+- `N to 1 Low Value`
+- `N to 1 High Value`
+- `N to 1 Average`
+- `Average`
+- `Circular Buffer`, 保持一个大小为`NSAM`的缓冲区.
+- `N to 1 Median`
+
+> `compress`的input link支持array field, 但只支持`N to 1`类的算法.
+
+`BLAG`又可选缓冲区的类型, `FIFO Buffer` 或者 `LIFO Buffer`
+
+`calc`每秒自增1, compress每隔10输入计算一次平均值, 最多存两个平均值.
+```
+record(calc, calc){
+  field(CALC, "VAL+1")
+  field(FLNK, "cp PP")
+  field(SCAN, "1 second")
+}
+record(compress, cp) {
+  field(INP,  "calc NPP")
+  field(ALG,  "Average")
+  field(BALG, "LIFO Buffer")
+  field(NSAM, "2")
+  field(N,    "10")
+  field(PINI, "YES")
+}
+```
+下例的效果, 计算10个输入的平均值, 然后放到`compress`的VAL field中. 使用`BALG`使得新值放到数组最前面.
+```shell
+$ camonitor cp
+cp                             <undefined> UDF INVALID
+cp                             2024-05-17 16:03:37.379709 4.5
+cp 2024-05-17 16:03:47.379616 2 14.5 4.5
+cp 2024-05-17 16:03:57.379640 2 24.5 14.5
+```
+
 -------------
 ### Event Record (event)
 用来触发一个epics event, 比如下例会触发event 14.
