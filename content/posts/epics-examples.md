@@ -846,9 +846,11 @@ record(histogram, hist){
   field(CMD,  "Read")
 }
 ```
-以下为一个正弦波的直方图示例, 横坐标应该是从-1到1的十组, 但我不知道怎么修改Phoebus的横轴😞.
+以下为一个正弦波的直方图示例, 横坐标应该是从-1到1的十组, 但我不知道怎么修改Phoebus的横轴😞. 也许需要一个单独的waveform作为横轴吧.
 ![histogram record](/images/epics-example-hist.png)
-另外, 发现了bug, 虽然的确停止采集了, 但返回值是错误的.
+
+另外, 发现了histogram的设计问题, 写入`Stop`后, 虽然的确停止采集了, 但返回值却依然是`Read`. 这样就无法使用`CMD`判断当前状态了. 必须要读取`CSTA`.
+
 ```shell
 $ caput hist.CMD "Stop"
 Old : hist.CMD                       Read
@@ -915,6 +917,24 @@ New : i64                            2.14748e+09
 
 -------------
 ### Printf Record (printf)
+用printf来输出格式化字符串. 可以输出到别的string record, 或者使用base提供的device support来输出到stream. 可用`@stdout, @stderr or @errlog`
+
+> SIZV 不能超过32767, 不然会导致segmentation fault.
+
+```
+record(printf, pr){
+  field(DTYP, "stdio")
+  field(SIZV, "80")
+  field(FMT,  "0: %s, 1: %f, 2: %f, 3: %s")
+  field(INP0, {const: hello})
+  field(INP1, {const: "3.14159"})
+  field(INP2, {const: "pi:3.14159"})
+  field(INP3, "non-exist-link")
+  field(IVLS, "Whoops")
+  field(PINI, "YES")
+  field(OUT,  "@stdout")
+}
+```
 -------------
 ### Select Record (sel)
 12个输入link.
@@ -992,8 +1012,78 @@ record(lso, lso){
 ```
 -------------
 ### Sub-Array Record (subArray)
+对于`subArray` record, 和`waveform`类似, 都有`FTVL, NELM, NORD`这些field.
+
+额外的field包括
+- `MALM`: 需要设置为`waveform`的size, 分配`subArray`元素的内存时会用`MALM`的大小
+- `INDX`: index, 必须小于`MALM`.
+
+注意它的实现只能获得前`MALM`个元素, 也就是说当`MALM`为1时, index只能为0. 如果要从一个size为1000的waveform中获得最后一个元素, 那`subArray`的大小也必须为1000, 即使它只关心那最后一个元素.
+
+下例中, 当设置`MALM`为5, 那waveform中后五个元素就无法得到了.
+```
+record(subArray,"subarr") {
+  field(INP,  "wf.VAL NPP NMS")
+  field(MALM, "5")
+  field(NELM, "2")
+  field(INDX, "4")
+  field(FTVL, "ULONG")
+}
+record(waveform,"wf") {
+  field(PINI, "YES")
+  field(INP,  "[3,1,4,1,5,9,2,6]")
+  field(NELM, "10")
+  field(FTVL, "ULONG")
+  field(FLNK, "subarr")
+}
+```
 -------------
 ### Subroutine Record (sub)
+
+sub有12个input link.
+
+用法如下, 很简单, `INAM`函数用来初始化一些设置, `SNAM`函数会在每次process时调用.
+```
+record(sub,"$(user):subExample")
+{
+  field(INAM,"mySubInit")
+  field(SNAM,"mySubProcess")
+}
+```
+
 -------------
 ### Array Subroutine Record (aSub)
+aSub就复杂多了, 有20个input和20个output.
 
+使用的field:
+- `LFLG`: Subr. Input Enable, 是否在每次record process时从`SUBL`读取新的值, 默认`IGNORE`, 可选`READ`. *! 这时候选项又不是首字母大写了. (┬┬﹏┬┬)*
+- `SUBL`: Subroutine Name Link, input link, 可以切换subroutine
+- `EFLG`: Output Event Flag, 是否触发输出事件, 默认为`ON CHANGE`, 可选`NEVER`, `ALWAYS`
+- `VAL`: subroutine的返回值, 状态码, 用于判断是否output, 0代表无故障.
+- `OVAL`: Old return value
+- `BRSV`: Bad Return Severity, 设置subroutine返回值不为0时的severity.
+- `INAM`: 初始化时调用
+- `SNAM`: process调用
+- `INPA-INPU`: input link
+- `A-U`: 输入值, 可以为数组
+- `FTA-FTU`: 数据类型, 输入
+- `NOA-NOU`: Max. elements, 在subroutine中使用`prec->NOT`要注意, `not`是C++的关键字, 所以必须大写来规避.
+- `NEA-NEU`: Num. elements
+- `OUTA-OUTU`: output link
+- `VALA-VALU`: 由subroutine负责修改, 写入到output link
+- `OVLA-OVLU`: 旧的`VALA-VALU`值, 用于比较是否变化.
+- `FTVA-FTVU`: 数据类型, 输出
+- `NOVA-NOVU`: Max. elements, 输出
+- `NEVA-NEVU`: Num. elements, in `VALA-VALU`, 输出
+- `ONVA-ONVU`: Old Num. elements, in `OVLA-OVLU`, 输出
+
+```
+record(aSub,"$(user):aSubExample")
+{
+  field(INAM,"myAsubInit")
+  field(SNAM,"myAsubProcess")
+  field(FTA,"DOUBLE")
+  field(NOA,"10")
+  field(INPA,"$(user):compressExample CPP")
+}
+```
