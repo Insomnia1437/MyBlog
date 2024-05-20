@@ -223,6 +223,8 @@ $ twistd -r poll -n recceiver -f demo.conf
 -------------
 ### calc
 -------------
+### sscan
+-------------
 ### busy
 - [epics busy](/posts/epics-busy)
 -------------
