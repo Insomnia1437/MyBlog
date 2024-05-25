@@ -1054,7 +1054,7 @@ record(mbboDirect, mbbodir){
 ### Printf Record (printf)
 用printf来输出格式化字符串. 可以输出到别的string record, 或者使用base提供的device support来输出到stream. 可用`@stdout, @stderr or @errlog`
 
-> SIZV 不能超过32767, 不然会导致segmentation fault.
+> SIZV 不能超过32767, 不然会导致segmentation fault. 修复于202405.
 
 ```
 record(printf, pr){
@@ -1125,6 +1125,8 @@ record(seq, seq){
 `SIZV`: 默认41, 不能超过65535
 
 有bug, 当设置`SIZV`大于32767时, 使用CA读取时会导致ioc segmentation fault.
+> 修复于202405.
+
 ```
 record(lsi, lsi){
   field(SIZV, "32768")
@@ -1136,7 +1138,7 @@ record(lsi, lsi){
 ### Long String Output Record (lso)
 65535 characters
 
-同样, SIZV大于32767时候就出问题
+同样, SIZV大于32767时候就出问题. 修复于202405.
 ```
 record(lso, lso){
   field(OMSL, "closed_loop")
