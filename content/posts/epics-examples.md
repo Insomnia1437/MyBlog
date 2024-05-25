@@ -3,7 +3,7 @@ title: "epics examples"
 date:  2024-05-07T09:56:17+02:00
 weight: 1
 # aliases: ["/first"]
-tags: ["Chinese"]
+tags: ["Chinese", "EPICS", "Linux"]
 author: "DW"
 # author: ["Me", "You"] # multiple authors
 showToc: false
@@ -303,6 +303,10 @@ iocRun: All initialization complete
 epics>
 iocInit
 ```
+
+-------------
+### ioc shell commands
+- [epics shell commands](/posts/epics-shell-cmd)
 
 -------------
 ## Database (record type)

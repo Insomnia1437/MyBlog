@@ -3,7 +3,7 @@ title: "epics sequencer"
 date:  2024-05-10T16:13:17+02:00
 # weight: 1
 # aliases: ["/first"]
-tags: ["Chinese"]
+tags: ["Chinese", "EPICS"]
 author: "DW"
 # author: ["Me", "You"] # multiple authors
 showToc: false
