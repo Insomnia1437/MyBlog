@@ -223,6 +223,8 @@ $ twistd -r poll -n recceiver -f demo.conf
 -------------
 ### calc
 -------------
+### std
+-------------
 ### sscan
 -------------
 ### busy
