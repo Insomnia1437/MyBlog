@@ -63,173 +63,20 @@ editPost:
 ## Module
 ### autosave
 - [epics autosave](/posts/epics-autosave)
--------------
 ### caputlog
-#### 用法
-log可以有JSON格式, 需要epics 7.0.1以上.
-
-server可以使用iocLogServer.
-```makefile
-<IOC app name>_DBD += caPutLog.dbd  # For standard format
-<IOC app name>_DBD += caPutJsonLog.dbd  # For JSON format (Exists only if module is compiled with supported version of base)
-<IOC app name>_LIBS += caPutLog  # Required for both output formats
-```
-
-需要首先配置[Access security](/posts/epics-access), 对于`DEFAULT`group, 添加`RULE(1,WRITE,TRAPWRITE)`. 然后在iocsh中, 设置
-```shell
-caPutLogInit "host[:port]" [config]
-caPutJsonLogInit "host[:port]" [config]
-# for example
-caPutLogInit "localhost:7011" 0
-caPutJsonLogInit $(CAPUTLOG_INET):$(CAPUTLOG_INET_PORT=8002) $(CAPUTLOG_OPTION=0)
-
-# 重新加载配置
-caPutLogReconf config
-caPutJsonLogReconf config
-
-# info
-caPutLogShow level
-caPutJsonLogShow level
-
-# 修改日期格式
-caPutLogSetTimeFmt "<date_time_format>"
-
-# log to a PV
-epicsEnvSet(EPICS_AS_PUT_LOG_PV, "pv.VAL$")
-epicsEnvSet(EPICS_AS_PUT_JSON_LOG_PV, "pv.VAL$")
-
-# debug
-var caPutLogDebug,1
-```
-#### 示例
-首先启动iocLogServer. 启动命令如下.
-```shell
-INSTALL_BIN=/home/sdcswd/epics/R7.0.8/base/bin/linux-x86_64
-
-# To change the default values for the EPICS Environment parameters,
-# uncomment and modify the relevant lines below.
-
-# EPICS_IOC_LOG_PORT="6500" export EPICS_IOC_LOG_PORT
-EPICS_IOC_LOG_FILE_NAME="ioclog.log" export EPICS_IOC_LOG_FILE_NAME
-# EPICS_IOC_LOG_FILE_LIMIT="1000000" export EPICS_IOC_LOG_FILE_LIMIT
-
-if [ $1 = "start" ]; then
-    if [ -x $INSTALL_BIN/iocLogServer ]; then
-        echo "Starting EPICS Log Server "
-        $INSTALL_BIN/iocLogServer &
-    fi
-else
-    if [ $1 = "stop" ]; then
-        pid=`ps -e | sed -ne '/iocLogSe/s/^ *\([1-9][0-9]*\).*$/\1/p'`
-        if [ "${pid}" != "" ]; then
-            echo "Stopping EPICS Log Server "
-            kill ${pid}
-        fi
-    fi
-fi
-```
-然后在st.cmd中
-```shell
-dbLoadTemplate("db/user.substitutions")
-
-epicsEnvSet(EPICS_IOC_LOG_INET, "localhost")
-#epicsEnvSet(EPICS_IOC_LOG_PORT, "$(LOG_INET_PORT)")
-epicsEnvSet(iocLogDisable, "$(LOGDISABLE=0)")
-
-asSetFilename("access.acf")
-iocLogPrefix("${IOC} ")
-
-cd "${TOP}/iocBoot/${IOC}"
-iocInit
-
-caPutLogInit "localhost:7004" 0
-iocLogInit()
-```
-
-然后在ioclog.log文件中, 可以同时得到iocLog(前两行)和caPutLog(后两行)的内容.
-```
-localhost:55142 Sun May 12 15:26:47 2024 iocexample iocPause: IOC suspended
-localhost:55142 Sun May 12 15:26:47 2024 iocexample iocRun: IOC restarted
-localhost:55128 Sun May 12 15:26:57 2024 iocexample 12-May-24 15:26:51 zephyrus sdcswd sdcswd:circle:step new=2 old=1
-localhost:55128 Sun May 12 15:27:02 2024 iocexample 12-May-24 15:26:57 zephyrus sdcswd sdcswd:circle:step new=1 old=2
-```
--------------
+- [epics caputlog](/posts/epics-caputlog)
 ### iocstats
--------------
+**TODO**
 ### recsync
-用于Channel Finder. 也就是把ioc中的record信息, epics environment以及info tag发送到一个数据库.
-
-但目前整个服务显得很繁杂, 要先开启Elasticsearch, 然后开启Channel Finder Service, 然后开启recsync中的server, 也叫`RecCeiver`, (这个名字很糟糕, 因为它其实是一个中间服务, 负责接受ioc发过来的内容, 然后发给Channel Finder Service), 最后开启带有recsync中的client功能(`RecCaster`)的ioc. client使用`5049`UDP端口.
-
-server会调用[pyCFClient module](https://github.com/ChannelFinder/pyCFClient), 创建Python class `ChannelFinderClient`, 与Channel Finder Service通信, 通信时使用了默认的`8080`端口.
-
-可以使用[https://github.com/ChannelFinder/RecSync-env](https://github.com/ChannelFinder/RecSync-env)来简化部署.
-
-以下为测试recsync的流程, 不涉及Channel Finder Service.
-#### RecCaster
-在ioc中添加reccaster依赖,
-```makefile
-test_DBD += reccaster.dbd
-test_LIBS += reccaster
-```
-在st.cmd中, 可以配置RecCaster
-```shell
-var(reccastTimeout, 5.0)
-var(reccastMaxHoldoff, 5.0)
-epicsEnvSet("CONTACT", "mycontact")
-epicsEnvSet("BUILDING", "mybuilding")
-epicsEnvSet("SECTOR", "mysector")
-
-addReccasterEnvVars("CONTACT", "SECTOR")
-addReccasterEnvVars("BUILDING")
-
-iocInit
-```
-#### RecCeiver
-开启RecCeiver的流程
-```shell
-$ cd recsync/server
-$ python3 -m venv venv
-$ source venv/bin/activate
-$ pip3 install --upgrade pip
-$ pip3 install requests
-$ pip3 install .
-$ pip3 list
-Package            Version
------------------- --------
-attrs              23.2.0
-Automat            22.10.0
-certifi            2024.2.2
-channelfinder      3.0.0
-charset-normalizer 3.3.2
-constantly         23.10.4
-hyperlink          21.0.0
-idna               3.7
-incremental        22.10.0
-pip                24.0
-recceiver          1.5
-requests           2.31.0
-setuptools         66.1.1
-simplejson         3.19.2
-six                1.16.0
-Twisted            24.3.0
-typing_extensions  4.11.0
-urllib3            2.2.1
-zope.interface     6.3
-# 或者直接指定PYTHONPATH
-$ export PYTHONPATH=${PWD}:${PWD}/build/lib:${channelfinder_path}
-$ twistd -r poll -n recceiver -f demo.conf
-```
--------------
+- [epics recsync](/posts/epics-recsync)
 ### calc
--------------
+**TODO**
 ### std
--------------
+**TODO**
 ### sscan
--------------
+**TODO**
 ### busy
 - [epics busy](/posts/epics-busy)
--------------
 ### sequencer
 - [epics sequencer](/posts/epics-sequencer)
 
