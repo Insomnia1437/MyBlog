@@ -46,6 +46,12 @@ editPost:
 
 当设定一个motor时, 我们需要确定设置已经完成, 再进行下一步操作(比如开启快门). 采集数据, 完成后然后关闭快门. 这中间, motor移动的时间不确定, 采集数据的时间不确定. 而使用轮询的方式又显得不可靠.
 
+## 安装
+```
+example_DBD += busySupport.dbd
+example_LIBS += busy
+```
+
 ## 用法
 首先使用put-callback修改一个record的值, 这个record的FLNK或OUT link指向busy record. 当busy record的值为1时, callback不会返回. 直到busy record的值变为0(通过CA 或者 asyn device support等), callback才会完成.
 

@@ -174,7 +174,7 @@ iocInit
 | `TSEL`  | Time Stamp Link                                                                  |
 | `TIME`  | epicsTimeStamp time                                                              |
 | `DISS`  | Disable Alarm Sevrty, `menuAlarmSevr`                                            |
-| `DISV`  | Disable Value, 只是不process, value依然可以改变, 与`DISA`比较, 相当的话disable   |
+| `DISV`  | Disable Value, 只是不process, value依然可以改变, 与`DISA`比较, 相等的话disable   |
 | `DISA`  | Disable, DBF_SHORT                                                               |
 | `SDIS`  | Scanning Disable, INLINK, 读取后放入`DISA`                                       |
 | `MLOK`  | Monitor lock, epicsMutexId                                                       |
