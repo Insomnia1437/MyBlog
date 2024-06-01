@@ -44,7 +44,12 @@ editPost:
 
 # asyn
 
-> 阅读本文需要对epics中的概念比较熟悉. 建议阅读`EPICS AppDevGuide`. 也许是历史原因, asyn文档中的概念很混乱. 很大程度上是源于一词多义. 比如driver, support, implement等词, 既可以表达asyn中的专用概念, 也会作寻常用法使用. 比如对driver一词的使用. 有时候是epics driver support, 有时候又是port driver, 有时候又写成device driver. 而port driver, 一般来说指一系列hardware driver, 但又容易与为了减少代码编写量而引入的`asynPortDriver`这一个c++ class的名字混淆. 因此我决定撰写此文便于将来的自己理解.
+> 阅读本文需要对epics中的概念比较熟悉. 建议阅读`EPICS AppDevGuide`.
+> 也许是历史原因, asyn文档中的概念很混乱. 很大程度上是源于一词多义与函数命名上的随意.
+> 比如非常多的相似Callback函数名称.
+> 也比如driver, support, implement等词, 既可以表达asyn中的专用概念, 也会作寻常用法使用.
+> 还比如对driver一词的使用. 有时候是epics driver support, 有时候又是port driver, 有时候又写成device driver. 而port driver, 一般来说指一系列hardware driver, 但又容易与为了减少代码编写量而引入的`asynPortDriver`这一个c++ class的名字混淆.
+> 因此我决定撰写此文便于将来的自己理解.
 
 ## aysn的出现
 
@@ -77,10 +82,11 @@ asynManager作为中间层. 服务于epics device support和hardware driver.
 - 解析record的INP或者OUT field 指定的port name和port addr
 - 调用`connectDevice`来让asynUser连接上这个port. 因为asynManager知道所有的port driver, 所以它依靠port name就能顺利把port的信息放到asynUser里.
 - 这时候asynUser就可以调用`pasynInterface = pasynManager->findInterface(pasynUser, asynInt32Type, 1)` 得到想调用的interface. 比如此时的`pasynInterface->pinterface` 就是一个`asynInt32`的接口, 使用这个接口才可以与hardware通信.
-- 对于asynchronous的设备, 肯定不能直接读取, 于是就在record被process(例如通过`caput`)的时候, 调用`pasynManager->queueRequest(pasynUser, 0, 0)`, 把请求放到port thread里
+- 对于asynchronous的设备, 肯定不能直接读取, 于是就在record被process(例如定时Scan的时候), 调用`pasynManager->queueRequest(pasynUser, 0, 0)`, 把请求放到port thread里
 - asynManager调用Callback函数`processCallback`(`createAsynUser`时候注册的).
-- 在Callback函数中会调用`pasynInterface->pinterface->read`来读写hardware.
+- 在Callback函数中会调用`pasynInterface->pinterface->read`来读写hardware.读写完成后将结果放到一个暂存空间, 然后再调用epics base 提供的`callbackRequestProcessCallback`函数来触发record的process. 将暂存空间中的值放到record的value field里.
 
+> 注意`processCallback`这个Callback是负责实现异步的record process, 而当hardware值变化时通知record则是通过`interruptCallback`完成.
 
 ### 对于port driver
 - 实现与hardware交互的接口, 比如connect serial的时候就要使用OS API连接到tty.
