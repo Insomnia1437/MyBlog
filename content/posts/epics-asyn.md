@@ -153,6 +153,59 @@ record init时候调用`registerInterruptUser`, 虽然函数是个接口, 但各
 而`asynXXXArrayBase.h`更进一步, 定义了一个超大macro.
 但由于port driver里还是需要重新实现read write函数, 所以实际上没省略多少代码量. 然后又搞出了一个`asynStandardInterfacesBase`, 由它实现实际的`registerInterface`, 这部分已经集成在`asynPortDriver`里.
 
+## asynPortDriver
+
+几个关键函数
+- `createParam`, 创建parameter
+- `setIntegerParam`
+- `setDoubleParam`
+- `callParamCallbacks`会调用`callCallbacks`, 而`callCallbacks`会根据parameter的类型来调用不同的函数. 这些函数又会调用`pInterrupt->callback(pInterrupt->userPvt, pInterrupt->pasynUser, value);`, 其中`pInterrupt->callback`中存的是epics device support中通过`registerInterruptUser`注册的interruptCallback. 最后就是会更新value, 然后process record.
+
+其中`callCallbacks`函数如下, 当调用`setIntegerParam`类函数更新parameter value时, 会把这个parameter的`index`放到flags这个vector里, 这样就可以只调用写入新值的parameter的callback.
+```c
+asynStatus paramList::callCallbacks(int addr)
+{
+    int index;
+    asynStatus status = asynSuccess;
+
+    if (!interruptAccept) return asynSuccess;
+
+    try {
+        for (size_t i = 0; i < this->flags.size(); i++)
+        {
+            index = this->flags[i];
+            paramVal *param(getParameter(index));
+            if (!param->isDefined()) continue;
+            switch(param->type) {
+                case asynParamInt32:
+                    status = int32Callback(index, addr);
+                    break;
+                case asynParamInt64:
+                    status = int64Callback(index, addr);
+                    break;
+                case asynParamUInt32Digital:
+                    status = uint32Callback(index, addr, this->vals[index]->uInt32CallbackMask);
+                    this->vals[index]->uInt32CallbackMask = 0;
+                    break;
+                case asynParamFloat64:
+                    status = float64Callback(index, addr);
+                    break;
+                case asynParamOctet:
+                    status = octetCallback(index, addr);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    catch (ParamListInvalidIndex&) {
+        return asynParamBadIndex;
+    }
+    flags.clear();
+    return status;
+}
+
+```
 ## asynTrace
 
 三种mask, 分别用于定义日志级别, 日志打印格式, 日志额外信息, marco定义值如下:
