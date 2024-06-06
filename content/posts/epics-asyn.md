@@ -85,6 +85,7 @@ asynManager作为中间层. 服务于epics device support和hardware driver.
 - 对于asynchronous的设备, 肯定不能直接读取, 于是就在record被process(例如定时Scan的时候), 调用`pasynManager->queueRequest(pasynUser, 0, 0)`, 把请求放到port thread里
 - asynManager调用Callback函数`processCallback`(`createAsynUser`时候注册的).
 - 在Callback函数中会调用`pasynInterface->pinterface->read`来读写hardware.读写完成后将结果放到一个暂存空间, 然后再调用epics base 提供的`callbackRequestProcessCallback`函数来触发record的process. 将暂存空间中的值放到record的value field里.
+- 对于enum类型的record, 如bi, mbbi等, 还会注册一个`interruptCallbackEnum`回调函数, 这些回调函数会调用`setEnums`来设置enum的string和value. 在port driver中使用`doCallbacksEnum`来把string和对应的value数组传给这个回调函数.
 
 > 注意`processCallback`这个Callback是负责实现异步的record process, 而当hardware值变化时通知record则是通过`interruptCallback`完成.
 
