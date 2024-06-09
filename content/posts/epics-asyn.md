@@ -105,7 +105,7 @@ interface, 在asyn中更强调其在面向对象编程(OO)中的特点, 即抽�
 - asynXXX, 一系列接口, 比如`asynOctet`, `asynInt32`, `asynFloat64Array`, `asynOption` 等等. port driver需要根据hardware的情况选择性实现一部分.
 
 ## interrupt 处理
-支持interrupt的接口会有`registerInterruptUser`函数, 例如
+支持interrupt的接口会有`registerInterruptUser`函数, 其实就是注册一下`interruptCallbackInt32 callback`到asynManager里, 这个callback基本都是用来process record的.
 
 ```c
 typedef struct asynInt32 {
@@ -130,7 +130,7 @@ typedef struct asynInt32 {
 ### 对于epics device support
 当某个record希望响应interrupt时, 需要调用`addInterruptUser `.
 
-record init时候调用`registerInterruptUser`, 虽然函数是个接口, 但各个asynXXXBase已经实现了, 可以在port driver中覆盖, 但似乎都使用默认值即可. 不像read write函数一样需要被覆盖. `registerInterruptUser`函数在asynXXXBase中实现, 该版本会调用`pasynManager->addInterruptUser(pasynUser,pinterruptNode)`, 其中`interruptNode`内部包含了一个Callback函数. 把这个Callback函数加入到一个链表中. 这样interrupt发生时, 就可以用Callback来process自己.
+record init时候调用`pPvt->pint32->registerInterruptUser(pPvt->int32Pvt,pPvt->pasynUser, pPvt->interruptCallback,pPvt,&pPvt->registrarPvt);`, 虽然函数是个接口, 但各个asynXXXBase已经实现了, 可以在port driver中覆盖, 但似乎都使用默认值即可. 不像read write函数一样需要被覆盖. `registerInterruptUser`函数在asynXXXBase中实现, 该版本会调用`pasynManager->addInterruptUser(pasynUser,pinterruptNode)`, 其中`interruptNode`内部包含了一个Callback函数. 把这个Callback函数加入到一个链表中. 这样interrupt发生时, 就可以用Callback来process自己.
 ### 对于port driver
 注册interface时候, 也注册了interface的`registerInterruptUser`函数.
 
@@ -151,8 +151,28 @@ record init时候调用`registerInterruptUser`, 虽然函数是个接口, 但各
 ```
 
 而`asynXXXArrayBase.h`更进一步, 定义了一个超大macro.
-但由于port driver里还是需要重新实现read write函数, 所以实际上没省略多少代码量. 然后又搞出了一个`asynStandardInterfacesBase`, 由它实现实际的`registerInterface`, 这部分已经集成在`asynPortDriver`里.
+但由于port driver里还是需要重新实现read write函数, 所以实际上没省略多少代码量. 然后又搞出了一个`asynStandardInterfacesBase`, 由它实现实际的`registerInterface`, 这部分已经集成在`asynPortDriver`里. 可以看到里面使用了`pasynStandardInterfacesBase->initialize(portName, pInterfaces, this->pasynUserSelf, this);`.
 
+## 使用技巧
+
+可以设置对应的info field来开启初始化读, hardware值变化时output record的值也随之更新, FIFO的大小.
+```
+record(stringout, "$(P)SoOctetRB")
+{
+   field(PINI, "1")
+   field(DTYP, "asynOctetWrite")
+   field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))OCTET_VALUE")
+   field(VAL,  "test")
+   info(asyn:INITIAL_READBACK,"1")
+   info(asyn:READBACK,"1")
+   info(asyn:FIFO, "$(FIFO)")
+}
+```
+
+在ioc中加入asynRecord, 其中IMAX和OMAX代表Max. size of input/output array
+```
+dbLoadRecords("db/asynRecord.db", "P=<ioc>, R=<record>, PORT=<port>, ADDR=<addr>, OMAX=<omax>, IMAX=<imax>")
+```
 ## asynPortDriver
 
 几个关键函数
