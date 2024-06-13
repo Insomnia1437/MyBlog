@@ -515,7 +515,7 @@ record(calc, "calc"){
 ### Calculation Output Record (calcout)
 相比与`calc`, 增加了一些output选项.
 - `OOPT`: Output Execute Opt, 可选`Every Time`, `On Change`, `When Zero`, `When Non-zero`, `Transition To Zero`, `Transition To Non-zero`
-- `DOPT`: Output Data Opt, 可选`CALC`, `OCAL`
+- `DOPT`: Output Data Opt, 可选`Use CALC`, `Use OCAL`
 - `OCAL`: Output Calculation, 和`CALC`一样包含运算表达式
 - `OVAL`: Output Value, `OCAL`的输出结果
 - `OEVT`: Event To Issue, 要触发的event
