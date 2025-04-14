@@ -202,7 +202,8 @@ Reports the IOC's OS clock synchronization status:
 #### CA related
 - casr, Channel Access Server Report
 - dbel, prints the Channel Access event list for the speciﬁed record
-- dbcar, Shows status of Channel Access links (CA_LINK)
+- dbcar, Shows status of Channel Access links (CA_LINK), to show all records with CA links, use `dbcar * 3`
+
 ```shell
 epics> casr 4
 Channel Access Server V4.13
