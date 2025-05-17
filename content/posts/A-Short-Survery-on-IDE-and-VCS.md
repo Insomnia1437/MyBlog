@@ -9,7 +9,7 @@ abbrlink: 46c470de
 date: 2019-11-19 01:51:40
 ---
 
-<!-- # A Short Introduction To VCS and IDE -->
+# A Short Introduction To VCS and IDE
 
 ```python
 # @Time    : 2019-11-19
@@ -45,12 +45,12 @@ The introduction would mainly based on three stages:
 
 > **V**ersion **C**ontrol **S**ystem (**VCS**):
 >
-> A component of software configuration management, version control, also known as revision control or source control, is the **<u>management of changes to documents, computer programs</u>**, large web sites, and other collections of information.  [Version control on Wikipedia](https://en.wikipedia.org/wiki/Version_control)
+> A component of software configuration management, version control, also known as revision control or source control, is the **management of changes to documents, computer programs**, large web sites, and other collections of information.  [Version control on Wikipedia](https://en.wikipedia.org/wiki/Version_control)
 
 
 ## Comparison of text editors
 
-**Note:  Recent years, the boundary between Editor and IDE becomes obscure, many editors can also integrate with build tools, debugger, compiler or interpreter with some plugin configuration to become a lightweight IDE (though some configuration might cost time and be somewhat geek), thus, I only select several "traditional" text editors <u>in my mind</u>.**
+**Note:  Recent years, the boundary between Editor and IDE becomes obscure, many editors can also integrate with build tools, debugger, compiler or interpreter with some plugin configuration to become a lightweight IDE (though some configuration might cost time and be somewhat geek), thus, I only select several "traditional" text editors in my mind.**
 
 ------
 
