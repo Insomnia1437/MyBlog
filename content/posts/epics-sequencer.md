@@ -45,7 +45,7 @@ editPost:
 > See [epics examples](/posts/epics-examples)
 
 ## 介绍
-自从去年夏天[bessy](http://www-csr.bessy.de/)被网络攻击之后, sequencer的网站 (http://www-csr.bessy.de/control/SoftDist/sequencer/) 就打不开了. Ralph建立了一个镜像仓库, 可以从此处下载源码. (http://www-csr.bessy.de/control/SoftDist/sequencer/)
+自从去年夏天[bessy](http://www-csr.bessy.de/)被网络攻击之后, sequencer的网站 (http://www-csr.bessy.de/control/SoftDist/sequencer/) 就打不开了. Ralph建立了一个镜像仓库, 可以从此处下载源码. (https://github.com/epics-modules/sequencer/tags)
 
 我个人没有用过sequencer, 简单逻辑我习惯通过db完成, 稍微复杂一点的用subroutine调用c函数.
 
